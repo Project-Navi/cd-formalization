@@ -53,13 +53,13 @@ drafts/            — In-progress proof targets and issue drafts
 
 ## Development Process
 
-**What the author did**: The proof strategy — choosing to axiomatize via `PdeInfra`,
-identifying which five classical PDE results to package, designing the typeclass
-hierarchy, and structuring the Schaefer → L∞ bound → existence → sub/super-solution
-→ nontriviality proof chain — is the core intellectual contribution. These are
-mathematical architecture decisions that require understanding where the real
-difficulty lies. The underlying theory is documented in the
-[paper](../paper/creative_determinant.pdf).
+**What the author did**: The original equations, proof strategy, and formalization
+architecture — choosing to axiomatize via `PdeInfra`, identifying which five
+classical PDE results to package, designing the typeclass hierarchy, and structuring
+the Schaefer → L∞ bound → existence → sub/super-solution → nontriviality proof
+chain — are the core intellectual contribution. These are mathematical architecture
+decisions that require understanding where the real difficulty lies. The underlying
+equations and theory are documented in the [paper](../paper/creative_determinant.pdf).
 
 **What AI tools did**: Claude Opus assisted with Lean 4 syntax, Mathlib API
 navigation, and proof term synthesis. Aristotle (Harmonic.fun) automated proving
