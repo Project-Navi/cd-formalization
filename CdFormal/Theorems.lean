@@ -1,15 +1,3 @@
-/-
-Creative Determinant Framework — Theorems
-
-Proved results:
-  - Spectral characterization (1D): β > β* implies eigenvalue < 0
-  - Scaling algebraic contradiction: k < k^p when p > 1
-  - Existence of weak coherent configurations (from PdeInfra)
-  - Existence of nontrivial coherent configurations (from PdeInfra)
-
-Reference: Spence 2026, "The Creative Determinant"
--/
-
 import CdFormal.Axioms
 
 set_option relaxedAutoImplicit false
@@ -18,6 +6,29 @@ set_option autoImplicit false
 noncomputable section
 
 open scoped Manifold Bundle
+
+/-!
+# Creative Determinant — Theorems
+
+## Main statements
+
+- `spectral_characterization_1d` — β > β* implies eigenvalue < 0 (pure algebra)
+- `scaling_algebraic_contradiction` — k < kᵖ when p > 1 (pure algebra)
+- `SemioticBVP.exists_isWeakCoherentConfiguration` — existence of nonneg
+  solutions (Paper Thm 3.12)
+- `SemioticBVP.exists_pos_isWeakCoherentConfiguration` — existence of
+  positive solutions (Paper Thm 3.16)
+
+## Implementation notes
+
+The first two results are proved by pure algebra (no PDE axioms).
+The existence theorems compose `PdeInfra` axioms; all dependencies are visible
+via `[PdeInfra bvp solOp]` and `#print axioms` in `CdFormal.Verify`.
+
+## References
+
+- [Spence2026] N. Spence, "The Creative Determinant," 2026.
+-/
 
 /-! ## Spectral Characterization (1D)
 

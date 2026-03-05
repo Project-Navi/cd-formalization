@@ -1,27 +1,3 @@
-/-
-PDE Infrastructure Axioms for the Creative Determinant Framework.
-
-These axioms encode classical results from elliptic PDE theory that are
-not yet available in Mathlib for abstract Riemannian manifolds.
-
-Design decisions (per GPT review, 2026-03-04):
-  - Axioms are packaged in a typeclass `PdeInfra` so downstream theorems
-    explicitly declare "assuming PDE infrastructure"
-  - Schaefer's theorem includes continuity/compactness as a hypothesis
-    (not silently assumed)
-  - L∞ bound requires p > 1 and c₀ > 0 (matching paper Lemma 3.10)
-  - Nontriviality is stated as a monotone iteration principle
-    (sub/super-solution), not as a one-shot existence oracle
-  - No `maxHeartbeats 0` in library code
-
-References:
-  - Schaefer 1955; Deimling 1985 (fixed-point theorem)
-  - Evans 2010, Ch. 6 (Schauder estimates)
-  - Gilbarg-Trudinger 2001, Ch. 6-8 (maximum principle, regularity)
-  - Amann 1976 (sub/super-solution monotone iteration)
-  - Spence 2026, "The Creative Determinant"
--/
-
 import CdFormal.Basic
 
 set_option relaxedAutoImplicit false
@@ -30,6 +6,37 @@ set_option autoImplicit false
 noncomputable section
 
 open scoped Manifold Bundle
+
+/-!
+# PDE Infrastructure Axioms
+
+Axioms encoding classical results from elliptic PDE theory not yet available in
+Mathlib for abstract Riemannian manifolds.
+
+## Main definitions
+
+- `SolutionOperator` — the operator T for the BVP (Paper Section 3.2)
+- `PrincipalEigendata` — principal eigenvalue and eigenfunction (Paper Definition 3.13)
+- `PdeInfra` — typeclass packaging five PDE infrastructure axioms
+
+## Implementation notes
+
+Axioms are packaged in a typeclass so downstream theorems explicitly declare their
+dependence via `[PdeInfra bvp solOp]`. The axiom surface consists of:
+1. T continuous & compact (placeholder `True` — see known limitation)
+2. L∞ bound (maximum principle at interior extremum)
+3. Schaefer's fixed-point theorem
+4. Fixed-point nonnegativity (maximum principle)
+5. Monotone iteration (sub/super-solution, Amann 1976)
+
+## References
+
+- [Schaefer1955] H. Schaefer, "Über die Methode der a priori-Schranken," 1955.
+- [Evans2010] L.C. Evans, *Partial Differential Equations*, 2nd ed., Ch. 6.
+- [GilbargTrudinger2001] D. Gilbarg and N.S. Trudinger, Ch. 6–8.
+- [Amann1976] H. Amann, "Fixed point equations and nonlinear eigenvalue problems," 1976.
+- [Spence2026] N. Spence, "The Creative Determinant," 2026.
+-/
 
 /-! ## Solution Operator -/
 

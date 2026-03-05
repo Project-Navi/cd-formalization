@@ -1,18 +1,14 @@
-/-
-Axiom contamination checks.
-
-Run `lake build CdFormal.Verify` to confirm which axioms each theorem depends on.
-
-Expected:
-  - spectral_characterization_1d: [propext, Classical.choice, Quot.sound] (pure algebra)
-  - scaling_algebraic_contradiction: same (pure algebra)
-  - SemioticBVP.exists_isWeakCoherentConfiguration: above + PdeInfra fields (no sorryAx)
-  - SemioticBVP.exists_pos_isWeakCoherentConfiguration: above + PdeInfra fields (no sorryAx)
-
-If `sorryAx` appears anywhere, something is broken.
--/
-
 import CdFormal.Theorems
+
+/-!
+# Axiom Contamination Checks
+
+Verification dashboard: run `lake build CdFormal.Verify` to confirm which axioms
+each theorem depends on. If `sorryAx` appears anywhere, something is broken.
+
+Pure algebra theorems should show only `[propext, Classical.choice, Quot.sound]`.
+PDE-dependent theorems should additionally show `PdeInfra` fields but no `sorryAx`.
+-/
 
 -- Pure algebra (NO sorryAx, NO PDE axioms)
 #print axioms spectral_characterization_1d

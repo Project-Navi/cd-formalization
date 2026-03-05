@@ -1,15 +1,3 @@
-/-
-Creative Determinant Framework — Core Definitions
-
-Formalization of the semiotic manifold, coefficient structures, PDE operators,
-boundary value problem, and weak coherent configuration.
-
-All definitions in this file are machine-verified against Mathlib.
-
-Reference: Spence 2026, "The Creative Determinant: Autopoietic Closure as a
-Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions"
--/
-
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.VectorBundle.Riemannian
@@ -21,6 +9,29 @@ set_option autoImplicit false
 noncomputable section
 
 open scoped Manifold Bundle BigOperators Real Nat Pointwise
+
+/-!
+# Creative Determinant Framework — Core Definitions
+
+Formalization of the semiotic manifold, coefficient structures, PDE operators,
+boundary value problem, and weak coherent configuration.
+
+## Main definitions
+
+- `SemioticModel` — model with corners for the semiotic manifold
+- `SemioticManifold` — compact, connected, smooth Riemannian manifold (Paper Definition 2.1)
+- `SemioticContext` — coefficients κ, γ, μ, b, c, p for the BVP (Paper Definitions 2.2, 3.1)
+- `SemioticContext.a` — creative drive coefficient a(x) = κγμ (Paper Definition 3.1)
+- `SemioticContext.canonicalViability` — b(x) = κγ - λμ (Paper Definition 3.3)
+- `SemioticOperators` — abstract Laplacian and gradient norm (Paper Section 3.2)
+- `SemioticBVP` — the boundary value problem -ΔΦ = a|∇Φ| + bΦ - cΦᵖ (Paper Definition 3.1)
+- `IsWeakCoherentConfiguration` — a solution to the BVP (Paper §3.2)
+
+## References
+
+- [Spence2026] N. Spence, "The Creative Determinant: Autopoietic Closure as a
+  Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions," 2026.
+-/
 
 /-! ## Semiotic Manifold -/
 
