@@ -10,7 +10,10 @@ Reference: Spence 2026, "The Creative Determinant: Autopoietic Closure as a
 Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions"
 -/
 
-import Mathlib
+import Mathlib.Geometry.Manifold.IsManifold.Basic
+import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Topology.VectorBundle.Riemannian
+import Mathlib.Tactic
 
 set_option relaxedAutoImplicit false
 set_option autoImplicit false
