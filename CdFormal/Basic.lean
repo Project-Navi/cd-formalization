@@ -123,6 +123,8 @@ structure SemioticOperators (n : ℕ) (M : Type*)
   /-- The gradient norm is positively homogeneous: |∇(c·f)| = |c|·|∇f| -/
   gradNorm_smul : ∀ (f : M → ℝ) (c : ℝ) (x : M),
     gradNorm (fun y => c * f y) x = |c| * gradNorm f x
+  /-- The gradient norm of a constant function is zero -/
+  gradNorm_const : ∀ (a : ℝ) (x : M), gradNorm (fun _ => a) x = 0
 
 /-! ## Boundary Value Problem
 

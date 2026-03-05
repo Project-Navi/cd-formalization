@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Nelson Spence
 -/
 import CdFormal.Theorems
+import CdFormal.OperatorLemmas
 
 /-!
 # Axiom Dependency Map
@@ -25,6 +26,10 @@ If `sorryAx` appears anywhere, the proof is incomplete.
 #print axioms viabilityThreshold
 #print axioms spectral_characterization_1d
 #print axioms scaling_algebraic_contradiction
+
+-- § Derived operator lemmas (from SemioticOperators axioms)
+#print axioms laplacian_zero
+#print axioms gradNorm_zero
 
 -- § PDEInfra-dependent (paper-specific)
 -- Should show PDEInfra fields but NO sorryAx.
