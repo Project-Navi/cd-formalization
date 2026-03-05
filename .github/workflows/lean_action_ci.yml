@@ -18,7 +18,7 @@ jobs:
 
       - name: Install elan and toolchain
         run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/917c18d0ad52f649c2603dc8b973f5b9fa5f8f43/elan-init.sh | sh -s -- -y --default-toolchain none
           echo "${ELAN_HOME}/bin" >> "${GITHUB_PATH}"
           export PATH="${ELAN_HOME}/bin:${PATH}"
           elan --version
