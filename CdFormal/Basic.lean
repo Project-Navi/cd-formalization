@@ -38,6 +38,12 @@ boundary value problem, and weak coherent configuration.
 /-- The model with corners for the semiotic manifold (self-model on Euclidean space). -/
 abbrev SemioticModel (n : ℕ) := modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin n))
 
+variable {n : ℕ} {M : Type*}
+  [TopologicalSpace M]
+  [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
+  [IsManifold (SemioticModel n) ⊤ M]
+  [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
+
 /-- A semiotic manifold is a compact, connected, smooth Riemannian manifold.
     Paper Definition 2.1. -/
 class SemioticManifold (n : ℕ) (M : Type*)
@@ -47,6 +53,8 @@ class SemioticManifold (n : ℕ) (M : Type*)
     [MetricSpace M] [CompactSpace M] [ConnectedSpace M] where
   /-- The Riemannian metric -/
   riemannianMetric : Bundle.RiemannianMetric (fun (_ : M) => EuclideanSpace ℝ (Fin n))
+
+variable [SemioticManifold n M]
 
 /-! ## Coefficient Structure -/
 
@@ -78,24 +86,12 @@ structure SemioticContext (n : ℕ) (M : Type*)
 
 /-- The creative drive coefficient a(x) = κ(x)·γ(x)·μ(x).
     Paper Definition 3.1. -/
-def SemioticContext.a {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
-    (ctx : SemioticContext n M) (x : M) : ℝ :=
+def SemioticContext.a (ctx : SemioticContext n M) (x : M) : ℝ :=
   ctx.κ x * ctx.γ x * ctx.μ x
 
 /-- The canonical viability closure b(x) = κ(x)·γ(x) - λ·μ(x).
     Paper Definition 3.3. -/
-def SemioticContext.canonicalViability {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
-    (ctx : SemioticContext n M) (lambda : ℝ) (x : M) : ℝ :=
+def SemioticContext.canonicalViability (ctx : SemioticContext n M) (lambda : ℝ) (x : M) : ℝ :=
   ctx.κ x * ctx.γ x - lambda * ctx.μ x
 
 /-! ## PDE Operators -/
@@ -159,13 +155,7 @@ structure SemioticBVP (n : ℕ) (M : Type*)
 
 /-- A weak coherent configuration is a solution to the Semiotic BVP.
     Paper §3.2 (inline definition after eq. V1'). -/
-def IsWeakCoherentConfiguration {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
-    (bvp : SemioticBVP n M) (Φ : M → ℝ) : Prop :=
+def IsWeakCoherentConfiguration (bvp : SemioticBVP n M) (Φ : M → ℝ) : Prop :=
   bvp.equation Φ ∧ bvp.boundaryCondition Φ
 
 end

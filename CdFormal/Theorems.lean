@@ -30,6 +30,13 @@ via `[PdeInfra bvp solOp]` and `#print axioms` in `CdFormal.Verify`.
 - [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
 
+variable {n : ℕ} {M : Type*}
+  [TopologicalSpace M]
+  [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
+  [IsManifold (SemioticModel n) ⊤ M]
+  [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
+  [SemioticManifold n M]
+
 /-! ## Spectral Characterization (1D)
 
 For constant viability b on [0,L], the principal eigenvalue is
@@ -86,12 +93,6 @@ All axiom dependencies are visible via `[PdeInfra bvp solOp]`. -/
 /-- Paper Theorem 3.12: The BVP admits at least one nonneg solution.
     Proof: L∞ bound → Schaefer set bounded → Schaefer fixed point → max principle. -/
 theorem SemioticBVP.exists_isWeakCoherentConfiguration
-    {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
     [infra : PdeInfra bvp solOp]
@@ -112,12 +113,6 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
     axiom uses a different proof route (sub/super-solution) that does not require
     an explicit bound on b. The two theorems are independent in the formalization. -/
 theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
-    {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
     [infra : PdeInfra bvp solOp]

@@ -38,6 +38,13 @@ dependence via `[PdeInfra bvp solOp]`. The axiom surface consists of:
 - [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
 
+variable {n : ℕ} {M : Type*}
+  [TopologicalSpace M]
+  [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
+  [IsManifold (SemioticModel n) ⊤ M]
+  [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
+  [SemioticManifold n M]
+
 /-! ## Solution Operator -/
 
 /-- The solution operator T for the BVP. Given u, T(u) solves the linearized equation.
@@ -46,13 +53,7 @@ dependence via `[PdeInfra bvp solOp]`. The axiom surface consists of:
     Note: We work with `M → ℝ` rather than an explicit Hölder/Sobolev space type.
     The functional-analytic properties (continuity, compactness) are encoded as
     fields of `SolutionOperator` and hypotheses of `PdeInfra`, not silently assumed. -/
-structure SolutionOperator {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
-    (bvp : SemioticBVP n M) where
+structure SolutionOperator (bvp : SemioticBVP n M) where
   /-- The operator T : (M → ℝ) → (M → ℝ) -/
   T : (M → ℝ) → (M → ℝ)
   /-- T(u) satisfies the boundary condition -/
@@ -65,13 +66,7 @@ structure SolutionOperator {n : ℕ} {M : Type*}
 /-- The principal eigenvalue problem for -Δ - β·b on the semiotic manifold.
     Paper Definition 3.13. The `beta` parameter generalizes the paper's
     statement (which is the β = 1 case) to allow scaling the potential. -/
-structure PrincipalEigendata {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
-    (bvp : SemioticBVP n M) (beta : ℝ) where
+structure PrincipalEigendata (bvp : SemioticBVP n M) (beta : ℝ) where
   /-- The principal eigenvalue -/
   eigval : ℝ
   /-- The principal eigenfunction -/
@@ -92,13 +87,7 @@ dependence on this infrastructure explicitly. -/
 
 /-- The PDE infrastructure required for the Creative Determinant existence theory.
     Each field corresponds to a classical result from elliptic PDE theory. -/
-class PdeInfra {n : ℕ} {M : Type*}
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
-    [SemioticManifold n M]
-    (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop where
+class PdeInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop where
 
   /-- T is continuous and compact on C^{1,α}(M).
       In practice this follows from Schauder estimates + Arzelà-Ascoli
