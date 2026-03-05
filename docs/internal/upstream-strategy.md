@@ -147,6 +147,31 @@ expert dictating API design.
 - If Schaefer discussion is positive → file GitHub issue (from `drafts/mathlib_issue_schaefer.md`)
 - If `k < k^p` is missing → draft small PR, reference Zulip discussion
 
+## Long-Term: ContinuousLinearMap Path for Operators
+
+Our `SemioticOperators` models the Laplacian as `(M → ℝ) → (M → ℝ)` with custom
+linearity/homogeneity axioms. The eventual Mathlib-aligned path would use
+`ContinuousLinearMap` from `Mathlib.Analysis.NormedSpace.OperatorNorm`:
+
+- The Laplacian is a continuous linear map on suitable Sobolev spaces
+  (`H²(M) → L²(M)`)
+- The gradient norm is a continuous map (nonlinear, but with known
+  homogeneity properties)
+
+**Why we can't do this now:** Mathlib lacks Sobolev spaces on Riemannian
+manifolds, Hölder spaces on manifolds, and the Laplace-Beltrami operator
+as a bundled `ContinuousLinearMap`. Our abstract axiom approach is the
+pragmatic choice until this infrastructure exists.
+
+**When to migrate:** Once Mathlib has either:
+1. Sobolev spaces on compact Riemannian manifolds, or
+2. The Laplace-Beltrami operator as a `ContinuousLinearMap`
+
+our `SemioticOperators.laplacian_add` and `laplacian_smul` axioms would
+become instances of `ContinuousLinearMap.map_add` and `map_smul`.
+
+---
+
 ## Timeline
 
 - **Done**: Per-theorem dependency annotations, Mathlib conventions enforcement

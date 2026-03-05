@@ -7,26 +7,23 @@
 
 Hi all,
 
-I'm looking for Schaefer's fixed-point theorem or the Leray-Schauder
-continuation principle in Mathlib — is there existing work on either of these?
+Is there existing work on Schaefer's fixed-point theorem or the
+Leray-Schauder continuation principle in Mathlib?
 
-**Context:** Schaefer's theorem says that if *T : E → E* is continuous and
-compact (maps bounded sets to relatively compact sets) on a Banach space, and
-the set *S = {x : ∃ τ ∈ [0,1], x = τ · T(x)}* is bounded, then *T* has a
-fixed point. It's a standard tool in nonlinear PDE existence theory (Deimling
-1985, Theorem 9.2; Evans 2010, §9.2.2).
+**The theorem:** If *T : E → E* is continuous and compact on a Banach
+space, and the set *{x : ∃ τ ∈ [0,1], x = τ · T(x)}* is bounded,
+then *T* has a fixed point (Deimling 1985, Thm 9.2).
 
-**What I've found so far:**
-- `IsCompactOperator` exists for linear maps (`Mathlib.Analysis.Normed.Operator.Compact`)
-- Sperner's lemma is in progress (#25231), which is on the path to Brouwer → Schauder → Schaefer
-- I don't see Schauder's fixed-point theorem (compact convex set version) either
+**What I've found:**
+- `IsCompactOperator` for linear maps (`Mathlib.Analysis.Normed.Operator.Compact`)
+- Sperner's lemma (#25231) on the path to Brouwer → Schauder → Schaefer
+- No Schauder or Schaefer fixed-point theorems
 
-**Concrete use case:** I'm working on a formalization of existence theory for a
+**Use case:** I have a Lean 4 formalization of existence theory for a
 nonlinear elliptic BVP on compact Riemannian manifolds
-([Project-Navi/cd-formalization](https://github.com/Project-Navi/cd-formalization)).
-The proof chain goes: L∞ bound → Schaefer set bounded → **Schaefer's theorem**
-→ fixed point. Everything except the Schaefer step is verified in Lean 4 against
-Mathlib; that step is currently axiomatized as:
+([cd-formalization](https://github.com/Project-Navi/cd-formalization)).
+The proof chain — L∞ bound, Schaefer set bounded, fixed point, maximum
+principle — is verified except the Schaefer step, which is axiomatized:
 
 ```lean
 schaefer :
@@ -38,13 +35,12 @@ schaefer :
   ∃ Φ : M → ℝ, solOp.T Φ = Φ
 ```
 
-**API question:** The nonlinear case needs a notion of "compact map" for
-nonlinear operators (T maps bounded sets to relatively compact sets). Should
-this extend or parallel `IsCompactOperator`? I'd appreciate any guidance on
-how this fits the existing API before attempting anything.
+**API question:** The nonlinear case needs "compact map" for nonlinear
+operators (bounded sets → relatively compact sets). Should this extend
+or parallel `IsCompactOperator`? Happy to take guidance on how this
+fits the existing API.
 
-**AI disclosure:** Parts of the formalization were developed with Claude
-(Anthropic) and Aristotle (theorem prover). All code has been manually
-reviewed and understood.
+**AI disclosure:** Parts of the formalization use Claude (Anthropic)
+and Aristotle (theorem prover). All code is manually reviewed.
 
 Thanks for any pointers!

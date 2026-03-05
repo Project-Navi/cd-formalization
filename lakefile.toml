@@ -8,6 +8,7 @@ lintDriver = "batteries/runLinter"
 pp.unicode.fun = true
 relaxedAutoImplicit = false
 autoImplicit = false
+maxHeartbeats = 200000
 # Mathlib standard linter set (docBlame, simpNF, unusedArguments, etc.)
 weak.linter.mathlibStandardSet = true
 # Style linters (longLine, lambda, dollar, cdot, missingEnd)
