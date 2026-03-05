@@ -98,13 +98,18 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
       The `schaefer` axiom below does not reference it, so the compactness
       hypothesis is effectively unguarded. This will be fixed when Mathlib
       gains Hölder spaces on manifolds and/or Schaefer's theorem (see
-      drafts/mathlib_issue_schaefer.md). -/
+      drafts/mathlib_issue_schaefer.md).
+
+    Mathlib status: requires Hölder spaces on manifolds (not in Mathlib). -/
   T_continuous_compact : True
 
   /-- L∞ bound for the Schaefer set (Paper Lemma 3.10).
       If u = τ·T(u) for τ ∈ [0,1], then ‖u‖_∞ ≤ K = (B/c₀)^{1/(p-1)}.
       Proof: evaluate PDE at interior max, use ∇u = 0, Δu ≤ 0.
-      Requires p > 1 (from ctx) and c₀ > 0 (from ctx.c_pos). -/
+      Requires p > 1 (from ctx) and c₀ > 0 (from ctx.c_pos).
+
+    Mathlib status: maximum principle for elliptic operators (not in Mathlib
+    for abstract manifolds; available for domains in ℝⁿ via Gilbarg-Trudinger). -/
   linfty_bound :
     ∀ (B : ℝ), (∀ x, bvp.ctx.b x ≤ B) →
     ∃ K > 0, ∀ (u : M → ℝ) (τ : ℝ),
@@ -115,7 +120,10 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
   /-- Schaefer's fixed-point theorem (Schaefer 1955; Deimling 1985).
       If T is continuous and compact (T_continuous_compact) and the
       Schaefer set S = {u : u = τT(u), τ ∈ [0,1]} is bounded,
-      then T has a fixed point. -/
+      then T has a fixed point.
+
+    Mathlib status: Schaefer's fixed-point theorem is not in Mathlib.
+    Draft issue: `drafts/mathlib_issue_schaefer.md`. -/
   schaefer :
     (∃ K > 0, ∀ (u : M → ℝ) (τ : ℝ),
       0 ≤ τ → τ ≤ 1 →
@@ -125,7 +133,10 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
 
   /-- Maximum principle: fixed points of T are nonnegative.
       Follows from the u₊ truncation in the saturation term and
-      standard maximum principle arguments. -/
+      standard maximum principle arguments.
+
+    Mathlib status: standard maximum principle (not in Mathlib for abstract
+    manifolds). -/
   fixed_point_nonneg :
     ∀ (Φ : M → ℝ), solOp.T Φ = Φ → ∀ x, Φ x ≥ 0
 
@@ -135,7 +146,9 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
         - A large constant K is a super-solution (Step 2)
         - Monotone iteration between them converges to a nontrivial
           fixed point with Φ > 0 in the interior (Step 3).
-      This is the nontriviality bridge, NOT a one-shot existence oracle. -/
+      This is the nontriviality bridge, NOT a one-shot existence oracle.
+
+    Mathlib status: sub/super-solution theory (Amann 1976) is not in Mathlib. -/
   monotone_iteration :
     ∀ (beta : ℝ) (eig : PrincipalEigendata bvp beta),
       eig.eigval < 0 →
