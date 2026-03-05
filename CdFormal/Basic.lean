@@ -103,8 +103,16 @@ structure SemioticOperators (n : ℕ) (M : Type*)
     laplacian (fun x => c * f x + g x) = fun x => c * laplacian f x + laplacian g x
   /-- The gradient norm is non-negative -/
   gradNorm_nonneg : ∀ (f : M → ℝ) (x : M), 0 ≤ gradNorm f x
+  /-- The gradient norm is positively homogeneous: |∇(c·f)| = |c|·|∇f| -/
+  gradNorm_homog : ∀ (f : M → ℝ) (c : ℝ) (x : M),
+    gradNorm (fun y => c * f y) x = |c| * gradNorm f x
 
-/-! ## Boundary Value Problem -/
+/-! ## Boundary Value Problem
+
+Convention: The paper's eq. (V1') writes the saturation term as `c·Φ^p`, but the
+operator formulation F(ψ) in §3.2 uses `c·(ψ₊)^p` where `ψ₊ = max(ψ, 0)`. We
+follow the operator formulation. For nonneg solutions (guaranteed by the maximum
+principle axiom in `PdeInfra.fixed_point_nonneg`), the two agree. -/
 
 /-- The BVP for the Creative Determinant: -ΔΦ = a|∇Φ| + bΦ - cΦ^p in M, Φ = 0 on ∂M.
     Paper Definition 3.1 (V1'). -/
@@ -116,12 +124,19 @@ structure SemioticBVP (n : ℕ) (M : Type*)
     [SemioticManifold n M] where
   ctx : SemioticContext n M
   ops : SemioticOperators n M
-  /-- The boundary of the manifold -/
+  /-- The boundary of the manifold.
+      Known limitation: this is an unstructured `Set M` with no requirement
+      that it equals the topological boundary or that the interior is
+      nonempty. Encoding manifold-with-boundary requires infrastructure
+      not yet available in Mathlib. -/
   boundary : Set M
-  /-- The PDE: -ΔΦ = a|∇Φ| + bΦ - cΦ^p -/
+  /-- The PDE: -ΔΦ = a|∇Φ| + bΦ - c(Φ₊)^p, where Φ₊ = max(Φ, 0).
+      The positive part matches the operator formulation F(ψ) in the paper (Section 3.2),
+      which uses ψ₊ in the saturation term. For nonneg solutions, Φ₊ = Φ. -/
   equation : (M → ℝ) → Prop := fun Φ =>
     ∀ x, -(ops.laplacian Φ x) =
-      (ctx.a x) * (ops.gradNorm Φ x) + (ctx.b x) * (Φ x) - (ctx.c x) * (Φ x) ^ (ctx.p)
+      (ctx.a x) * (ops.gradNorm Φ x) + (ctx.b x) * (Φ x) -
+      (ctx.c x) * (max (Φ x) 0) ^ (ctx.p)
   /-- The boundary condition: Φ = 0 on ∂M -/
   boundaryCondition : (M → ℝ) → Prop := fun Φ =>
     ∀ x ∈ boundary, Φ x = 0
@@ -129,7 +144,7 @@ structure SemioticBVP (n : ℕ) (M : Type*)
 /-! ## Weak Coherent Configuration -/
 
 /-- A weak coherent configuration is a solution to the Semiotic BVP.
-    Paper Definition 3.6. -/
+    Paper §3.2 (inline definition after eq. V1'). -/
 def IsWeakCoherentConfiguration {n : ℕ} {M : Type*}
     [TopologicalSpace M]
     [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]

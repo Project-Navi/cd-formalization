@@ -11,13 +11,17 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: leanprover/lean-action@v1
+      - uses: leanprover/lean-action@c544e89643240c6b398f14a431bcdc6309e36b3e # v1
+        with:
+          build-args: "--wfail"
 
       - name: Check for sorry contamination
         run: |
           echo "Checking axiom dependencies..."
+          # Force re-elaboration so cached oleans can't hide a sorry
+          touch CdFormal/Verify.lean
           lake env lean CdFormal/Verify.lean 2>&1 | tee verify_output.txt
           if grep -q "sorryAx" verify_output.txt; then
             echo "FATAL: sorryAx found in verified theorems!"

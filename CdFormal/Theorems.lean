@@ -32,7 +32,10 @@ No axiom dependencies — pure algebra. -/
 def viabilityThreshold (L : ℝ) (b : ℝ) (_ : L > 0) (_ : b > 0) : ℝ :=
   (Real.pi / L) ^ 2 / b
 
-/-- Spectral characterization: β > β* implies eigenvalue < 0. -/
+/-- Spectral characterization (1D, constant coefficients): β > β* implies
+    the principal eigenvalue λ₁ = (π/L)² − βb is negative. This is the
+    constant-coefficient case on [0,L]; the general manifold statement
+    requires Courant–Fischer theory not yet in Mathlib. -/
 theorem spectral_characterization_1d
     (L : ℝ) (b : ℝ) (beta : ℝ)
     (hL : L > 0) (hb : b > 0) :
@@ -91,7 +94,12 @@ theorem existence_weak_coherent_configuration
 
 /-- Paper Theorem 3.16: When viability exceeds dissipation (eigval < 0),
     there exists a positive solution — coherent presence can be self-maintained.
-    Proof: monotone iteration (sub/super-solution) → nontrivial fixed point → max principle. -/
+    Proof: monotone iteration (sub/super-solution) → nontrivial fixed point → max principle.
+
+    Note: The paper's Thm 3.16 says "assume the hypotheses of Thm 3.12" (including
+    bounded b). This Lean statement omits `B`/`hB` because the `monotone_iteration`
+    axiom uses a different proof route (sub/super-solution) that does not require
+    an explicit bound on b. The two theorems are independent in the formalization. -/
 theorem existence_nontrivial_coherent_configuration
     {n : ℕ} {M : Type*}
     [TopologicalSpace M]

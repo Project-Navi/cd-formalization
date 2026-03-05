@@ -56,7 +56,8 @@ structure SolutionOperator {n : ℕ} {M : Type*}
 /-! ## Principal Eigenvalue -/
 
 /-- The principal eigenvalue problem for -Δ - β·b on the semiotic manifold.
-    Paper Definition 3.13. -/
+    Paper Definition 3.13. The `beta` parameter generalizes the paper's
+    statement (which is the β = 1 case) to allow scaling the potential. -/
 structure PrincipalEigendata {n : ℕ} {M : Type*}
     [TopologicalSpace M]
     [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
@@ -95,11 +96,14 @@ class PdeInfra {n : ℕ} {M : Type*}
   /-- T is continuous and compact on C^{1,α}(M).
       In practice this follows from Schauder estimates + Arzelà-Ascoli
       (paper Lemma 3.7). We state it abstractly since Mathlib lacks the
-      function space infrastructure to make this concrete. -/
+      function space infrastructure to make this concrete.
+
+      **Known limitation:** This field is currently `True` (a placeholder).
+      The `schaefer` axiom below does not reference it, so the compactness
+      hypothesis is effectively unguarded. This will be fixed when Mathlib
+      gains Hölder spaces on manifolds and/or Schaefer's theorem (see
+      drafts/mathlib_issue_schaefer.md). -/
   T_continuous_compact : True
-  -- TODO: replace with proper statement when Mathlib has Hölder spaces
-  -- on manifolds. For now, this is a placeholder that makes the Schaefer
-  -- axiom honest about its missing hypothesis.
 
   /-- L∞ bound for the Schaefer set (Paper Lemma 3.10).
       If u = τ·T(u) for τ ∈ [0,1], then ‖u‖_∞ ≤ K = (B/c₀)^{1/(p-1)}.
