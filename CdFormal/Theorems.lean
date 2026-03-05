@@ -1,0 +1,116 @@
+/-
+Creative Determinant Framework — Theorems
+
+Proved results:
+  - Spectral characterization (1D): β > β* implies eigenvalue < 0
+  - Scaling algebraic contradiction: k < k^p when p > 1
+  - Existence of weak coherent configurations (from PdeInfra)
+  - Existence of nontrivial coherent configurations (from PdeInfra)
+
+Reference: Spence 2026, "The Creative Determinant"
+-/
+
+import CdFormal.Axioms
+
+set_option relaxedAutoImplicit false
+set_option autoImplicit false
+
+noncomputable section
+
+open scoped Manifold Bundle
+
+/-! ## Spectral Characterization (1D)
+
+For constant viability b on [0,L], the principal eigenvalue is
+  eigval = (π/L)² - β·b
+The condition eigval < 0 is equivalent to β > β* := (π/L)²/b.
+
+Proved independently by Aristotle in runs 8654be8c and 017f6779.
+No axiom dependencies — pure algebra. -/
+
+/-- The viability threshold β* = (π/L)² / b for constant viability b on [0,L]. -/
+def viabilityThreshold (L : ℝ) (b : ℝ) (_ : L > 0) (_ : b > 0) : ℝ :=
+  (Real.pi / L) ^ 2 / b
+
+/-- Spectral characterization: β > β* implies eigenvalue < 0. -/
+theorem spectral_characterization_1d
+    (L : ℝ) (b : ℝ) (beta : ℝ)
+    (hL : L > 0) (hb : b > 0) :
+    let beta_star := viabilityThreshold L b hL hb
+    beta > beta_star → (Real.pi / L) ^ 2 - beta * b < 0 := by
+  intro beta_star h_beta
+  have h1 : beta > (Real.pi / L) ^ 2 / b := h_beta
+  have h2 : beta * b > (Real.pi / L) ^ 2 := by
+    rwa [gt_iff_lt, div_lt_iff₀ hb] at h1
+  linarith
+
+/-! ## Scaling Algebraic Contradiction
+
+If p > 1, k > 1, c > 0, Φ > 0, then k < k^p (used in uniqueness arguments).
+
+Proved by Aristotle in run 017f6779. No axiom dependencies — pure algebra. -/
+
+lemma scaling_algebraic_contradiction
+    (p : ℝ) (k : ℝ) (c : ℝ) (Phi_val : ℝ)
+    (hp : p > 1) (hk : k > 1) (hc : c > 0) (hPhi : Phi_val > 0)
+    (h_eq : -c * k * Phi_val ^ p ≤ -c * k ^ p * Phi_val ^ p) :
+    False := by
+  have hcΦp : (0 : ℝ) < c * Phi_val ^ p := by positivity
+  have h_div : k ≥ k ^ p := by nlinarith
+  have h_lt : k < k ^ p := by
+    have h := Real.rpow_lt_rpow_of_exponent_lt hk hp
+    simp only [Real.rpow_one] at h
+    exact h
+  linarith
+
+/-! ## Existence Theorems (from PdeInfra typeclass)
+
+These compose the PDE infrastructure axioms to prove existence.
+The proof logic is verified; the PDE infrastructure is axiomatized.
+All axiom dependencies are visible via `[PdeInfra bvp solOp]`. -/
+
+/-- Paper Theorem 3.12: The BVP admits at least one nonneg solution.
+    Proof: L∞ bound → Schaefer set bounded → Schaefer fixed point → max principle. -/
+theorem existence_weak_coherent_configuration
+    {n : ℕ} {M : Type*}
+    [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
+    [IsManifold (SemioticModel n) ⊤ M]
+    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
+    [SemioticManifold n M]
+    (bvp : SemioticBVP n M)
+    (solOp : SolutionOperator bvp)
+    [infra : PdeInfra bvp solOp]
+    (B : ℝ) (hB : ∀ x, bvp.ctx.b x ≤ B) :
+    ∃ Phi : M → ℝ,
+      IsWeakCoherentConfiguration bvp Phi ∧
+      (∀ x, Phi x ≥ 0) := by
+  have h_bounded := infra.linfty_bound B hB
+  obtain ⟨Phi, hfix⟩ := infra.schaefer h_bounded
+  exact ⟨Phi, solOp.T_fixed_point Phi hfix, infra.fixed_point_nonneg Phi hfix⟩
+
+/-- Paper Theorem 3.16: When viability exceeds dissipation (eigval < 0),
+    there exists a positive solution — coherent presence can be self-maintained.
+    Proof: monotone iteration (sub/super-solution) → nontrivial fixed point → max principle. -/
+theorem existence_nontrivial_coherent_configuration
+    {n : ℕ} {M : Type*}
+    [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
+    [IsManifold (SemioticModel n) ⊤ M]
+    [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
+    [SemioticManifold n M]
+    (bvp : SemioticBVP n M)
+    (solOp : SolutionOperator bvp)
+    [infra : PdeInfra bvp solOp]
+    (beta : ℝ)
+    (eig : PrincipalEigendata bvp beta)
+    (eigval_neg : eig.eigval < 0) :
+    ∃ Phi : M → ℝ,
+      IsWeakCoherentConfiguration bvp Phi ∧
+      (∀ x, Phi x ≥ 0) ∧
+      (∃ x, x ∉ bvp.boundary ∧ Phi x > 0) := by
+  obtain ⟨Phi, hfix, x, hx_int, hx_pos⟩ := infra.monotone_iteration beta eig eigval_neg
+  exact ⟨Phi, solOp.T_fixed_point Phi hfix,
+    infra.fixed_point_nonneg Phi hfix, x, hx_int, hx_pos⟩
+
+end

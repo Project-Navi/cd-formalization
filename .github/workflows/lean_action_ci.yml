@@ -1,0 +1,26 @@
+name: Lean CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@v1
+
+      - name: Check for sorry contamination
+        run: |
+          echo "Checking axiom dependencies..."
+          lake env lean CdFormal/Verify.lean 2>&1 | tee verify_output.txt
+          if grep -q "sorryAx" verify_output.txt; then
+            echo "FATAL: sorryAx found in verified theorems!"
+            exit 1
+          fi
+          echo "No sorry contamination detected."
