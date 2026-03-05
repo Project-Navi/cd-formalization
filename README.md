@@ -6,14 +6,15 @@ Formal verification of the existence theory from:
 
 ## What is verified
 
-| Result | File | Status |
-|--------|------|--------|
-| Spectral characterization (1D) | `CdFormal/Theorems.lean` | Proved (pure algebra) |
-| Scaling algebraic contradiction | `CdFormal/Theorems.lean` | Proved (pure algebra) |
-| Existence of weak coherent configurations | `CdFormal/Theorems.lean` | Proved (conditional on `PDEInfra`) |
-| Existence of nontrivial configurations | `CdFormal/Theorems.lean` | Proved (conditional on `PDEInfra`) |
-| L∞ bound algebraic core | `artifacts/aristotle/LinftyAlgebraic_proved.lean` | Proved (standalone) |
-| Scaling uniqueness | `artifacts/aristotle/ScalingUniqueness_proved.lean` | Proved (uses `SemioticOperators` axioms) |
+| Result | File | Dependencies | Track |
+|--------|------|-------------|-------|
+| Viability threshold (1D) | `CdFormal/Theorems.lean` | Pure algebra | Upstream candidate (deferred) |
+| Spectral characterization (1D) | `CdFormal/Theorems.lean` | Pure algebra | Upstream candidate (deferred) |
+| Scaling algebraic contradiction | `CdFormal/Theorems.lean` | Pure algebra | Upstream candidate |
+| Existence of weak coherent configurations | `CdFormal/Theorems.lean` | `PDEInfra`: linfty_bound, schaefer, fixed_point_nonneg | Paper-specific |
+| Existence of nontrivial configurations | `CdFormal/Theorems.lean` | `PDEInfra`: monotone_iteration, fixed_point_nonneg | Paper-specific |
+| L∞ bound algebraic core | `artifacts/aristotle/` | Pure algebra | Standalone artifact |
+| Scaling uniqueness | `artifacts/aristotle/` | `SemioticOperators` axioms | Standalone artifact |
 
 All definitions (semiotic manifold, BVP, operators, weak coherent configuration) are machine-checked against Mathlib.
 
