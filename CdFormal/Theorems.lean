@@ -1,4 +1,5 @@
 import CdFormal.Axioms
+import Mathlib.Tactic
 
 set_option relaxedAutoImplicit false
 set_option autoImplicit false

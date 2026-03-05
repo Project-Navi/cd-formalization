@@ -1,7 +1,6 @@
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.VectorBundle.Riemannian
-import Mathlib.Tactic
 
 set_option relaxedAutoImplicit false
 set_option autoImplicit false
