@@ -5,6 +5,7 @@ Authors: Nelson Spence
 -/
 import CdFormal.Theorems
 import CdFormal.OperatorLemmas
+import CdFormal.CoefficientLemmas
 
 /-!
 # Axiom Dependency Map
@@ -29,7 +30,13 @@ If `sorryAx` appears anywhere, the proof is incomplete.
 
 -- § Derived operator lemmas (from SemioticOperators axioms)
 #print axioms laplacian_zero
+#print axioms laplacian_linear
 #print axioms gradNorm_zero
+
+-- § Coefficient bound lemmas (from SemioticContext bounds)
+#print axioms SemioticContext.a_nonneg
+#print axioms SemioticContext.a_le_one
+#print axioms SemioticContext.p_sub_one_pos
 
 -- § PDEInfra-dependent (paper-specific)
 -- Should show PDEInfra fields but NO sorryAx.

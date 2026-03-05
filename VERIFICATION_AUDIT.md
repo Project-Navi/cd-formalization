@@ -69,25 +69,49 @@ validating that the axioms are well-formed and non-vacuous.
 -- CdFormal/OperatorLemmas.lean
 
 lemma laplacian_zero :
-    ops.laplacian (fun _ : M => (0 : ℝ)) = fun _ => 0 := by
-  have h := ops.laplacian_smul (fun _ => (0 : ℝ)) 0
+    ops.laplacian (fun _ : M ↦ (0 : ℝ)) = fun _ ↦ 0 := by
+  have h := ops.laplacian_smul (fun _ ↦ (0 : ℝ)) 0
   simp only [zero_mul] at h
   exact h
 
 lemma gradNorm_zero (x : M) :
-    ops.gradNorm (fun _ : M => (0 : ℝ)) x = 0 := by
-  have h := ops.gradNorm_smul (fun _ => (0 : ℝ)) 0 x
+    ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0 := by
+  have h := ops.gradNorm_smul (fun _ ↦ (0 : ℝ)) 0 x
   simp only [zero_mul, abs_zero] at h
   exact h
 ```
 
-**Axiom dependencies:** `SemioticOperators.laplacian_smul`, `SemioticOperators.gradNorm_smul` —
-derived from operator axioms only (no `PDEInfra`).
+Also includes the composed linearity lemma:
+
+```lean
+lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
+    ops.laplacian (fun x ↦ c * f x + g x) =
+    fun x ↦ c * ops.laplacian f x + ops.laplacian g x
+```
+
+**Axiom dependencies:** `SemioticOperators.laplacian_add`, `SemioticOperators.laplacian_smul`,
+`SemioticOperators.gradNorm_smul` — derived from operator axioms only (no `PDEInfra`).
 
 **Provenance:** Aristotle run `41cee644-80f9-4122-9c7d-c32dc1b571d6` (original proofs against
 pre-Phase 2 axiom set, adapted here for current axioms).
 
-### 1.4 Existence of Weak Coherent Configurations — Paper Theorem 3.12
+### 1.4 Coefficient Bound Lemmas — derived from `SemioticContext` bounds
+
+**Statement:** Properties of the creative drive coefficient a(x) = κγμ
+and the saturation exponent p, derived from the coefficient bounds.
+
+```lean
+-- CdFormal/CoefficientLemmas.lean
+
+theorem SemioticContext.a_nonneg (x : M) : 0 ≤ ctx.a x
+theorem SemioticContext.a_le_one (x : M) : ctx.a x ≤ 1
+theorem SemioticContext.p_sub_one_pos : 0 < ctx.p - 1
+```
+
+**Axiom dependencies:** `[propext, Classical.choice, Quot.sound]` — pure algebra
+from `κ_bounds`, `γ_bounds`, `μ_bounds`, `one_lt_p`.
+
+### 1.5 Existence of Weak Coherent Configurations — Paper Theorem 3.12
 
 **Statement:** Under the `PDEInfra` typeclass, the BVP admits at least one nonnegative solution.
 
@@ -112,7 +136,7 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
 **Axiom dependencies:** `PDEInfra.T_continuous_compact`, `PDEInfra.linfty_bound`,
 `PDEInfra.schaefer`, `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point` — no `sorryAx`.
 
-### 1.5 Existence of Nontrivial Coherent Configurations — Paper Theorem 3.16
+### 1.6 Existence of Nontrivial Coherent Configurations — Paper Theorem 3.16
 
 **Statement:** When `λ₁(-Δ - b; M) < 0`, there exists a positive solution in the interior.
 
@@ -140,7 +164,7 @@ theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
 **Axiom dependencies:** `PDEInfra.monotone_iteration`, `PDEInfra.fixed_point_nonneg`,
 `SolutionOperator.T_fixed_point` — no `sorryAx`.
 
-### 1.6 L∞ Bound — Algebraic Core — Paper Lemma 3.10 (partial)
+### 1.7 L∞ Bound — Algebraic Core — Paper Lemma 3.10 (partial)
 
 **Statement:** At an interior maximum, the PDE reduces to `b·v ≥ c·v^p`. The algebraic
 consequence is `v ≤ (B/c₀)^{1/(p-1)}`. This is the algebraic half of Lemma 3.10; the
@@ -175,7 +199,7 @@ theorem linfty_bound_algebraic
 
 **Axiom dependencies:** `[propext, Classical.choice, Quot.sound]` — pure real analysis, no `sorryAx`.
 
-### 1.7 Scaling Uniqueness — Proportional solutions are impossible
+### 1.8 Scaling Uniqueness — Proportional solutions are impossible
 
 **Statement:** If Φ solves the CD equation and kΦ (with k > 1) also solves it, then at any
 point where c(x) > 0 and Φ(x) > 0, we get a contradiction. Solutions are unique within the
@@ -209,7 +233,7 @@ class SemioticManifold (n : ℕ) (M : Type*)
     [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
     [IsManifold (SemioticModel n) ⊤ M]
     [MetricSpace M] [CompactSpace M] [ConnectedSpace M] where
-  riemannianMetric : Bundle.RiemannianMetric (fun (_ : M) => EuclideanSpace ℝ (Fin n))
+  riemannianMetric : Bundle.RiemannianMetric (fun (_ : M) ↦ EuclideanSpace ℝ (Fin n))
 ```
 
 ### 2.2 Coefficient Structure — Paper Definitions 2.2, 3.1
@@ -259,13 +283,13 @@ structure SemioticOperators (n : ℕ) (M : Type*) [...] [SemioticManifold n M] w
   laplacian : (M → ℝ) → (M → ℝ)
   gradNorm : (M → ℝ) → (M → ℝ)
   laplacian_add : ∀ (f g : M → ℝ),
-    laplacian (fun x => f x + g x) = fun x => laplacian f x + laplacian g x
+    laplacian (fun x ↦ f x + g x) = fun x ↦ laplacian f x + laplacian g x
   laplacian_smul : ∀ (f : M → ℝ) (c : ℝ),
-    laplacian (fun x => c * f x) = fun x => c * laplacian f x
+    laplacian (fun x ↦ c * f x) = fun x ↦ c * laplacian f x
   gradNorm_nonneg : ∀ (f : M → ℝ) (x : M), 0 ≤ gradNorm f x
   gradNorm_smul : ∀ (f : M → ℝ) (c : ℝ) (x : M),
-    gradNorm (fun y => c * f y) x = |c| * gradNorm f x
-  gradNorm_const : ∀ (a : ℝ) (x : M), gradNorm (fun _ => a) x = 0
+    gradNorm (fun y ↦ c * f y) x = |c| * gradNorm f x
+  gradNorm_const : ∀ (a : ℝ) (x : M), gradNorm (fun _ ↦ a) x = 0
 ```
 
 ### 2.6 Boundary Value Problem — Paper Definition 3.1 (V1')
@@ -278,11 +302,11 @@ structure SemioticBVP (n : ℕ) (M : Type*) [...] [SemioticManifold n M] where
   ops : SemioticOperators n M
   boundary : Set M
   interior_nonempty : ∃ x, x ∉ boundary
-  equation : (M → ℝ) → Prop := fun Φ =>
+  equation : (M → ℝ) → Prop := fun Φ ↦
     ∀ x, -(ops.laplacian Φ x) =
       (ctx.a x) * (ops.gradNorm Φ x) + (ctx.b x) * (Φ x) -
       (ctx.c x) * (max (Φ x) 0) ^ (ctx.p)
-  boundary_condition : (M → ℝ) → Prop := fun Φ =>
+  boundary_condition : (M → ℝ) → Prop := fun Φ ↦
     ∀ x ∈ boundary, Φ x = 0
 ```
 
@@ -486,7 +510,13 @@ Fails on any warning (including `sorry`), ensuring no silent contamination.
 
 -- § Derived operator lemmas (from SemioticOperators axioms)
 #print axioms laplacian_zero
+#print axioms laplacian_linear
 #print axioms gradNorm_zero
+
+-- § Coefficient bound lemmas (from SemioticContext bounds)
+#print axioms SemioticContext.a_nonneg
+#print axioms SemioticContext.a_le_one
+#print axioms SemioticContext.p_sub_one_pos
 
 -- § PDEInfra-dependent (paper-specific)
 -- Should show PDEInfra fields but NO sorryAx.
@@ -520,12 +550,13 @@ Fails on any warning (including `sorry`), ensuring no silent contamination.
 cd_formalization/
 ├── .github/workflows/lean_action_ci.yml   # CI with --wfail + sorry check
 ├── CdFormal.lean                          # root import (Basic, Axioms, Theorems,
-│                                          #   OperatorLemmas, Verify)
+│                                          #   OperatorLemmas, CoefficientLemmas, Verify)
 ├── CdFormal/
 │   ├── Basic.lean                         # definitions (§2)
 │   ├── Axioms.lean                        # PDE infrastructure typeclass (§3)
 │   ├── Theorems.lean                      # proved theorems (§1)
 │   ├── OperatorLemmas.lean                # derived operator lemmas (§1.3)
+│   ├── CoefficientLemmas.lean             # coefficient bound lemmas (§1.4)
 │   └── Verify.lean                        # axiom dependency dashboard (§6)
 ├── drafts/                                # Aristotle targets + community drafts
 │   ├── LinftyAlgebraic.lean
