@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake
-          key: lake-${{ hashFiles('lean-toolchain', 'lakefile.lean', 'lake-manifest.json') }}
+          key: lake-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'lake-manifest.json') }}
           restore-keys: lake-
 
       - name: Get Mathlib cache
@@ -37,6 +37,9 @@ jobs:
 
       - name: Build (fail on sorry)
         run: lake build --wfail
+
+      - name: Lint (Mathlib environment linters)
+        run: lake lint
 
       - name: Check for sorry contamination
         run: |

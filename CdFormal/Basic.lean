@@ -131,7 +131,9 @@ structure SemioticBVP (n : ℕ) (M : Type*)
     [IsManifold (SemioticModel n) ⊤ M]
     [MetricSpace M] [CompactSpace M] [ConnectedSpace M]
     [SemioticManifold n M] where
+  /-- The coefficient context (care, coherence, contradiction, viability, capacity) -/
   ctx : SemioticContext n M
+  /-- The differential operators (Laplacian, gradient norm) -/
   ops : SemioticOperators n M
   /-- The boundary of the manifold.
       Known limitation: this is an unstructured `Set M` with no requirement

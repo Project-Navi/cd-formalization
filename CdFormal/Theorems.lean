@@ -48,7 +48,7 @@ Proved independently by Aristotle in runs 8654be8c and 017f6779.
 No axiom dependencies — pure algebra. -/
 
 /-- The viability threshold β* = (π/L)² / b for constant viability b on [0,L]. -/
-def viabilityThreshold (L : ℝ) (b : ℝ) (_ : L > 0) (_ : b > 0) : ℝ :=
+def viabilityThreshold (L : ℝ) (b : ℝ) : ℝ :=
   (Real.pi / L) ^ 2 / b
 
 /-- Spectral characterization (1D, constant coefficients): β > β* implies
@@ -56,9 +56,8 @@ def viabilityThreshold (L : ℝ) (b : ℝ) (_ : L > 0) (_ : b > 0) : ℝ :=
     constant-coefficient case on [0,L]; the general manifold statement
     requires Courant–Fischer theory not yet in Mathlib. -/
 theorem spectral_characterization_1d
-    (L : ℝ) (b : ℝ) (beta : ℝ)
-    (hL : L > 0) (hb : b > 0) :
-    let beta_star := viabilityThreshold L b hL hb
+    (L : ℝ) (b : ℝ) (beta : ℝ) (hb : b > 0) :
+    let beta_star := viabilityThreshold L b
     beta > beta_star → (Real.pi / L) ^ 2 - beta * b < 0 := by
   intro beta_star h_beta
   have h1 : beta > (Real.pi / L) ^ 2 / b := h_beta
