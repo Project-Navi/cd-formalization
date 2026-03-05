@@ -1,23 +1,30 @@
 import CdFormal.Theorems
 
 /-!
-# Axiom Contamination Checks
+# Axiom Dependency Map
 
-Verification dashboard: run `lake build CdFormal.Verify` to confirm which axioms
-each theorem depends on. If `sorryAx` appears anywhere, something is broken.
+Run `lake build CdFormal.Verify` to confirm axiom dependencies.
+If `sorryAx` appears anywhere, the proof is incomplete.
 
-Pure algebra theorems should show only `[propext, Classical.choice, Quot.sound]`.
-PDE-dependent theorems should additionally show `PDEInfra` fields but no `sorryAx`.
+## Categories
+
+- **Pure algebra**: Only `[propext, Classical.choice, Quot.sound]`.
+  These are upstream candidates (see per-theorem annotations).
+- **PDEInfra-dependent**: Additionally shows `PDEInfra` fields.
+  Paper-specific — not upstream candidates.
+- **Definitions**: Should be axiom-free beyond `[propext, Quot.sound]`.
 -/
 
--- Pure algebra (NO sorryAx, NO PDE axioms)
+-- § Pure algebra (upstream candidates)
+-- No PDEInfra axioms. Depend only on core Lean axioms.
+#print axioms viabilityThreshold
 #print axioms spectral_characterization_1d
 #print axioms scaling_algebraic_contradiction
 
--- PDE-dependent (should show PDEInfra fields, but NO sorryAx)
+-- § PDEInfra-dependent (paper-specific)
+-- Should show PDEInfra fields but NO sorryAx.
 #print axioms SemioticBVP.exists_isWeakCoherentConfiguration
 #print axioms SemioticBVP.exists_pos_isWeakCoherentConfiguration
 
--- Definitions (should be axiom-free)
+-- § Definitions (axiom-free)
 #print axioms IsWeakCoherentConfiguration
-#print axioms viabilityThreshold
