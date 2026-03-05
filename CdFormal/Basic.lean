@@ -107,13 +107,16 @@ structure SemioticOperators (n : ℕ) (M : Type*)
   laplacian : (M → ℝ) → (M → ℝ)
   /-- The norm of the gradient -/
   gradNorm : (M → ℝ) → (M → ℝ)
-  /-- The Laplacian is linear -/
-  laplacian_linear : ∀ (f g : M → ℝ) (c : ℝ),
-    laplacian (fun x => c * f x + g x) = fun x => c * laplacian f x + laplacian g x
+  /-- The Laplacian is additive -/
+  laplacian_add : ∀ (f g : M → ℝ),
+    laplacian (fun x => f x + g x) = fun x => laplacian f x + laplacian g x
+  /-- The Laplacian is homogeneous -/
+  laplacian_smul : ∀ (f : M → ℝ) (c : ℝ),
+    laplacian (fun x => c * f x) = fun x => c * laplacian f x
   /-- The gradient norm is non-negative -/
   gradNorm_nonneg : ∀ (f : M → ℝ) (x : M), 0 ≤ gradNorm f x
   /-- The gradient norm is positively homogeneous: |∇(c·f)| = |c|·|∇f| -/
-  gradNorm_homog : ∀ (f : M → ℝ) (c : ℝ) (x : M),
+  gradNorm_smul : ∀ (f : M → ℝ) (c : ℝ) (x : M),
     gradNorm (fun y => c * f y) x = |c| * gradNorm f x
 
 /-! ## Boundary Value Problem
