@@ -51,6 +51,22 @@ artifacts/
 drafts/            — In-progress proof targets and issue drafts
 ```
 
+## Development Process
+
+**Mathematical framework**: The Creative Determinant equations, existence theory,
+and proof strategy were developed by Nelson Spence over 12 months (April 2025 –
+March 2026), documented in the [parent repository](https://github.com/Project-Navi/navi-creative-determinant) and [paper](../paper/creative_determinant.pdf).
+
+**Lean formalization**: Translating the paper proofs into Lean 4 was assisted by:
+- **Claude Opus**: Project structure, Mathlib API navigation, proof term generation
+- **Aristotle** (Harmonic.fun): Automated proving of algebraic/analysis lemmas
+
+All mathematical content originates from the author's research. AI tools were used
+as formalization assistants, analogous to proof automation in Coq/Isabelle.
+
+**Verification**: All proofs compile against Mathlib v4.28.0 with zero `sorry`.
+The axiom surface (`PdeInfra`) packages classical PDE results not yet in Mathlib.
+
 ## License
 
 See the parent repository for license information.
