@@ -95,10 +95,10 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
       function space infrastructure to make this concrete.
 
       **Known limitation:** This field is currently `True` (a placeholder).
-      The `schaefer` axiom below does not reference it, so the compactness
-      hypothesis is effectively unguarded. This will be fixed when Mathlib
-      gains Hölder spaces on manifolds and/or Schaefer's theorem (see
-      drafts/mathlib_issue_schaefer.md).
+      The `schaefer` axiom below takes this as a hypothesis (via `True →`),
+      so the dependency is structurally present but content-free until
+      Mathlib gains Hölder spaces on manifolds and/or Schaefer's theorem
+      (see drafts/mathlib_issue_schaefer.md).
 
     Mathlib status: requires Hölder spaces on manifolds (not in Mathlib). -/
   T_continuous_compact : True
@@ -125,6 +125,7 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
     Mathlib status: Schaefer's fixed-point theorem is not in Mathlib.
     Draft issue: `drafts/mathlib_issue_schaefer.md`. -/
   schaefer :
+    True →
     (∃ K > 0, ∀ (u : M → ℝ) (τ : ℝ),
       0 ≤ τ → τ ≤ 1 →
       (∀ x, u x = τ * solOp.T u x) →

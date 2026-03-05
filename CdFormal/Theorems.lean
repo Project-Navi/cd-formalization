@@ -107,7 +107,8 @@ All axiom dependencies are visible via `[PDEInfra bvp solOp]`. -/
     Proof: L∞ bound → Schaefer set bounded → Schaefer fixed point →
     max principle.
 
-    Axiom dependencies: `PDEInfra.linfty_bound`, `PDEInfra.schaefer`,
+    Axiom dependencies: `PDEInfra.T_continuous_compact`,
+    `PDEInfra.linfty_bound`, `PDEInfra.schaefer`,
     `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point`.
     Upstream candidate: no — paper-specific composition of PDE axioms. -/
 theorem SemioticBVP.exists_isWeakCoherentConfiguration
@@ -119,7 +120,7 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
       IsWeakCoherentConfiguration bvp Phi ∧
       (∀ x, Phi x ≥ 0) := by
   have h_bounded := infra.linfty_bound B hB
-  obtain ⟨Phi, hfix⟩ := infra.schaefer h_bounded
+  obtain ⟨Phi, hfix⟩ := infra.schaefer infra.T_continuous_compact h_bounded
   exact ⟨Phi, solOp.T_fixed_point Phi hfix, infra.fixed_point_nonneg Phi hfix⟩
 
 /-- Paper Theorem 3.16: When viability exceeds dissipation (eigval < 0),
