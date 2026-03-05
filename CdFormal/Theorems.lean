@@ -47,14 +47,20 @@ The condition eigval < 0 is equivalent to β > β* := (π/L)²/b.
 Proved independently by Aristotle in runs 8654be8c and 017f6779.
 No axiom dependencies — pure algebra. -/
 
-/-- The viability threshold β* = (π/L)² / b for constant viability b on [0,L]. -/
+/-- The viability threshold β* = (π/L)² / b for constant viability b on [0,L].
+
+    Axiom dependencies: none (pure algebra).
+    Upstream candidate: deferred — needs Sturm-Liouville eigenvalue context in Mathlib. -/
 def viabilityThreshold (L : ℝ) (b : ℝ) : ℝ :=
   (Real.pi / L) ^ 2 / b
 
 /-- Spectral characterization (1D, constant coefficients): β > β* implies
     the principal eigenvalue λ₁ = (π/L)² − βb is negative. This is the
     constant-coefficient case on [0,L]; the general manifold statement
-    requires Courant–Fischer theory not yet in Mathlib. -/
+    requires Courant–Fischer theory not yet in Mathlib.
+
+    Axiom dependencies: none (pure algebra).
+    Upstream candidate: deferred — needs Sturm-Liouville eigenvalue context in Mathlib. -/
 theorem spectral_characterization_1d
     (L : ℝ) (b : ℝ) (beta : ℝ) (hb : b > 0) :
     let beta_star := viabilityThreshold L b
@@ -71,6 +77,13 @@ If p > 1, k > 1, c > 0, Φ > 0, then k < k^p (used in uniqueness arguments).
 
 Proved by Aristotle in run 017f6779. No axiom dependencies — pure algebra. -/
 
+/-- If p > 1, k > 1, c > 0, Φ > 0, and -c·k·Φᵖ ≤ -c·kᵖ·Φᵖ, then False.
+    The core fact is k < kᵖ for k > 1 and p > 1
+    (`Real.rpow_lt_rpow_of_exponent_lt`), contradicting the hypothesis.
+
+    Axiom dependencies: none (pure algebra).
+    Upstream candidate: the core inequality k < kᵖ may be a useful simp
+    lemma near `Mathlib.Analysis.SpecialFunctions.Pow.Real`. -/
 lemma scaling_algebraic_contradiction
     (p : ℝ) (k : ℝ) (c : ℝ) (Phi_val : ℝ)
     (hp : p > 1) (hk : k > 1) (hc : c > 0) (hPhi : Phi_val > 0)
@@ -91,7 +104,12 @@ The proof logic is verified; the PDE infrastructure is axiomatized.
 All axiom dependencies are visible via `[PDEInfra bvp solOp]`. -/
 
 /-- Paper Theorem 3.12: The BVP admits at least one nonneg solution.
-    Proof: L∞ bound → Schaefer set bounded → Schaefer fixed point → max principle. -/
+    Proof: L∞ bound → Schaefer set bounded → Schaefer fixed point →
+    max principle.
+
+    Axiom dependencies: `PDEInfra.linfty_bound`, `PDEInfra.schaefer`,
+    `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point`.
+    Upstream candidate: no — paper-specific composition of PDE axioms. -/
 theorem SemioticBVP.exists_isWeakCoherentConfiguration
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
@@ -105,13 +123,18 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
   exact ⟨Phi, solOp.T_fixed_point Phi hfix, infra.fixed_point_nonneg Phi hfix⟩
 
 /-- Paper Theorem 3.16: When viability exceeds dissipation (eigval < 0),
-    there exists a positive solution — coherent presence can be self-maintained.
-    Proof: monotone iteration (sub/super-solution) → nontrivial fixed point → max principle.
+    there exists a positive solution — coherent presence can be
+    self-maintained. Proof: monotone iteration (sub/super-solution) →
+    nontrivial fixed point → max principle.
 
-    Note: The paper's Thm 3.16 says "assume the hypotheses of Thm 3.12" (including
-    bounded b). This Lean statement omits `B`/`hB` because the `monotone_iteration`
-    axiom uses a different proof route (sub/super-solution) that does not require
-    an explicit bound on b. The two theorems are independent in the formalization. -/
+    Axiom dependencies: `PDEInfra.monotone_iteration`,
+    `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point`.
+    Upstream candidate: no — paper-specific composition of PDE axioms.
+
+    Note: The paper's Thm 3.16 says "assume the hypotheses of Thm 3.12"
+    (including bounded b). This Lean statement omits `B`/`hB` because
+    `monotone_iteration` uses sub/super-solution theory that does not
+    require an explicit bound on b. -/
 theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
