@@ -6,15 +6,38 @@ Formal verification of the existence theory from:
 
 ## What is verified
 
-| Result | File | Dependencies | Track |
-|--------|------|-------------|-------|
-| Viability threshold (1D) | `CdFormal/Theorems.lean` | Pure algebra | Upstream candidate (deferred) |
-| Spectral characterization (1D) | `CdFormal/Theorems.lean` | Pure algebra | Upstream candidate (deferred) |
-| Scaling algebraic contradiction | `CdFormal/Theorems.lean` | Pure algebra | Upstream candidate |
-| Existence of weak coherent configurations | `CdFormal/Theorems.lean` | `PDEInfra`: linfty_bound, schaefer, fixed_point_nonneg | Paper-specific |
-| Existence of nontrivial configurations | `CdFormal/Theorems.lean` | `PDEInfra`: monotone_iteration, fixed_point_nonneg | Paper-specific |
-| L∞ bound algebraic core | `artifacts/aristotle/` | Pure algebra | Standalone artifact |
-| Scaling uniqueness | `artifacts/aristotle/` | `SemioticOperators` axioms | Standalone artifact |
+Eleven theorems proved with zero `sorry`, organized in four dependency tiers:
+
+### Tier 1 — Pure algebra (no domain axioms)
+
+| Result | Declaration | File |
+|--------|-------------|------|
+| Spectral characterization (1D) | `spectral_characterization_1d` | `Theorems` |
+| Scaling algebraic contradiction | `scaling_algebraic_contradiction` | `Theorems` |
+
+### Tier 2 — Operator lemmas (from abstract linearity/homogeneity)
+
+| Result | Declaration | File |
+|--------|-------------|------|
+| Laplacian of zero | `laplacian_zero` | `OperatorLemmas` |
+| Laplacian linearity | `laplacian_linear` | `OperatorLemmas` |
+| Gradient norm of zero | `gradNorm_zero` | `OperatorLemmas` |
+
+### Tier 3 — Coefficient bounds (from [0,1] field constraints)
+
+| Result | Declaration | File |
+|--------|-------------|------|
+| a(x) nonneg | `SemioticContext.a_nonneg` | `CoefficientLemmas` |
+| a(x) ≤ 1 | `SemioticContext.a_le_one` | `CoefficientLemmas` |
+| p − 1 > 0 | `SemioticContext.p_sub_one_pos` | `CoefficientLemmas` |
+
+### Tier 4 — PDE-level results
+
+| Result | Declaration | File | Dependencies |
+|--------|-------------|------|--------------|
+| Scaling uniqueness (kΦ impossible for k > 1) | `scaling_uniqueness` | `ScalingUniqueness` | `SemioticOperators` axioms |
+| Existence of weak coherent configurations | `exists_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
+| Nontrivial configurations | `exists_pos_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
 
 All definitions (semiotic manifold, BVP, operators, weak coherent configuration) are machine-checked against Mathlib.
 
@@ -22,13 +45,15 @@ All definitions (semiotic manifold, BVP, operators, weak coherent configuration)
 
 The `PDEInfra` typeclass in `CdFormal/Axioms.lean` packages five classical PDE results not yet in Mathlib:
 
-1. **T continuous & compact** — Schauder estimates + Arzelà–Ascoli (placeholder `True`)
-2. **L∞ bound** — Maximum principle at interior extremum
-3. **Schaefer's fixed-point theorem** — Not in Mathlib ([draft issue](drafts/mathlib_issue_schaefer.md))
-4. **Fixed-point nonnegativity** — Maximum principle
-5. **Monotone iteration** — Sub/super-solution theory (Amann 1976)
+| Axiom | Classical source | Mathlib status |
+|-------|-----------------|----------------|
+| `T_continuous_compact` | Schauder estimates + Arzelà–Ascoli | No Hölder spaces on manifolds (placeholder `True`) |
+| `linfty_bound` | Maximum principle (Gilbarg–Trudinger) | No max. principle for manifolds |
+| `schaefer` | Schaefer 1955 | Not in Mathlib ([draft issue](drafts/mathlib_issue_schaefer.md)) |
+| `fixed_point_nonneg` | Strong maximum principle | No max. principle for manifolds |
+| `monotone_iteration` | Amann 1976 | No sub-/super-solution theory |
 
-The existence theorems explicitly carry `[PDEInfra bvp solOp]` so the axiom surface is visible to Lean's kernel. Run `#print axioms` in `CdFormal/Verify.lean` to confirm no `sorryAx`.
+The existence theorems explicitly carry `[PDEInfra bvp solOp]` so the axiom surface is visible to Lean's kernel. Run `#print axioms` in `CdFormal/Verify.lean` to confirm no `sorryAx` — all theorems depend only on `[propext, Classical.choice, Quot.sound]`.
 
 ## Building
 
@@ -36,20 +61,23 @@ Requires Lean 4 (v4.28.0) and Mathlib.
 
 ```bash
 lake build
-lake build --wfail   # fail on any sorry
+lake build --wfail   # fail on any sorry or warning
 ```
 
 ## Project structure
 
 ```
 CdFormal/
-  Basic.lean       — Definitions (manifold, coefficients, operators, BVP)
-  Axioms.lean      — PDEInfra typeclass (explicit axiom surface)
-  Theorems.lean    — Proved theorems
-  Verify.lean      — #print axioms dashboard
+  Basic.lean            — Definitions (manifold, coefficients, operators, BVP)
+  Axioms.lean           — PDEInfra typeclass (explicit axiom surface)
+  Theorems.lean         — Existence and algebraic theorems
+  OperatorLemmas.lean   — Laplacian/gradient-norm derived properties
+  CoefficientLemmas.lean — Bounds from [0,1] field constraints
+  ScalingUniqueness.lean — PDE-level scaling impossibility
+  Verify.lean           — #print axioms dashboard (13 declarations)
 artifacts/
-  aristotle/       — Proved outputs from the Aristotle theorem prover
-drafts/            — In-progress proof targets and issue drafts
+  aristotle/            — Proved outputs from the Aristotle theorem prover
+drafts/                 — Community engagement drafts (Zulip, Mathlib issues)
 ```
 
 ## Development Process
