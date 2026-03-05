@@ -36,8 +36,8 @@ Eleven theorems proved with zero `sorry`, organized in four dependency tiers:
 | Result | Declaration | File | Dependencies |
 |--------|-------------|------|--------------|
 | Scaling uniqueness (kΦ impossible for k > 1) | `scaling_uniqueness` | `ScalingUniqueness` | `SemioticOperators` axioms |
-| Existence of weak coherent configurations | `exists_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
-| Nontrivial configurations | `exists_pos_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
+| Existence of weak coherent configurations | `SemioticBVP.exists_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
+| Nontrivial configurations | `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
 
 All definitions (semiotic manifold, BVP, operators, weak coherent configuration) are machine-checked against Mathlib.
 
