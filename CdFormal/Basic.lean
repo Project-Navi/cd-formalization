@@ -81,7 +81,7 @@ structure SemioticContext (n : ℕ) (M : Type*)
   γ_bounds : ∀ x, 0 ≤ γ x ∧ γ x ≤ 1
   μ_bounds : ∀ x, 0 ≤ μ x ∧ μ x ≤ 1
   c_pos : ∃ c₀ > 0, ∀ x, c x ≥ c₀
-  p_gt_one : p > 1
+  one_lt_p : 1 < p
 
 /-- The creative drive coefficient a(x) = κ(x)·γ(x)·μ(x).
     Paper Definition 3.1. -/
@@ -121,7 +121,7 @@ structure SemioticOperators (n : ℕ) (M : Type*)
 Convention: The paper's eq. (V1') writes the saturation term as `c·Φ^p`, but the
 operator formulation F(ψ) in §3.2 uses `c·(ψ₊)^p` where `ψ₊ = max(ψ, 0)`. We
 follow the operator formulation. For nonneg solutions (guaranteed by the maximum
-principle axiom in `PdeInfra.fixed_point_nonneg`), the two agree. -/
+principle axiom in `PDEInfra.fixed_point_nonneg`), the two agree. -/
 
 /-- The BVP for the Creative Determinant: -ΔΦ = a|∇Φ| + bΦ - cΦ^p in M, Φ = 0 on ∂M.
     Paper Definition 3.1 (V1'). -/
@@ -147,7 +147,7 @@ structure SemioticBVP (n : ℕ) (M : Type*)
       (ctx.a x) * (ops.gradNorm Φ x) + (ctx.b x) * (Φ x) -
       (ctx.c x) * (max (Φ x) 0) ^ (ctx.p)
   /-- The boundary condition: Φ = 0 on ∂M -/
-  boundaryCondition : (M → ℝ) → Prop := fun Φ =>
+  boundary_condition : (M → ℝ) → Prop := fun Φ =>
     ∀ x ∈ boundary, Φ x = 0
 
 /-! ## Weak Coherent Configuration -/
@@ -155,6 +155,6 @@ structure SemioticBVP (n : ℕ) (M : Type*)
 /-- A weak coherent configuration is a solution to the Semiotic BVP.
     Paper §3.2 (inline definition after eq. V1'). -/
 def IsWeakCoherentConfiguration (bvp : SemioticBVP n M) (Φ : M → ℝ) : Prop :=
-  bvp.equation Φ ∧ bvp.boundaryCondition Φ
+  bvp.equation Φ ∧ bvp.boundary_condition Φ
 
 end

@@ -23,8 +23,8 @@ open scoped Manifold Bundle
 ## Implementation notes
 
 The first two results are proved by pure algebra (no PDE axioms).
-The existence theorems compose `PdeInfra` axioms; all dependencies are visible
-via `[PdeInfra bvp solOp]` and `#print axioms` in `CdFormal.Verify`.
+The existence theorems compose `PDEInfra` axioms; all dependencies are visible
+via `[PDEInfra bvp solOp]` and `#print axioms` in `CdFormal.Verify`.
 
 ## References
 
@@ -85,18 +85,18 @@ lemma scaling_algebraic_contradiction
     exact h
   linarith
 
-/-! ## Existence Theorems (from PdeInfra typeclass)
+/-! ## Existence Theorems (from PDEInfra typeclass)
 
 These compose the PDE infrastructure axioms to prove existence.
 The proof logic is verified; the PDE infrastructure is axiomatized.
-All axiom dependencies are visible via `[PdeInfra bvp solOp]`. -/
+All axiom dependencies are visible via `[PDEInfra bvp solOp]`. -/
 
 /-- Paper Theorem 3.12: The BVP admits at least one nonneg solution.
     Proof: L∞ bound → Schaefer set bounded → Schaefer fixed point → max principle. -/
 theorem SemioticBVP.exists_isWeakCoherentConfiguration
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
-    [infra : PdeInfra bvp solOp]
+    [infra : PDEInfra bvp solOp]
     (B : ℝ) (hB : ∀ x, bvp.ctx.b x ≤ B) :
     ∃ Phi : M → ℝ,
       IsWeakCoherentConfiguration bvp Phi ∧
@@ -116,7 +116,7 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
 theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
-    [infra : PdeInfra bvp solOp]
+    [infra : PDEInfra bvp solOp]
     (beta : ℝ)
     (eig : PrincipalEigendata bvp beta)
     (eigval_neg : eig.eigval < 0) :

@@ -17,12 +17,12 @@ Mathlib for abstract Riemannian manifolds.
 
 - `SolutionOperator` — the operator T for the BVP (Paper Section 3.2)
 - `PrincipalEigendata` — principal eigenvalue and eigenfunction (Paper Definition 3.13)
-- `PdeInfra` — typeclass packaging five PDE infrastructure axioms
+- `PDEInfra` — typeclass packaging five PDE infrastructure axioms
 
 ## Implementation notes
 
 Axioms are packaged in a typeclass so downstream theorems explicitly declare their
-dependence via `[PdeInfra bvp solOp]`. The axiom surface consists of:
+dependence via `[PDEInfra bvp solOp]`. The axiom surface consists of:
 1. T continuous & compact (placeholder `True` — see known limitation)
 2. L∞ bound (maximum principle at interior extremum)
 3. Schaefer's fixed-point theorem
@@ -52,7 +52,7 @@ variable {n : ℕ} {M : Type*}
 
     Note: We work with `M → ℝ` rather than an explicit Hölder/Sobolev space type.
     The functional-analytic properties (continuity, compactness) are encoded as
-    fields of `SolutionOperator` and hypotheses of `PdeInfra`, not silently assumed. -/
+    fields of `SolutionOperator` and hypotheses of `PDEInfra`, not silently assumed. -/
 structure SolutionOperator (bvp : SemioticBVP n M) where
   /-- The operator T : (M → ℝ) → (M → ℝ) -/
   T : (M → ℝ) → (M → ℝ)
@@ -82,12 +82,12 @@ structure PrincipalEigendata (bvp : SemioticBVP n M) (beta : ℝ) where
 /-! ## PDE Infrastructure Typeclass
 
 Packages the analytic assumptions needed for existence proofs.
-Downstream theorems say `[PdeInfra bvp solOp]` to declare their
+Downstream theorems say `[PDEInfra bvp solOp]` to declare their
 dependence on this infrastructure explicitly. -/
 
 /-- The PDE infrastructure required for the Creative Determinant existence theory.
     Each field corresponds to a classical result from elliptic PDE theory. -/
-class PdeInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop where
+class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop where
 
   /-- T is continuous and compact on C^{1,α}(M).
       In practice this follows from Schauder estimates + Arzelà-Ascoli
