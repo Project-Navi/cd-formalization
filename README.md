@@ -53,19 +53,25 @@ drafts/            — In-progress proof targets and issue drafts
 
 ## Development Process
 
-**Mathematical framework**: The Creative Determinant equations, existence theory,
-and proof strategy were developed by Nelson Spence over 12 months (April 2025 –
-March 2026), documented in the [parent repository](https://github.com/Project-Navi/navi-creative-determinant) and [paper](../paper/creative_determinant.pdf).
+**What the author did**: The proof strategy — choosing to axiomatize via `PdeInfra`,
+identifying which five classical PDE results to package, designing the typeclass
+hierarchy, and structuring the Schaefer → L∞ bound → existence → sub/super-solution
+→ nontriviality proof chain — is the core intellectual contribution. These are
+mathematical architecture decisions that require understanding where the real
+difficulty lies. The underlying theory is documented in the
+[paper](../paper/creative_determinant.pdf).
 
-**Lean formalization**: Translating the paper proofs into Lean 4 was assisted by:
-- **Claude Opus**: Project structure, Mathlib API navigation, proof term generation
-- **Aristotle** (Harmonic.fun): Automated proving of algebraic/analysis lemmas
+**What AI tools did**: Claude Opus assisted with Lean 4 syntax, Mathlib API
+navigation, and proof term synthesis. Aristotle (Harmonic.fun) automated proving
+of standalone algebraic lemmas. These roles are analogous to `omega`, `aesop`, and
+other proof automation — the strategy is human, the term-level search is machine-assisted.
 
-All mathematical content originates from the author's research. AI tools were used
-as formalization assistants, analogous to proof automation in Coq/Isabelle.
-
-**Verification**: All proofs compile against Mathlib v4.28.0 with zero `sorry`.
-The axiom surface (`PdeInfra`) packages classical PDE results not yet in Mathlib.
+**Verification**: The final arbiter is the Lean compiler, not trust:
+```bash
+lake build --wfail   # type-checks or it doesn't — zero sorry
+```
+Run `#print axioms` in `CdFormal/Verify.lean` to confirm the axiom surface.
+Every assumption is explicit in `PdeInfra`. Nothing is hidden.
 
 ## License
 
