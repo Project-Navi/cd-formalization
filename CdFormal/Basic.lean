@@ -137,10 +137,12 @@ structure SemioticBVP (n : ℕ) (M : Type*)
   ops : SemioticOperators n M
   /-- The boundary of the manifold.
       Known limitation: this is an unstructured `Set M` with no requirement
-      that it equals the topological boundary or that the interior is
-      nonempty. Encoding manifold-with-boundary requires infrastructure
-      not yet available in Mathlib. -/
+      that it equals the topological boundary. Encoding manifold-with-boundary
+      requires infrastructure not yet available in Mathlib. -/
   boundary : Set M
+  /-- The complement of the boundary is nonempty (prevents degenerate
+      `boundary = Set.univ` which would make existence theorems vacuous). -/
+  interior_nonempty : ∃ x, x ∉ boundary
   /-- The PDE: -ΔΦ = a|∇Φ| + bΦ - c(Φ₊)^p, where Φ₊ = max(Φ, 0).
       The positive part matches the operator formulation F(ψ) in the paper (Section 3.2),
       which uses ψ₊ in the saturation term. For nonneg solutions, Φ₊ = Φ. -/
