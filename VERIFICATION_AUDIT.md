@@ -202,18 +202,33 @@ theorem linfty_bound_algebraic
 ### 1.8 Scaling Uniqueness — Proportional solutions are impossible
 
 **Statement:** If Φ solves the CD equation and kΦ (with k > 1) also solves it, then at any
-point where c(x) > 0 and Φ(x) > 0, we get a contradiction. Solutions are unique within the
+point where c(x₀) > 0 and Φ(x₀) > 0, we get a contradiction. Solutions are unique within the
 class of proportional rescalings. Full uniqueness remains Open Problem #3 in the paper.
 
-Proved by Aristotle (`1c3414f4`).
+```lean
+-- CdFormal/ScalingUniqueness.lean
 
-**Note:** This artifact (`artifacts/aristotle/ScalingUniqueness_proved.lean`) was proved against
-the pre-Phase 2 axiom names (`laplacian_linear`, `gradNorm_homog`, `p_gt_one`) and does not
-build against the current code. The algebraic core `scaling_algebraic_contradiction` (§1.2)
-captures the key inequality and is fully integrated.
+theorem scaling_uniqueness
+    (ops : SemioticOperators n M)
+    (ctx : SemioticContext n M)
+    (Φ : M → ℝ) (k : ℝ)
+    (hk : k > 1)
+    (hΦ_eq : ∀ x, -(ops.laplacian Φ x) = ...)
+    (hkΦ_eq : ∀ x, -(ops.laplacian (fun y ↦ k * Φ y) x) = ...)
+    (x₀ : M) (hc : ctx.c x₀ > 0) (hΦpos : Φ x₀ > 0) :
+    False
+```
+
+**Proof sketch:** Uses `laplacian_smul` (Δ(kΦ) = kΔΦ) and `gradNorm_smul` (|∇(kΦ)| = k|∇Φ|)
+to substitute into the PDE. Expanding `(kΦ)^p = k^p·Φ^p` via `Real.mul_rpow` and comparing
+with `k·Φ^p` from the other equation yields `k = k^p`. Since `k > 1` and `p > 1`,
+`Real.rpow_lt_rpow_of_exponent_lt` gives `k < k^p`, contradiction.
+
+**Provenance:** Originally proved by Aristotle (`1c3414f4`, `60ec288c`). Adapted for Lean 4.28.0
+with manual proof repair (rpow API changes).
 
 **Axiom dependencies:** `[propext, Classical.choice, Quot.sound]` — uses only `SemioticOperators`
-fields and `SemioticContext.one_lt_p`. No `sorryAx`.
+fields and `SemioticContext.one_lt_p`. No `PDEInfra`, no `sorryAx`.
 
 ---
 
@@ -454,13 +469,14 @@ against the current codebase.
 **Output:** `artifacts/aristotle/LinftyAlgebraic_proved.lean`
 **Status:** Proved and integrated. See §1.6 for full proofs.
 
-### 4.2 Scaling Uniqueness — **PROVED**
+### 4.2 Scaling Uniqueness — **PROVED AND INTEGRATED**
 
-**Aristotle ID:** `1c3414f4-fd21-47b5-99a1-2ab27892df92`
-**Output:** `artifacts/aristotle/ScalingUniqueness_proved.lean`
-**Status:** Proved. The algebraic core is integrated as `scaling_algebraic_contradiction` (§1.2).
-The full `scaling_uniqueness` theorem references pre-Phase 2 axiom names and needs updating
-to build against current code.
+**Aristotle IDs:** `1c3414f4` (original), `60ec288c` (current axioms)
+**Outputs:** `artifacts/aristotle/ScalingUniqueness_proved.lean` (v1),
+`artifacts/aristotle/ScalingUniqueness_v2.lean` (v2)
+**Status:** Proved and fully integrated. The algebraic core is in
+`scaling_algebraic_contradiction` (§1.2). The full PDE-level theorem is in
+`CdFormal/ScalingUniqueness.lean` (§1.8), adapted for Lean 4.28.0.
 
 ### 4.3 Operator Consequence Lemmas — **PARTIALLY PROVED**
 
@@ -513,6 +529,9 @@ Fails on any warning (including `sorry`), ensuring no silent contamination.
 #print axioms laplacian_linear
 #print axioms gradNorm_zero
 
+-- § Scaling uniqueness (from SemioticOperators + SemioticContext)
+#print axioms scaling_uniqueness
+
 -- § Coefficient bound lemmas (from SemioticContext bounds)
 #print axioms SemioticContext.a_nonneg
 #print axioms SemioticContext.a_le_one
@@ -550,13 +569,15 @@ Fails on any warning (including `sorry`), ensuring no silent contamination.
 cd_formalization/
 ├── .github/workflows/lean_action_ci.yml   # CI with --wfail + sorry check
 ├── CdFormal.lean                          # root import (Basic, Axioms, Theorems,
-│                                          #   OperatorLemmas, CoefficientLemmas, Verify)
+│                                          #   OperatorLemmas, CoefficientLemmas,
+│                                          #   ScalingUniqueness, Verify)
 ├── CdFormal/
 │   ├── Basic.lean                         # definitions (§2)
 │   ├── Axioms.lean                        # PDE infrastructure typeclass (§3)
 │   ├── Theorems.lean                      # proved theorems (§1)
 │   ├── OperatorLemmas.lean                # derived operator lemmas (§1.3)
 │   ├── CoefficientLemmas.lean             # coefficient bound lemmas (§1.4)
+│   ├── ScalingUniqueness.lean             # scaling uniqueness theorem (§1.8)
 │   └── Verify.lean                        # axiom dependency dashboard (§6)
 ├── drafts/                                # Aristotle targets + community drafts
 │   ├── LinftyAlgebraic.lean
@@ -591,4 +612,4 @@ cd_formalization/
 | Thm 3.12 (Existence) | `SemioticBVP.exists_isWeakCoherentConfiguration` | **Proved** (conditional on PDEInfra) |
 | Thm 3.16 (Nontriviality) | `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | **Proved** (conditional on PDEInfra) |
 | §3.4 (Spectral, 1D) | `spectral_characterization_1d` | **Proved** (pure algebra) |
-| Open Problem #3 (Uniqueness) | `scaling_algebraic_contradiction` | **Proved** (partial: algebraic core of proportional-class uniqueness) |
+| Open Problem #3 (Uniqueness) | `scaling_uniqueness` + `scaling_algebraic_contradiction` | **Proved** (proportional-class uniqueness; full uniqueness remains open) |

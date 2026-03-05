@@ -6,6 +6,7 @@ Authors: Nelson Spence
 import CdFormal.Theorems
 import CdFormal.OperatorLemmas
 import CdFormal.CoefficientLemmas
+import CdFormal.ScalingUniqueness
 
 /-!
 # Axiom Dependency Map
@@ -32,6 +33,9 @@ If `sorryAx` appears anywhere, the proof is incomplete.
 #print axioms laplacian_zero
 #print axioms laplacian_linear
 #print axioms gradNorm_zero
+
+-- § Scaling uniqueness (from SemioticOperators + SemioticContext)
+#print axioms scaling_uniqueness
 
 -- § Coefficient bound lemmas (from SemioticContext bounds)
 #print axioms SemioticContext.a_nonneg

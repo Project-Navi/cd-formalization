@@ -8,4 +8,5 @@ import CdFormal.Axioms
 import CdFormal.Theorems
 import CdFormal.OperatorLemmas
 import CdFormal.CoefficientLemmas
+import CdFormal.ScalingUniqueness
 import CdFormal.Verify
