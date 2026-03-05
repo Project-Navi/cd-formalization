@@ -74,7 +74,7 @@ All axiom dependencies are visible via `[PdeInfra bvp solOp]`. -/
 
 /-- Paper Theorem 3.12: The BVP admits at least one nonneg solution.
     Proof: L∞ bound → Schaefer set bounded → Schaefer fixed point → max principle. -/
-theorem existence_weak_coherent_configuration
+theorem SemioticBVP.exists_isWeakCoherentConfiguration
     {n : ℕ} {M : Type*}
     [TopologicalSpace M]
     [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
@@ -100,7 +100,7 @@ theorem existence_weak_coherent_configuration
     bounded b). This Lean statement omits `B`/`hB` because the `monotone_iteration`
     axiom uses a different proof route (sub/super-solution) that does not require
     an explicit bound on b. The two theorems are independent in the formalization. -/
-theorem existence_nontrivial_coherent_configuration
+theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
     {n : ℕ} {M : Type*}
     [TopologicalSpace M]
     [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
