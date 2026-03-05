@@ -76,4 +76,4 @@ Every assumption is explicit in `PDEInfra`. Nothing is hidden.
 
 ## License
 
-See the parent repository for license information.
+Copyright 2026 Nelson Spence. Licensed under [Apache 2.0](LICENSE).
