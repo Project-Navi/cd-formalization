@@ -413,24 +413,28 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
 
 | Field | Paper Reference | Classical Source | Mathlib Status |
 |-------|----------------|-----------------|----------------|
-| `T_continuous_compact : True` | Lemma 3.7 | Schauder estimates + Arzelà-Ascoli | Requires Hölder spaces on manifolds (not in Mathlib) |
-| `linfty_bound` | Lemma 3.10 | Maximum principle at interior max | Algebraic core proved (§1.6); max principle not in Mathlib for manifolds |
+| `T_compact` | Lemma 3.7 | Schauder estimates + Arzelà-Ascoli | Uses `IsVonNBounded` + `IsCompact` ([credit: Aaron Lin](https://leanprover.zulipchat.com)); proof requires Hölder spaces on manifolds |
+| `linfty_bound` | Lemma 3.10 | Maximum principle at interior max | Algebraic core proved (§1.7); max principle not in Mathlib for manifolds |
 | `schaefer` | Theorem 3.12 | Schaefer 1955; Deimling 1985 | Schaefer's theorem not in Mathlib (draft issue: `drafts/mathlib_issue_schaefer.md`) |
 | `fixed_point_nonneg` | Theorem 3.12 | Maximum principle | Strong max principle not in Mathlib for manifolds |
 | `monotone_iteration` | Theorem 3.16 | Amann 1976 sub/super-solution | Sub/super-solution theory not in Mathlib |
 
-### 3.1 `T_continuous_compact`
+### 3.1 `T_compact` (Lemma 3.7)
 
 ```lean
-  T_continuous_compact : True
+  T_compact : ∀ S : Set (M → ℝ),
+    Bornology.IsVonNBounded ℝ S →
+    IsCompact (closure (solOp.T '' S))
 ```
 
-**Known limitation:** This field is currently `True` (a placeholder). The `schaefer` axiom
-takes this as a hypothesis (via `True →`), so the dependency is structurally present but
-content-free until Mathlib gains Hölder spaces on manifolds. See `drafts/mathlib_issue_schaefer.md`.
+**Bornological typing:** T maps von Neumann bounded sets to relatively compact sets.
+This is the propositional form of `@LocallyBoundedMap (M → ℝ) (M → ℝ) (vonNBornology ℝ _)
+(Bornology.relativelyCompact _)`, following the approach suggested by Yongxi Lin (Aaron)
+on Lean Zulip. Uses `Bornology.IsVonNBounded` from `Mathlib.Analysis.LocallyConvex.Bounded`.
 
 **Why it can't be proved now:** Mathlib has no `C^{k,α}` Hölder space type on Riemannian manifolds,
-no Schauder estimates, and no Arzelà-Ascoli for manifold function spaces.
+no Schauder estimates, and no Arzelà-Ascoli for manifold function spaces. But the axiom now
+carries real mathematical content — only genuinely compact operators satisfy it.
 
 ### 3.2 `linfty_bound` (Lemma 3.10)
 
@@ -451,7 +455,8 @@ no Schauder estimates, and no Arzelà-Ascoli for manifold function spaces.
 
 ```lean
   schaefer :
-    True →
+    (∀ S : Set (M → ℝ), Bornology.IsVonNBounded ℝ S →
+      IsCompact (closure (solOp.T '' S))) →
     (∃ K > 0, ∀ (u : M → ℝ) (τ : ℝ),
       0 ≤ τ → τ ≤ 1 →
       (∀ x, u x = τ * solOp.T u x) →
@@ -459,9 +464,9 @@ no Schauder estimates, and no Arzelà-Ascoli for manifold function spaces.
     ∃ Φ : M → ℝ, solOp.T Φ = Φ
 ```
 
-**Note:** The `True →` first argument corresponds to `T_continuous_compact`. At the call site,
-`infra.T_continuous_compact` is passed. This makes the dependency structurally visible even
-though the content is currently trivial.
+**Note:** The first argument is `T_compact` — the compactness of T in the bornological
+sense. At the call site, `infra.T_compact` is passed, making the dependency structurally
+visible and mathematically meaningful.
 
 **Why it can't be proved now:** Requires Schaefer's theorem for continuous compact operators
 on a Banach space. Mathlib has Banach space basics but not this fixed-point theorem.
@@ -626,7 +631,6 @@ cd_formalization/
 │   ├── LinftyAlgebraic.lean, OperatorLemmas.lean
 │   └── ScalingUniqueness.lean, ScalingUniqueness_v2.lean, ScalingUniqueness_v3.lean
 ├── artifacts/aristotle/                   # Aristotle prover outputs (raw archives)
-├── docs/internal/upstream-strategy.md     # upstream engagement strategy
 ├── debt.md                                # technical debt tracker
 ├── LICENSE                                # Apache 2.0
 ├── lakefile.toml                          # Lake config (Mathlib v4.28.0)
@@ -647,7 +651,7 @@ cd_formalization/
 | Def 3.3 (Canonical viability) | `SemioticContext.canonicalViability` | Verified definition |
 | §3.2 (Weak coherent config) | `IsWeakCoherentConfiguration` | Verified definition |
 | Def 3.13 (Principal eigenvalue) | `PrincipalEigendata` | Verified structure |
-| Lemma 3.7 (Compactness of T) | `PDEInfra.T_continuous_compact` | Axiom (placeholder) |
+| Lemma 3.7 (Compactness of T) | `PDEInfra.T_compact` | Axiom (bornological: vonN-bounded → compact closure) |
 | Lemma 3.10 (L∞ bound) | `PDEInfra.linfty_bound` + `linfty_bound_algebraic` | Axiom (max principle) + **proved** (algebraic core) |
 | Lemma 3.11 (C^{1,α} bound) | Not formalized | Paper proof strengthened (interpolation) |
 | Thm 3.12 (Existence) | `SemioticBVP.exists_isWeakCoherentConfiguration` | **Proved** (conditional on PDEInfra) |

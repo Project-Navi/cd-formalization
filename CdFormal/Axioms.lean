@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Nelson Spence
 -/
 import CdFormal.Basic
+import Mathlib.Analysis.LocallyConvex.Bounded
 
 set_option relaxedAutoImplicit false
 set_option autoImplicit false
@@ -28,7 +29,7 @@ Mathlib for abstract Riemannian manifolds.
 
 Axioms are packaged in a typeclass so downstream theorems explicitly declare their
 dependence via `[PDEInfra bvp solOp]`. The axiom surface consists of:
-1. T continuous & compact (placeholder `True` — see known limitation)
+1. T compact (maps vonN-bounded sets to relatively compact sets)
 2. L∞ bound (maximum principle at interior extremum)
 3. Schaefer's fixed-point theorem
 4. Fixed-point nonnegativity (maximum principle)
@@ -94,19 +95,21 @@ dependence on this infrastructure explicitly. -/
     Each field corresponds to a classical result from elliptic PDE theory. -/
 class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop where
 
-  /-- T is continuous and compact on C^{1,α}(M).
+  /-- T maps von Neumann bounded sets to relatively compact sets.
+      This is the bornological characterization of compact operators:
+      `T` is a locally bounded map from `(vonNBornology ℝ (M → ℝ))` to
+      `(Bornology.relativelyCompact (M → ℝ))`, following the approach
+      suggested by Yongxi Lin (Aaron) on Lean Zulip.
+
       In practice this follows from Schauder estimates + Arzelà-Ascoli
-      (paper Lemma 3.7). We state it abstractly since Mathlib lacks the
-      function space infrastructure to make this concrete.
+      (paper Lemma 3.7). The `schaefer` axiom below takes this as a
+      hypothesis, making the dependency structurally visible.
 
-      **Known limitation:** This field is currently `True` (a placeholder).
-      The `schaefer` axiom below takes this as a hypothesis (via `True →`),
-      so the dependency is structurally present but content-free until
-      Mathlib gains Hölder spaces on manifolds and/or Schaefer's theorem
-      (see drafts/mathlib_issue_schaefer.md).
-
-    Mathlib status: requires Hölder spaces on manifolds (not in Mathlib). -/
-  T_continuous_compact : True
+    Mathlib status: `Bornology.IsVonNBounded` and `IsCompact` available;
+    the actual proof requires Hölder spaces on manifolds (not in Mathlib). -/
+  T_compact : ∀ S : Set (M → ℝ),
+    Bornology.IsVonNBounded ℝ S →
+    IsCompact (closure (solOp.T '' S))
 
   /-- L∞ bound for the Schaefer set (Paper Lemma 3.10).
       If u = τ·T(u) for τ ∈ [0,1], then ‖u‖_∞ ≤ K = (B/c₀)^{1/(p-1)}.
@@ -123,14 +126,14 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
       ∀ x, |u x| ≤ K
 
   /-- Schaefer's fixed-point theorem (Schaefer 1955; Deimling 1985).
-      If T is continuous and compact (T_continuous_compact) and the
-      Schaefer set S = {u : u = τT(u), τ ∈ [0,1]} is bounded,
-      then T has a fixed point.
+      If T is compact (`T_compact`) and the Schaefer set
+      S = {u : u = τT(u), τ ∈ [0,1]} is bounded, then T has a fixed point.
 
     Mathlib status: Schaefer's fixed-point theorem is not in Mathlib.
     Draft issue: `drafts/mathlib_issue_schaefer.md`. -/
   schaefer :
-    True →
+    (∀ S : Set (M → ℝ), Bornology.IsVonNBounded ℝ S →
+      IsCompact (closure (solOp.T '' S))) →
     (∃ K > 0, ∀ (u : M → ℝ) (τ : ℝ),
       0 ≤ τ → τ ≤ 1 →
       (∀ x, u x = τ * solOp.T u x) →

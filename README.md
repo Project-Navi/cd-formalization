@@ -53,7 +53,7 @@ The `PDEInfra` typeclass in `CdFormal/Axioms.lean` packages five classical PDE r
 
 | Axiom | Classical source | Mathlib status |
 |-------|-----------------|----------------|
-| `T_continuous_compact` | Schauder estimates + Arzelà–Ascoli | No Hölder spaces on manifolds (placeholder `True`) |
+| `T_compact` | Schauder estimates + Arzelà–Ascoli | Uses `IsVonNBounded` + `IsCompact` (bornological typing, [credit: Aaron Lin](https://leanprover.zulipchat.com)) |
 | `linfty_bound` | Maximum principle (Gilbarg–Trudinger) | No max. principle for manifolds |
 | `schaefer` | Schaefer 1955 | Not in Mathlib ([draft issue](drafts/mathlib_issue_schaefer.md)) |
 | `fixed_point_nonneg` | Strong maximum principle | No max. principle for manifolds |
@@ -85,9 +85,9 @@ CdFormal/
   Verify.lean             — #print axioms dashboard (17 declarations)
 artifacts/
   aristotle/              — Proved outputs from the Aristotle theorem prover
-drafts/                   — Community engagement drafts + Lean proof sketches
-  mathlib_issue_schaefer.md, MonotoneFixedPoint_sorry.lean
-  LinftyAlgebraic.lean, OperatorLemmas.lean
+drafts/                   — Mathlib issue drafts + Lean proof sketches
+  mathlib_issue_schaefer.md, BornologyBridge_sorry.lean
+  MonotoneFixedPoint_sorry.lean, LinftyAlgebraic.lean, OperatorLemmas.lean
   ScalingUniqueness.lean, ScalingUniqueness_v2.lean, ScalingUniqueness_v3.lean
 ```
 
