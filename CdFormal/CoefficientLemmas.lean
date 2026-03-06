@@ -60,25 +60,16 @@ theorem a_nonneg (x : M) : 0 ≤ ctx.a x := by
     Upstream candidate: no — paper-specific coefficient structure. -/
 theorem a_le_one (x : M) : ctx.a x ≤ 1 := by
   unfold SemioticContext.a
-  calc ctx.κ x * ctx.γ x * ctx.μ x
-      ≤ 1 * 1 * 1 := by
-        apply mul_le_mul
-        · exact mul_le_mul
-            (ctx.κ_bounds x).2 (ctx.γ_bounds x).2
-            (ctx.γ_bounds x).1 (by linarith [(ctx.κ_bounds x).1])
-        · exact (ctx.μ_bounds x).2
-        · exact (ctx.μ_bounds x).1
-        · exact mul_nonneg
-            (by linarith [(ctx.κ_bounds x).1])
-            (by linarith [(ctx.γ_bounds x).1])
-    _ = 1 := by ring
+  exact mul_le_one₀
+    (mul_le_one₀ (ctx.κ_bounds x).2 (ctx.γ_bounds x).1 (ctx.γ_bounds x).2)
+    (ctx.μ_bounds x).1 (ctx.μ_bounds x).2
 
 /-- The saturation exponent satisfies p - 1 > 0.
     Direct consequence of `one_lt_p`.
 
     Axiom dependencies: `one_lt_p`.
     Upstream candidate: no — paper-specific (wraps `SemioticContext.one_lt_p`). -/
-theorem p_sub_one_pos : 0 < ctx.p - 1 := by linarith [ctx.one_lt_p]
+theorem p_sub_one_pos : 0 < ctx.p - 1 := sub_pos.mpr ctx.one_lt_p
 
 end SemioticContext
 

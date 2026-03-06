@@ -84,11 +84,9 @@ Proved by Aristotle in run 017f6779. No axiom dependencies — pure algebra. -/
 
 /-- If p > 1, k > 1, c > 0, Φ > 0, and -c·k·Φᵖ ≤ -c·kᵖ·Φᵖ, then False.
     The core fact is k < kᵖ for k > 1 and p > 1
-    (`Real.rpow_lt_rpow_of_exponent_lt`), contradicting the hypothesis.
+    (`Real.self_lt_rpow_of_one_lt`), contradicting the hypothesis.
 
-    Axiom dependencies: none (pure algebra).
-    Upstream candidate: the core inequality k < kᵖ may be a useful simp
-    lemma near `Mathlib.Analysis.SpecialFunctions.Pow.Real`. -/
+    Axiom dependencies: none (pure algebra). -/
 lemma scaling_algebraic_contradiction
     (p : ℝ) (k : ℝ) (c : ℝ) (Phi_val : ℝ)
     (hp : p > 1) (hk : k > 1) (hc : c > 0) (hPhi : Phi_val > 0)
@@ -96,10 +94,7 @@ lemma scaling_algebraic_contradiction
     False := by
   have hcΦp : (0 : ℝ) < c * Phi_val ^ p := by positivity
   have h_div : k ≥ k ^ p := by nlinarith
-  have h_lt : k < k ^ p := by
-    have h := Real.rpow_lt_rpow_of_exponent_lt hk hp
-    simp only [Real.rpow_one] at h
-    exact h
+  have h_lt : k < k ^ p := Real.self_lt_rpow_of_one_lt hk hp
   linarith
 
 /-! ## Existence Theorems (from PDEInfra typeclass)

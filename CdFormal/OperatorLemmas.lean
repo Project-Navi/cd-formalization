@@ -23,7 +23,7 @@ These validate that the operator contract is well-formed and non-vacuous.
 - `laplacian_zero` — Δ(0) = 0 (from `laplacian_smul` with c = 0)
 - `laplacian_linear` — Δ(c·f + g) = c·Δf + Δg (from `laplacian_add` +
   `laplacian_smul`)
-- `gradNorm_zero` — |∇(0)| = 0 (from `gradNorm_smul` with c = 0)
+- `gradNorm_zero` — |∇(0)| = 0 (from `gradNorm_const` with a = 0)
 
 ## References
 
@@ -66,15 +66,13 @@ lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
   exact h_add
 
 /-- The gradient norm of the zero function is zero.
-    From `gradNorm_smul` with c = 0.
+    Direct consequence of `gradNorm_const` with a = 0.
 
-    Axiom dependencies: `SemioticOperators.gradNorm_smul`.
+    Axiom dependencies: `SemioticOperators.gradNorm_const`.
     Upstream candidate: trivial consequence of homogeneity. -/
 @[simp]
 lemma gradNorm_zero (x : M) :
-    ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0 := by
-  have h := ops.gradNorm_smul (fun _ ↦ (0 : ℝ)) 0 x
-  simp only [zero_mul, abs_zero] at h
-  exact h
+    ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0 :=
+  ops.gradNorm_const 0 x
 
 end

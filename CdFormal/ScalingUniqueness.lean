@@ -53,11 +53,9 @@ variable {n : ℕ} {M : Type*}
     3. Algebraic cancellation: equating the two PDE evaluations
        yields k·c·Φ^p = c·k^p·Φ^p
     4. k < k^p when k > 1, p > 1
-       (`Real.rpow_lt_rpow_of_exponent_lt`).
+       (`Real.self_lt_rpow_of_one_lt`).
 
-    Axiom dependencies: `SemioticOperators` fields only (no PDEInfra).
-    Upstream candidate: the core inequality k < kᵖ may be a useful
-    simp lemma near `Mathlib.Analysis.SpecialFunctions.Pow.Real`. -/
+    Axiom dependencies: `SemioticOperators` fields only (no PDEInfra). -/
 theorem scaling_uniqueness
     (ops : SemioticOperators n M)
     (ctx : SemioticContext n M)
@@ -92,11 +90,9 @@ theorem scaling_uniqueness
   rw [max_eq_left (le_of_lt hΦpos)] at eq1
   rw [max_eq_left (le_of_lt (mul_pos hk_pos hΦpos))] at eq2
   -- Step 4: Expand (k * Φ x₀) ^ p = k ^ p * Φ x₀ ^ p
-  rw [Real.mul_rpow (le_of_lt hk_pos) (le_of_lt hΦpos)] at eq2
+  rw [Real.mul_rpow hk_pos.le hΦpos.le] at eq2
   -- Step 5: k < k^p from k > 1, p > 1
-  have hkp : k < k ^ ctx.p := by
-    have := Real.rpow_lt_rpow_of_exponent_lt hk ctx.one_lt_p
-    rwa [Real.rpow_one] at this
+  have hkp : k < k ^ ctx.p := Real.self_lt_rpow_of_one_lt hk ctx.one_lt_p
   -- Step 6: Derive contradiction via nonlinear arithmetic
   -- eq1: -L = a*G + b*Φ - c*Φ^p
   -- eq2: -(k*L) = a*(k*G) + b*(k*Φ) - c*(k^p*Φ^p)
