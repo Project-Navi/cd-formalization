@@ -42,7 +42,7 @@ Together these decompose Paper Lemma 3.10 into:
 
     Provenance: Aristotle run `224a0625`. -/
 lemma rpow_le_of_mul_rpow_le
-    (v b c p : ℝ) (hv : v > 0) (hc : c > 0) (_hp : p > 1)
+    (v b c p : ℝ) (hv : v > 0) (hc : c > 0)
     (h : b * v ≥ c * v ^ p) :
     v ^ (p - 1) ≤ b / c := by
   have h_div : b * v / (c * v) ≥ c * v ^ p / (c * v) :=
@@ -64,6 +64,6 @@ theorem linfty_bound_algebraic
     fun h ↦ le_trans
       (by rw [← Real.rpow_mul hv.le, mul_one_div_cancel (by linarith), Real.rpow_one])
       (Real.rpow_le_rpow (by positivity) h (one_div_nonneg.mpr (by linarith)))
-  exact h_root (rpow_le_of_mul_rpow_le v b c p hv hc hp h)
+  exact h_root (rpow_le_of_mul_rpow_le v b c p hv hc h)
 
 end
