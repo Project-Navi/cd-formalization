@@ -124,11 +124,11 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
       IsWeakCoherentConfiguration bvp Phi ∧
       (∀ x, Phi x ≥ 0) := by
   have h_bounded := infra.linfty_bound B hB
-  obtain ⟨Phi, hfix⟩ := infra.schaefer infra.T_continuous_compact h_bounded
+  obtain ⟨Phi, hfix⟩ := infra.schaefer infra.T_compact h_bounded
   exact ⟨Phi, solOp.T_fixed_point Phi hfix, infra.fixed_point_nonneg Phi hfix⟩
 ```
 
-**Axiom dependencies:** `PDEInfra.T_continuous_compact`, `PDEInfra.linfty_bound`,
+**Axiom dependencies:** `PDEInfra.T_compact`, `PDEInfra.linfty_bound`,
 `PDEInfra.schaefer`, `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point` — no `sorryAx`.
 
 ### 1.6 Existence of Nontrivial Coherent Configurations — Paper Theorem 3.16

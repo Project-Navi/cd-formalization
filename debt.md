@@ -20,9 +20,8 @@ Items identified by the consolidated audit (2026-03-05).
   function-space types instead of bare `M → ℝ`. Blocked on Mathlib's Sobolev space infrastructure
   (see Schaefer Zulip thread). *(Axioms.lean)*
 
-- [ ] **Arzelà-Ascoli compactness** — `T_continuous_compact : True` is a placeholder. Real content
-  requires `CompactOperator` on `BoundedContinuousFunction`, not yet available for Riemannian
-  manifolds in Mathlib. *(Axioms.lean)*
+- [x] **Arzelà-Ascoli compactness** — Resolved: `T_compact` now uses bornological vocabulary
+  (`IsVonNBounded → IsCompact`). See resolved entry below. *(Axioms.lean)*
 
 - [ ] **Eigenvalue theory for elliptic operators** — `PrincipalEigendata` is axiomatic. Proving it
   requires Mathlib spectral theory for unbounded self-adjoint operators on Hilbert spaces, which
