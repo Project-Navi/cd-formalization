@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "Creative Determinant: Lean 4 Formalization"
+message: "If you use this formalization, please cite it using the metadata from this file."
+type: software
+authors:
+  - family-names: Spence
+    given-names: Nelson
+    email: nelson@projectnavi.ai
+    affiliation: Project Navi LLC
+repository-code: "https://github.com/Project-Navi/cd-formalization"
+abstract: >-
+  Lean 4 + Mathlib formalization of the Creative Determinant framework.
+  Fifteen theorems proved with zero sorry, CI-enforced via lake build --wfail.
+  Covers spectral characterization, operator algebra, coefficient bounds,
+  scaling uniqueness, L-infinity algebraic bounds, monotone fixed-point
+  existence, and PDE existence/nontriviality conditional on five classical
+  axioms (Schaefer, Schauder, maximum principle, Amann iteration).
+keywords:
+  - Lean 4
+  - Mathlib
+  - formal verification
+  - theorem proving
+  - elliptic PDE
+  - fixed-point theorems
+  - autopoiesis
+license: Apache-2.0
+version: "0.2.0"
+date-released: "2026-03-06"
+preferred-citation:
+  type: report
+  authors:
+    - family-names: Spence
+      given-names: Nelson
+  title: "The Creative Determinant: Autopoietic Closure as a Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions"
+  year: 2026
+  institution:
+    name: Project Navi LLC
+  address: Austin, Texas
