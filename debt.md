@@ -4,7 +4,29 @@ Items identified by the consolidated audit (2026-03-05).
 
 ## Open
 
-*(None — all items resolved)*
+### Stitching opportunities (decompose axioms → proved math + sharper residual)
+
+- [ ] **LinearMap packaging for `laplacian`** — Wrap `laplacian_linear` + `laplacian_zero` into a
+  `LinearMap` instance using `LinearMap.mk₂`. Eliminates two axioms; the residual axiom becomes
+  `laplacian : LinearMap ℝ (M → ℝ) (M → ℝ)` with only Fredholm/regularity content. *(OperatorLemmas.lean, Axioms.lean)*
+
+- [ ] **`posPart` API for `(Φ₊)^p`** — Use `Mathlib.Order.LatticeOfPosPart` or `max Φ 0` to define
+  positive-part truncation, replacing the implicit convention. Would let `SemioticBVP.pde` use
+  `posPart Φ x ^ ctx.p` explicitly, improving type safety. *(Basic.lean)*
+
+### Deferred (blocked on upstream Mathlib)
+
+- [ ] **`BoundedContinuousFunction` / Sobolev spaces** — Needed to give `PDEInfra` fields proper
+  function-space types instead of bare `M → ℝ`. Blocked on Mathlib's Sobolev space infrastructure
+  (see Schaefer Zulip thread). *(Axioms.lean)*
+
+- [ ] **Arzelà-Ascoli compactness** — `T_continuous_compact : True` is a placeholder. Real content
+  requires `CompactOperator` on `BoundedContinuousFunction`, not yet available for Riemannian
+  manifolds in Mathlib. *(Axioms.lean)*
+
+- [ ] **Eigenvalue theory for elliptic operators** — `PrincipalEigendata` is axiomatic. Proving it
+  requires Mathlib spectral theory for unbounded self-adjoint operators on Hilbert spaces, which
+  is partially available but not specialized to elliptic PDE. *(Axioms.lean)*
 
 ## Resolved
 

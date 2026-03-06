@@ -9,4 +9,6 @@ import CdFormal.Theorems
 import CdFormal.OperatorLemmas
 import CdFormal.CoefficientLemmas
 import CdFormal.ScalingUniqueness
+import CdFormal.MonotoneFixedPoint
+import CdFormal.LinftyAlgebraic
 import CdFormal.Verify

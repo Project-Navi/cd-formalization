@@ -1,6 +1,6 @@
 # Creative Determinant — Lean 4 Verification Audit
 
-**Date:** 2026-03-05
+**Date:** 2026-03-06 (updated from 2026-03-05)
 **Lean toolchain:** `leanprover/lean4:v4.28.0`
 **Mathlib:** `v4.28.0` (pinned in `lakefile.toml`)
 **Build status:** Clean (`lake build --wfail`, 0 warnings, 0 `sorryAx`)
@@ -51,10 +51,7 @@ lemma scaling_algebraic_contradiction
     False := by
   have hcΦp : (0 : ℝ) < c * Phi_val ^ p := by positivity
   have h_div : k ≥ k ^ p := by nlinarith
-  have h_lt : k < k ^ p := by
-    have h := Real.rpow_lt_rpow_of_exponent_lt hk hp
-    simp only [Real.rpow_one] at h
-    exact h
+  have h_lt : k < k ^ p := Real.self_lt_rpow_of_one_lt hk hp
   linarith
 ```
 
@@ -75,10 +72,8 @@ lemma laplacian_zero :
   exact h
 
 lemma gradNorm_zero (x : M) :
-    ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0 := by
-  have h := ops.gradNorm_smul (fun _ ↦ (0 : ℝ)) 0 x
-  simp only [zero_mul, abs_zero] at h
-  exact h
+    ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0 :=
+  ops.gradNorm_const 0 x
 ```
 
 Also includes the composed linearity lemma:
@@ -90,7 +85,7 @@ lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
 ```
 
 **Axiom dependencies:** `SemioticOperators.laplacian_add`, `SemioticOperators.laplacian_smul`,
-`SemioticOperators.gradNorm_smul` — derived from operator axioms only (no `PDEInfra`).
+`SemioticOperators.gradNorm_const` — derived from operator axioms only (no `PDEInfra`).
 
 **Provenance:** Aristotle run `41cee644-80f9-4122-9c7d-c32dc1b571d6` (original proofs against
 pre-Phase 2 axiom set, adapted here for current axioms).
@@ -170,31 +165,31 @@ theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
 consequence is `v ≤ (B/c₀)^{1/(p-1)}`. This is the algebraic half of Lemma 3.10; the
 maximum-principle half (∇u = 0, Δu ≤ 0 at interior max) remains an axiom.
 
-Proved by Aristotle (`224a0625`).
+Originally proved by Aristotle (`224a0625`), now integrated into the main build.
 
 ```lean
--- artifacts/aristotle/LinftyAlgebraic_proved.lean
+-- CdFormal/LinftyAlgebraic.lean
 
 lemma rpow_le_of_mul_rpow_le
-    (v b c p : ℝ) (hv : v > 0) (hc : c > 0) (hp : p > 1)
+    (v b c p : ℝ) (hv : v > 0) (hc : c > 0) (_hp : p > 1)
     (h : b * v ≥ c * v ^ p) :
     v ^ (p - 1) ≤ b / c := by
-  have h_div : b * v / (c * v) ≥ c * v ^ p / (c * v) := by
-    apply div_le_div_of_nonneg_right h (mul_nonneg hc.le hv.le);
+  have h_div : b * v / (c * v) ≥ c * v ^ p / (c * v) :=
+    div_le_div_of_nonneg_right h (mul_nonneg hc.le hv.le)
   have h_simplified : b / c ≥ v ^ p / v := by
     field_simp [mul_comm, mul_assoc, mul_left_comm] at h_div ⊢
-    exact h_div;
-  rwa [ Real.rpow_sub_one hv.ne' ] at *
+    exact h_div
+  rwa [Real.rpow_sub_one hv.ne'] at *
 
 theorem linfty_bound_algebraic
     (v b c p : ℝ) (hv : v > 0) (hc : c > 0) (hp : p > 1)
     (h : b * v ≥ c * v ^ p) :
     v ≤ (b / c) ^ (1 / (p - 1)) := by
-  have h_root : v ^ (p - 1) ≤ b / c → v ≤ (b / c) ^ (1 / (p - 1)) := by
-    exact fun h => le_trans
-      ( by rw [ ← Real.rpow_mul hv.le, mul_one_div_cancel ( by linarith ), Real.rpow_one ] )
-      ( Real.rpow_le_rpow ( by positivity ) h ( by exact one_div_nonneg.mpr ( by linarith ) ) );
-  apply h_root; exact rpow_le_of_mul_rpow_le v b c p hv hc hp h
+  have h_root : v ^ (p - 1) ≤ b / c → v ≤ (b / c) ^ (1 / (p - 1)) :=
+    fun h ↦ le_trans
+      (by rw [← Real.rpow_mul hv.le, mul_one_div_cancel (by linarith), Real.rpow_one])
+      (Real.rpow_le_rpow (by positivity) h (one_div_nonneg.mpr (by linarith)))
+  exact h_root (rpow_le_of_mul_rpow_le v b c p hv hc hp h)
 ```
 
 **Axiom dependencies:** `[propext, Classical.choice, Quot.sound]` — pure real analysis, no `sorryAx`.
@@ -221,14 +216,52 @@ theorem scaling_uniqueness
 
 **Proof sketch:** Uses `laplacian_smul` (Δ(kΦ) = kΔΦ) and `gradNorm_smul` (|∇(kΦ)| = k|∇Φ|)
 to substitute into the PDE. Expanding `(kΦ)^p = k^p·Φ^p` via `Real.mul_rpow` and comparing
-with `k·Φ^p` from the other equation yields `k = k^p`. Since `k > 1` and `p > 1`,
-`Real.rpow_lt_rpow_of_exponent_lt` gives `k < k^p`, contradiction.
+with `k·Φ^p` from the other equation yields `k ≥ k^p`. Since `k > 1` and `p > 1`,
+`Real.self_lt_rpow_of_one_lt` gives `k < k^p`, contradiction.
 
 **Provenance:** Originally proved by Aristotle (`1c3414f4`, `60ec288c`). Adapted for Lean 4.28.0
 with manual proof repair (rpow API changes).
 
 **Axiom dependencies:** `[propext, Classical.choice, Quot.sound]` — uses only `SemioticOperators`
 fields and `SemioticContext.one_lt_p`. No `PDEInfra`, no `sorryAx`.
+
+### 1.9 Monotone Fixed Point Between Sub/Super-Fixed Points — Order-Theoretic Core
+
+**Statement:** If `f : α →o α` is monotone on a complete lattice, `sub ≤ f sub`
+(sub-fixed point), `f super ≤ super` (super-fixed point), and `sub ≤ super`, then
+`f` has a fixed point `x` with `sub ≤ x ∧ x ≤ super`.
+
+This is the order-theoretic skeleton of Amann's sub/super-solution method (1976).
+The PDE content (monotonicity of T, construction of sub/super-solutions, nontriviality)
+remains axiomatic in `PDEInfra.monotone_iteration`.
+
+```lean
+-- CdFormal/MonotoneFixedPoint.lean
+
+theorem OrderHom.nextFixed_le_of_le
+    {sub super : α}
+    (h_sub : sub ≤ f sub)
+    (h_super : f super ≤ super)
+    (h_le : sub ≤ super) :
+    (f.nextFixed sub h_sub : α) ≤ super :=
+  OrderHom.lfp_le _ (sup_le h_le h_super)
+
+theorem monotone_fixed_point_between
+    {sub super : α}
+    (h_sub : sub ≤ f sub)
+    (h_super : f super ≤ super)
+    (h_le : sub ≤ super) :
+    ∃ x : α, f x = x ∧ sub ≤ x ∧ x ≤ super :=
+  let fp := f.nextFixed sub h_sub
+  ⟨fp, fp.2, f.le_nextFixed h_sub, f.nextFixed_le_of_le h_sub h_super h_le⟩
+```
+
+**Proof technique:** `nextFixed sub` is `lfp` of `(const sub ⊔ f)`. Since
+`(const sub ⊔ f)(super) = sub ⊔ f(super) ≤ sub ⊔ super = super`, `super` is a
+pre-fixed point, so `lfp ≤ super` by `OrderHom.lfp_le`.
+
+**Axiom dependencies:** `[propext, Quot.sound]` — notably **no `Classical.choice`**,
+making these candidates for constructive upstream contribution.
 
 ---
 
@@ -412,7 +445,7 @@ no Schauder estimates, and no Arzelà-Ascoli for manifold function spaces.
 
 **Decomposition:** The proof has two parts:
 1. **Analytic:** At interior max, `∇u = 0` and `Δu ≤ 0` (maximum principle — must remain axiom)
-2. **Algebraic:** `b·v ≥ c·v^p` implies `v ≤ (B/c₀)^{1/(p-1)}` (**proved** — see §1.6)
+2. **Algebraic:** `b·v ≥ c·v^p` implies `v ≤ (B/c₀)^{1/(p-1)}` (**proved** — see §1.7, `CdFormal/LinftyAlgebraic.lean`)
 
 ### 3.3 `schaefer` (Schaefer's Fixed-Point Theorem)
 
@@ -463,11 +496,11 @@ Artifacts from the Aristotle theorem prover are archived in `artifacts/aristotle
 These are raw outputs — some proved against earlier axiom names and may not build
 against the current codebase.
 
-### 4.1 L∞ Bound Algebraic Core — **PROVED**
+### 4.1 L∞ Bound Algebraic Core — **PROVED AND INTEGRATED**
 
 **Aristotle ID:** `224a0625-a2ed-45f0-ac27-1dfd0d421057`
 **Output:** `artifacts/aristotle/LinftyAlgebraic_proved.lean`
-**Status:** Proved and integrated. See §1.6 for full proofs.
+**Status:** Proved and integrated into main build as `CdFormal/LinftyAlgebraic.lean`. See §1.7.
 
 ### 4.2 Scaling Uniqueness — **PROVED AND INTEGRATED**
 
@@ -537,6 +570,14 @@ Fails on any warning (including `sorry`), ensuring no silent contamination.
 #print axioms SemioticContext.a_le_one
 #print axioms SemioticContext.p_sub_one_pos
 
+-- § L∞ bound algebraic core (pure real analysis)
+#print axioms rpow_le_of_mul_rpow_le
+#print axioms linfty_bound_algebraic
+
+-- § Monotone fixed point (from Knaster-Tarski, pure order theory)
+#print axioms OrderHom.nextFixed_le_of_le
+#print axioms monotone_fixed_point_between
+
 -- § PDEInfra-dependent (paper-specific)
 -- Should show PDEInfra fields but NO sorryAx.
 #print axioms SemioticBVP.exists_isWeakCoherentConfiguration
@@ -568,9 +609,7 @@ Fails on any warning (including `sorry`), ensuring no silent contamination.
 ```
 cd_formalization/
 ├── .github/workflows/lean_action_ci.yml   # CI with --wfail + sorry check
-├── CdFormal.lean                          # root import (Basic, Axioms, Theorems,
-│                                          #   OperatorLemmas, CoefficientLemmas,
-│                                          #   ScalingUniqueness, Verify)
+├── CdFormal.lean                          # root import (all modules)
 ├── CdFormal/
 │   ├── Basic.lean                         # definitions (§2)
 │   ├── Axioms.lean                        # PDE infrastructure typeclass (§3)
@@ -578,15 +617,17 @@ cd_formalization/
 │   ├── OperatorLemmas.lean                # derived operator lemmas (§1.3)
 │   ├── CoefficientLemmas.lean             # coefficient bound lemmas (§1.4)
 │   ├── ScalingUniqueness.lean             # scaling uniqueness theorem (§1.8)
+│   ├── MonotoneFixedPoint.lean            # Knaster-Tarski fixed point (§1.9)
+│   ├── LinftyAlgebraic.lean              # L∞ algebraic core (§1.7)
 │   └── Verify.lean                        # axiom dependency dashboard (§6)
 ├── drafts/                                # Aristotle targets + community drafts
-│   ├── LinftyAlgebraic.lean
-│   ├── OperatorLemmas.lean
-│   ├── ScalingUniqueness.lean
-│   ├── zulip_schaefer_post.md
-│   └── mathlib_issue_schaefer.md
+│   ├── mathlib_issue_schaefer.md
+│   ├── MonotoneFixedPoint_sorry.lean
+│   ├── LinftyAlgebraic.lean, OperatorLemmas.lean
+│   └── ScalingUniqueness.lean, ScalingUniqueness_v2.lean, ScalingUniqueness_v3.lean
 ├── artifacts/aristotle/                   # Aristotle prover outputs (raw archives)
 ├── docs/internal/upstream-strategy.md     # upstream engagement strategy
+├── debt.md                                # technical debt tracker
 ├── LICENSE                                # Apache 2.0
 ├── lakefile.toml                          # Lake config (Mathlib v4.28.0)
 ├── lake-manifest.json                     # dependency lock
@@ -613,3 +654,5 @@ cd_formalization/
 | Thm 3.16 (Nontriviality) | `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | **Proved** (conditional on PDEInfra) |
 | §3.4 (Spectral, 1D) | `spectral_characterization_1d` | **Proved** (pure algebra) |
 | Open Problem #3 (Uniqueness) | `scaling_uniqueness` + `scaling_algebraic_contradiction` | **Proved** (proportional-class uniqueness; full uniqueness remains open) |
+| Knaster-Tarski (order-theoretic core) | `monotone_fixed_point_between` | **Proved** (pure order theory, no Classical.choice) |
+| Lemma 3.10 algebraic step | `rpow_le_of_mul_rpow_le` + `linfty_bound_algebraic` | **Proved** (pure real analysis) |

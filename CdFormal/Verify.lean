@@ -7,6 +7,8 @@ import CdFormal.Theorems
 import CdFormal.OperatorLemmas
 import CdFormal.CoefficientLemmas
 import CdFormal.ScalingUniqueness
+import CdFormal.MonotoneFixedPoint
+import CdFormal.LinftyAlgebraic
 
 /-!
 # Axiom Dependency Map
@@ -41,6 +43,14 @@ If `sorryAx` appears anywhere, the proof is incomplete.
 #print axioms SemioticContext.a_nonneg
 #print axioms SemioticContext.a_le_one
 #print axioms SemioticContext.p_sub_one_pos
+
+-- § L∞ bound algebraic core (pure real analysis)
+#print axioms rpow_le_of_mul_rpow_le
+#print axioms linfty_bound_algebraic
+
+-- § Monotone fixed point (from Knaster-Tarski, pure order theory)
+#print axioms OrderHom.nextFixed_le_of_le
+#print axioms monotone_fixed_point_between
 
 -- § PDEInfra-dependent (paper-specific)
 -- Should show PDEInfra fields but NO sorryAx.

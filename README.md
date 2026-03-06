@@ -6,14 +6,18 @@ Formal verification of the existence theory from:
 
 ## What is verified
 
-Eleven theorems proved with zero `sorry`, organized in four dependency tiers:
+Fifteen theorems and lemmas proved with zero `sorry`, organized in five dependency tiers:
 
-### Tier 1 — Pure algebra (no domain axioms)
+### Tier 1 — Pure mathematics (no domain axioms)
 
-| Result | Declaration | File |
-|--------|-------------|------|
-| Spectral characterization (1D) | `spectral_characterization_1d` | `Theorems` |
-| Scaling algebraic contradiction | `scaling_algebraic_contradiction` | `Theorems` |
+| Result | Declaration | File | Topic |
+|--------|-------------|------|-------|
+| Spectral characterization (1D) | `spectral_characterization_1d` | `Theorems` | Algebra |
+| Scaling algebraic contradiction | `scaling_algebraic_contradiction` | `Theorems` | Algebra |
+| v^{p−1} ≤ b/c from PDE inequality | `rpow_le_of_mul_rpow_le` | `LinftyAlgebraic` | Real analysis |
+| v ≤ (b/c)^{1/(p−1)} | `linfty_bound_algebraic` | `LinftyAlgebraic` | Real analysis |
+| nextFixed ≤ super-fixed point | `OrderHom.nextFixed_le_of_le` | `MonotoneFixedPoint` | Order theory |
+| Fixed point between sub/super | `monotone_fixed_point_between` | `MonotoneFixedPoint` | Order theory |
 
 ### Tier 2 — Operator lemmas (from abstract linearity/homogeneity)
 
@@ -31,7 +35,7 @@ Eleven theorems proved with zero `sorry`, organized in four dependency tiers:
 | a(x) ≤ 1 | `SemioticContext.a_le_one` | `CoefficientLemmas` |
 | p − 1 > 0 | `SemioticContext.p_sub_one_pos` | `CoefficientLemmas` |
 
-### Tier 4 — PDE-level results
+### Tier 4 — PDE-level results (from `SemioticOperators` / `PDEInfra`)
 
 | Result | Declaration | File | Dependencies |
 |--------|-------------|------|--------------|
@@ -40,6 +44,8 @@ Eleven theorems proved with zero `sorry`, organized in four dependency tiers:
 | Nontrivial configurations | `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
 
 All definitions (semiotic manifold, BVP, operators, weak coherent configuration) are machine-checked against Mathlib.
+
+The monotone fixed-point theorems depend only on `[propext, Quot.sound]` — no `Classical.choice` — making them candidates for constructive upstream contribution.
 
 ## Axiom boundary
 
@@ -53,7 +59,7 @@ The `PDEInfra` typeclass in `CdFormal/Axioms.lean` packages five classical PDE r
 | `fixed_point_nonneg` | Strong maximum principle | No max. principle for manifolds |
 | `monotone_iteration` | Amann 1976 | No sub-/super-solution theory |
 
-The existence theorems explicitly carry `[PDEInfra bvp solOp]` so the axiom surface is visible to Lean's kernel. Run `#print axioms` in `CdFormal/Verify.lean` to confirm no `sorryAx` — all theorems depend only on `[propext, Classical.choice, Quot.sound]`.
+The existence theorems explicitly carry `[PDEInfra bvp solOp]` so the axiom surface is visible to Lean's kernel. Run `#print axioms` in `CdFormal/Verify.lean` to confirm no `sorryAx` — all theorems depend only on `[propext, Classical.choice, Quot.sound]` (monotone fixed-point theorems use only `[propext, Quot.sound]`).
 
 ## Building
 
@@ -68,17 +74,20 @@ lake build --wfail   # fail on any sorry or warning
 
 ```
 CdFormal/
-  Basic.lean            — Definitions (manifold, coefficients, operators, BVP)
-  Axioms.lean           — PDEInfra typeclass (explicit axiom surface)
-  Theorems.lean         — Existence and algebraic theorems
-  OperatorLemmas.lean   — Laplacian/gradient-norm derived properties
-  CoefficientLemmas.lean — Bounds from [0,1] field constraints
-  ScalingUniqueness.lean — PDE-level scaling impossibility
-  Verify.lean           — #print axioms dashboard (13 declarations)
+  Basic.lean              — Definitions (manifold, coefficients, operators, BVP)
+  Axioms.lean             — PDEInfra typeclass (explicit axiom surface)
+  Theorems.lean           — Existence and algebraic theorems
+  OperatorLemmas.lean     — Laplacian/gradient-norm derived properties
+  CoefficientLemmas.lean  — Bounds from [0,1] field constraints
+  ScalingUniqueness.lean  — PDE-level scaling impossibility
+  MonotoneFixedPoint.lean — Knaster-Tarski fixed point between sub/super
+  LinftyAlgebraic.lean    — L∞ bound algebraic core (Paper Lemma 3.10)
+  Verify.lean             — #print axioms dashboard (17 declarations)
 artifacts/
-  aristotle/            — Proved outputs from the Aristotle theorem prover
-drafts/                 — Community engagement drafts + Lean proof sketches
-  zulip_schaefer_post.md, zulip_lt_rpow_self_post.md, mathlib_issue_schaefer.md
+  aristotle/              — Proved outputs from the Aristotle theorem prover
+drafts/                   — Community engagement drafts + Lean proof sketches
+  mathlib_issue_schaefer.md, MonotoneFixedPoint_sorry.lean
+  LinftyAlgebraic.lean, OperatorLemmas.lean
   ScalingUniqueness.lean, ScalingUniqueness_v2.lean, ScalingUniqueness_v3.lean
 ```
 
