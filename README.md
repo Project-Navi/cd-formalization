@@ -1,3 +1,10 @@
+[![CI](https://github.com/Project-Navi/cd-formalization/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Project-Navi/cd-formalization/actions/workflows/lean_action_ci.yml)
+![Lean v4.28.0](https://img.shields.io/badge/Lean-v4.28.0-blue)
+![Mathlib](https://img.shields.io/badge/Mathlib-dep-blue)
+![sorry-free](https://img.shields.io/badge/sorry--free-%E2%9C%93-brightgreen)
+![axiom boundary](https://img.shields.io/badge/axiom%20boundary-5%20classical-yellow)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-orange)](LICENSE)
+
 # Creative Determinant — Lean 4 Formalization
 
 Formal verification of the existence theory from:
