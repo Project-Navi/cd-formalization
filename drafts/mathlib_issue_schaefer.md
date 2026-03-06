@@ -60,7 +60,7 @@ schaefer :
 ```
 
 The project has zero `sorry`, zero `sorryAx`, CI with `--wfail`, and
-13 axiom-checked theorems. Having Schaefer in Mathlib would replace
+11 axiom-checked theorems. Having Schaefer in Mathlib would replace
 this axiom with a real proof.
 
 **AI disclosure:** Parts of the formalization use Claude (Anthropic)

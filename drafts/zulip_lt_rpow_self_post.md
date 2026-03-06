@@ -7,28 +7,23 @@
 
 Hi,
 
-Quick check — does Mathlib have the lemma `x < x ^ p` for `1 < x`
-and `1 < p` (real rpow)? I can find `Real.rpow_lt_rpow_of_exponent_lt`
-which gives `x ^ y < x ^ z` from `1 < x` and `y < z`, and composing
-with `rpow_one` gives what I need in two lines:
+Quick check — does Mathlib have `x < x ^ p` for `1 < x` and `1 < p`
+(real rpow)? I can get it in two lines from
+`rpow_lt_rpow_of_exponent_lt` + `rpow_one`:
 
 ```lean
-theorem lt_rpow_self_of_one_lt (hx : 1 < x) (hp : 1 < p) :
+example (x p : ℝ) (hx : 1 < x) (hp : 1 < p) :
     x < x ^ p := by
   have := Real.rpow_lt_rpow_of_exponent_lt hx hp
   rwa [Real.rpow_one] at this
 ```
 
-But I haven't found a named lemma for this directly. I've been using it
-in a formalization of uniqueness results for nonlinear elliptic PDEs
-([cd-formalization](https://github.com/Project-Navi/cd-formalization))
-and it comes up naturally whenever you have a superlinear exponent.
+If it's missing, happy to PR it near
+`Mathlib.Analysis.SpecialFunctions.Pow.Real`. What would the right
+name be?
 
-If it's missing, happy to PR it as a lemma near
-`Mathlib.Analysis.SpecialFunctions.Pow.Real`. Would `@[simp]` be
-appropriate here, or just a named lemma?
-
-**AI disclosure:** The formalization uses Claude (Anthropic) and
-Aristotle (theorem prover). All code is manually reviewed.
+**AI disclosure:** I found this gap while working on a Lean 4
+formalization — the proof strategy is my own work, Claude (Anthropic)
+assisted with Lean syntax and Mathlib API navigation.
 
 Thanks!

@@ -77,7 +77,9 @@ CdFormal/
   Verify.lean           — #print axioms dashboard (13 declarations)
 artifacts/
   aristotle/            — Proved outputs from the Aristotle theorem prover
-drafts/                 — Community engagement drafts (Zulip, Mathlib issues)
+drafts/                 — Community engagement drafts + Lean proof sketches
+  zulip_schaefer_post.md, zulip_lt_rpow_self_post.md, mathlib_issue_schaefer.md
+  ScalingUniqueness.lean, ScalingUniqueness_v2.lean, ScalingUniqueness_v3.lean
 ```
 
 ## Development Process

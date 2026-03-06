@@ -5,25 +5,33 @@
 
 ---
 
-Hi all,
+Hi everyone,
 
-Is there existing work on Schaefer's fixed-point theorem or the
-Leray-Schauder continuation principle in Mathlib?
+I'm Nelson — first time posting here. I've been working on a Lean 4
+formalization of a nonlinear elliptic PDE result as part of a research
+project, and it's been a great way to learn both Lean and Mathlib. I'm
+hoping to get some guidance from the community on a gap I've hit.
 
-**The theorem:** If *T : E → E* is continuous and compact on a Banach
-space, and the set *{x : ∃ τ ∈ [0,1], x = τ · T(x)}* is bounded,
-then *T* has a fixed point (Deimling 1985, Thm 9.2).
-
-**What I've found:**
-- `IsCompactOperator` for linear maps (`Mathlib.Analysis.Normed.Operator.Compact`)
-- Sperner's lemma (#25231) on the path to Brouwer → Schauder → Schaefer
-- No Schauder or Schaefer fixed-point theorems
-
-**Use case:** I have a Lean 4 formalization of existence theory for a
-nonlinear elliptic BVP on compact Riemannian manifolds
+**Context:** I have a formalization of existence theory for a nonlinear
+elliptic BVP on compact Riemannian manifolds
 ([cd-formalization](https://github.com/Project-Navi/cd-formalization)).
-The proof chain — L∞ bound, Schaefer set bounded, fixed point, maximum
-principle — is verified except the Schaefer step, which is axiomatized:
+The proof chain — L∞ bound → Schaefer set bounded → fixed point →
+maximum principle — builds and passes CI with `--wfail`, zero `sorry`.
+But five steps in the chain are axiomatized in a `PDEInfra` typeclass
+because the underlying classical PDE infrastructure isn't in Mathlib yet.
+
+The one I'd most like to understand better is **Schaefer's fixed-point
+theorem** (Deimling 1985, Thm 9.2): if *T : E → E* is continuous and
+compact on a Banach space, and the set *{x : ∃ τ ∈ [0,1], x = τ · T(x)}*
+is bounded, then *T* has a fixed point.
+
+**What I've found so far:**
+- `IsCompactOperator` for linear maps (`Mathlib.Analysis.Normed.Operator.Compact`)
+- Sperner's lemma (#25231) — great to see this landing, since it's the
+  foundation of the Brouwer → Schauder → Schaefer chain
+- No Schauder or Schaefer fixed-point theorems yet
+
+**Where I'm stuck:** In my formalization, the Schaefer step is axiomatized as:
 
 ```lean
 schaefer :
@@ -35,12 +43,25 @@ schaefer :
   ∃ Φ : M → ℝ, solOp.T Φ = Φ
 ```
 
-**API question:** The nonlinear case needs "compact map" for nonlinear
-operators (bounded sets → relatively compact sets). Should this extend
-or parallel `IsCompactOperator`? Happy to take guidance on how this
-fits the existing API.
+The `True →` is a placeholder for the compactness hypothesis — I wasn't
+sure how to state "T is continuous and maps bounded sets to relatively
+compact sets" for a nonlinear operator in Mathlib's current API. The
+linear `IsCompactOperator` doesn't quite fit since Schaefer applies to
+nonlinear maps.
 
-**AI disclosure:** Parts of the formalization use Claude (Anthropic)
-and Aristotle (theorem prover). All code is manually reviewed.
+**What I'm looking for:**
+- Has anyone started work on Schaefer, Schauder, or Leray-Schauder
+  (beyond the Sperner foundation)?
+- Is there a preferred way to express nonlinear compactness (something
+  like `IsCompactMap`)? I'd appreciate guidance on how this should fit
+  the existing API.
+  - I'm looking to contribute upstream if this would support Mathlib's long-term goals — I'd just need some mentoring on the right approach since I'm new to the Mathlib
+  contribution process.
 
-Thanks for any pointers!
+**AI disclosure:** The equations, proof strategy, and formalization
+architecture are my own work — Claude (Anthropic) assisted with Lean 4
+syntax and Mathlib API navigation, and Aristotle (theorem prover)
+automated some standalone algebraic lemmas. All code is manually
+reviewed; the Lean compiler is the final arbiter (`lake build --wfail`).
+
+Thank you in advance for the guidance!

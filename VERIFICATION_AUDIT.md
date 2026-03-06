@@ -604,7 +604,7 @@ cd_formalization/
 | Def 3.1 (BVP V1') | `SemioticBVP` | Verified definition |
 | Def 3.1 (Creative drive) | `SemioticContext.a` | Verified definition |
 | Def 3.3 (Canonical viability) | `SemioticContext.canonicalViability` | Verified definition |
-| Def 3.6 (Weak coherent config) | `IsWeakCoherentConfiguration` | Verified definition |
+| §3.2 (Weak coherent config) | `IsWeakCoherentConfiguration` | Verified definition |
 | Def 3.13 (Principal eigenvalue) | `PrincipalEigendata` | Verified structure |
 | Lemma 3.7 (Compactness of T) | `PDEInfra.T_continuous_compact` | Axiom (placeholder) |
 | Lemma 3.10 (L∞ bound) | `PDEInfra.linfty_bound` + `linfty_bound_algebraic` | Axiom (max principle) + **proved** (algebraic core) |
