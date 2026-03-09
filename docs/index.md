@@ -6,7 +6,7 @@ hide:
 
 <div class="hero-glow" markdown>
 
-# Creative Determinant — Lean 4 Formalization
+# cd-formalization
 
 **Machine-checked existence theory for coherent presence on Riemannian manifolds.**
 
