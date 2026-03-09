@@ -4,8 +4,6 @@ hide:
   - toc
 ---
 
-<div class="hero-glow" markdown>
-
 # cd-formalization
 
 **Machine-checked existence theory for coherent presence on Riemannian manifolds.**
@@ -14,8 +12,6 @@ hide:
 
 [Get Started](getting-started/quickstart.md){ .md-button .md-button--primary }
 [Theorem Catalog](reference/theorems.md){ .md-button }
-
-</div>
 
 ---
 
