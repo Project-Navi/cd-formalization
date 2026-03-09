@@ -23,7 +23,13 @@ nav = [
   {"Getting Started" = [
     {"Quickstart" = "getting-started/quickstart.md"},
   ]},
+  {"Explanation" = [
+    {"Proof Strategy" = "explanation/proof-strategy.md"},
+    {"Axiom Boundary" = "explanation/axiom-boundary.md"},
+  ]},
   {"Reference" = [
+    {"Theorem Catalog" = "reference/theorems.md"},
+    {"Verification Audit" = "reference/verification-audit.md"},
     {"Changelog" = "reference/changelog.md"},
   ]},
 ]
