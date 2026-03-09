@@ -1,0 +1,8 @@
+[project]
+name = "cd-formalization"
+version = "0.1.0"
+description = "Lean 4 formalization of the Creative Determinant framework"
+requires-python = ">=3.12"
+
+[dependency-groups]
+docs = ["zensical>=0.0.24"]
