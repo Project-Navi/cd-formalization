@@ -1,0 +1,24 @@
+name: OpenSSF Scorecard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "15 6 * * 1"  # Monday 06:15 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: scorecard
+  cancel-in-progress: false
+
+jobs:
+  scorecard:
+    uses: Project-Navi/.github/.github/workflows/scorecard.yml@83f5a6860e88af77ecebda9d90836c6e7caec159
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+      actions: read
+    secrets: inherit
