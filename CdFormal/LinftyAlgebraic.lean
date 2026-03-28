@@ -45,12 +45,8 @@ lemma rpow_le_of_mul_rpow_le
     (v b c p : ℝ) (hv : v > 0) (hc : c > 0)
     (h : b * v ≥ c * v ^ p) :
     v ^ (p - 1) ≤ b / c := by
-  have h_div : b * v / (c * v) ≥ c * v ^ p / (c * v) :=
-    div_le_div_of_nonneg_right h (mul_nonneg hc.le hv.le)
-  have h_simplified : b / c ≥ v ^ p / v := by
-    field_simp [mul_comm, mul_assoc, mul_left_comm] at h_div ⊢
-    exact h_div
-  rwa [Real.rpow_sub_one hv.ne'] at *
+  rw [Real.rpow_sub, Real.rpow_one] <;> try linarith
+  rw [div_le_div_iff₀] <;> linarith
 
 /-- From `b·v ≥ c·v^p` conclude `v ≤ (b/c)^{1/(p-1)}` by taking the
     `(p-1)`-th root. This is the algebraic core of Paper Lemma 3.10.
@@ -59,11 +55,10 @@ lemma rpow_le_of_mul_rpow_le
 theorem linfty_bound_algebraic
     (v b c p : ℝ) (hv : v > 0) (hc : c > 0) (hp : p > 1)
     (h : b * v ≥ c * v ^ p) :
-    v ≤ (b / c) ^ (1 / (p - 1)) := by
-  have h_root : v ^ (p - 1) ≤ b / c → v ≤ (b / c) ^ (1 / (p - 1)) :=
-    fun h ↦ le_trans
-      (by rw [← Real.rpow_mul hv.le, mul_one_div_cancel (by linarith), Real.rpow_one])
-      (Real.rpow_le_rpow (by positivity) h (one_div_nonneg.mpr (by linarith)))
-  exact h_root (rpow_le_of_mul_rpow_le v b c p hv hc h)
+    v ≤ (b / c) ^ (1 / (p - 1)) :=
+  le_trans
+    (by rw [← Real.rpow_mul hv.le, mul_one_div_cancel (by linarith), Real.rpow_one])
+    (Real.rpow_le_rpow (by positivity) (rpow_le_of_mul_rpow_le v b c p hv hc h)
+      (one_div_nonneg.mpr (by linarith)))
 
 end
