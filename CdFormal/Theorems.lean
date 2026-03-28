@@ -70,11 +70,7 @@ theorem spectral_characterization_1d
     (L : ℝ) (b : ℝ) (beta : ℝ) (hb : b > 0) :
     let beta_star := viabilityThreshold L b
     beta > beta_star → (Real.pi / L) ^ 2 - beta * b < 0 := by
-  intro beta_star h_beta
-  have h1 : beta > (Real.pi / L) ^ 2 / b := h_beta
-  have h2 : beta * b > (Real.pi / L) ^ 2 := by
-    rwa [gt_iff_lt, div_lt_iff₀ hb] at h1
-  linarith
+  intro _ h; have := (div_lt_iff₀ hb).mp h; linarith
 
 /-! ## Scaling Algebraic Contradiction
 
@@ -92,10 +88,8 @@ lemma scaling_algebraic_contradiction
     (hp : p > 1) (hk : k > 1) (hc : c > 0) (hPhi : Phi_val > 0)
     (h_eq : -c * k * Phi_val ^ p ≤ -c * k ^ p * Phi_val ^ p) :
     False := by
-  have hcΦp : (0 : ℝ) < c * Phi_val ^ p := by positivity
-  have h_div : k ≥ k ^ p := by nlinarith
-  have h_lt : k < k ^ p := Real.self_lt_rpow_of_one_lt hk hp
-  linarith
+  have : (0 : ℝ) < c * Phi_val ^ p := by positivity
+  nlinarith [Real.self_lt_rpow_of_one_lt hk hp]
 
 /-! ## Existence Theorems (from PDEInfra typeclass)
 
@@ -119,8 +113,7 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
     ∃ Phi : M → ℝ,
       IsWeakCoherentConfiguration bvp Phi ∧
       (∀ x, Phi x ≥ 0) := by
-  have h_bounded := infra.linfty_bound B hB
-  obtain ⟨Phi, hfix⟩ := infra.schaefer infra.T_compact h_bounded
+  obtain ⟨Phi, hfix⟩ := infra.schaefer infra.T_compact (infra.linfty_bound B hB)
   exact ⟨Phi, solOp.T_fixed_point Phi hfix, infra.fixed_point_nonneg Phi hfix⟩
 
 /-- Paper Theorem 3.16: When viability exceeds dissipation (eigval < 0),

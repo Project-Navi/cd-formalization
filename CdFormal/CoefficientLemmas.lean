@@ -47,21 +47,16 @@ variable (ctx : SemioticContext n M)
 
     Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`.
     Upstream candidate: no — paper-specific coefficient structure. -/
-theorem a_nonneg (x : M) : 0 ≤ ctx.a x := by
-  unfold SemioticContext.a
-  exact mul_nonneg
-    (mul_nonneg (ctx.κ_bounds x).1 (ctx.γ_bounds x).1)
-    (ctx.μ_bounds x).1
+theorem a_nonneg (x : M) : 0 ≤ ctx.a x :=
+  mul_nonneg (mul_nonneg (ctx.κ_bounds x).1 (ctx.γ_bounds x).1) (ctx.μ_bounds x).1
 
 /-- The creative drive a(x) = κ(x)·γ(x)·μ(x) ≤ 1,
     since each factor lies in [0,1].
 
     Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`.
     Upstream candidate: no — paper-specific coefficient structure. -/
-theorem a_le_one (x : M) : ctx.a x ≤ 1 := by
-  unfold SemioticContext.a
-  exact mul_le_one₀
-    (mul_le_one₀ (ctx.κ_bounds x).2 (ctx.γ_bounds x).1 (ctx.γ_bounds x).2)
+theorem a_le_one (x : M) : ctx.a x ≤ 1 :=
+  mul_le_one₀ (mul_le_one₀ (ctx.κ_bounds x).2 (ctx.γ_bounds x).1 (ctx.γ_bounds x).2)
     (ctx.μ_bounds x).1 (ctx.μ_bounds x).2
 
 /-- The saturation exponent satisfies p - 1 > 0.

@@ -47,9 +47,7 @@ variable {n : ℕ} {M : Type*}
 @[simp]
 lemma laplacian_zero :
     ops.laplacian (fun _ : M ↦ (0 : ℝ)) = fun _ ↦ 0 := by
-  have h := ops.laplacian_smul (fun _ ↦ (0 : ℝ)) 0
-  simp only [zero_mul] at h
-  exact h
+  simpa using ops.laplacian_smul (fun _ ↦ (0 : ℝ)) 0
 
 /-- Full linearity of the Laplacian: Δ(c·f + g) = c·Δf + Δg.
     Composed from `laplacian_add` and `laplacian_smul`.
@@ -60,10 +58,7 @@ lemma laplacian_zero :
 lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
     ops.laplacian (fun x ↦ c * f x + g x) =
     fun x ↦ c * ops.laplacian f x + ops.laplacian g x := by
-  have h_add := ops.laplacian_add (fun x ↦ c * f x) g
-  have h_smul := ops.laplacian_smul f c
-  simp only [h_smul] at h_add
-  exact h_add
+  simpa [ops.laplacian_smul] using ops.laplacian_add (fun x ↦ c * f x) g
 
 /-- The gradient norm of the zero function is zero.
     Direct consequence of `gradNorm_const` with a = 0.
