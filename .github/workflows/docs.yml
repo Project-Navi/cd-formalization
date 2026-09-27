@@ -6,40 +6,117 @@ on:
     paths:
       - "docs/**"
       - "zensical.toml"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/docs.yml"
+  pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: docs-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
+  # Not named 'build', so it cannot stand in for the required Lean check.
+  docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7.3.1
         with:
           enable-cache: true
       - name: Install docs dependencies
-        # For library repos, remove --no-install-project so the package is importable
         run: uv sync --frozen --no-install-project --group docs
       - name: Build site
         run: uv run zensical build
-      - name: Strip internal docs from build
-        run: rm -rf site/internal
-      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+      # Every nav page is built, every built page is in the nav, local links, assets and
+      # fragments resolve, and no page refers to the retired prover archive or planning notes.
+      # External links are not checked.
+      - name: Check site
+        shell: python
+        run: |
+          import html, pathlib, re, sys, tomllib, urllib.parse
+          site = pathlib.Path("site")
+          config = tomllib.loads(pathlib.Path("zensical.toml").read_text(encoding="utf-8"))
+
+          def nav_pages(items):
+              for item in items:
+                  for value in item.values():
+                      yield from [value] if isinstance(value, str) else nav_pages(value)
+
+          def built(md):
+              stem = md.removesuffix(".md")
+              return site / "index.html" if stem == "index" else site / stem / "index.html"
+
+          nav = list(nav_pages(config["project"]["nav"]))
+          errors = [] if nav else ["the nav lists no pages"]
+          for md in nav:
+              if not (pathlib.Path("docs") / md).is_file():
+                  errors.append(f"nav entry without source: docs/{md}")
+              if not built(md).is_file():
+                  errors.append(f"nav page not built: {md}")
+          pages = sorted(site.rglob("*.html"))
+          allowed = {built(md) for md in nav} | {site / "404.html"}
+          errors += [f"page not in nav: {p.relative_to(site)}" for p in pages if p not in allowed]
+
+          ids = {}
+          def anchors(page):
+              if page not in ids:
+                  ids[page] = set(re.findall(r'\bid="([^"]+)"', page.read_text(encoding="utf-8")))
+              return ids[page]
+
+          links = 0
+          for page in pages:
+              for ref in re.findall(r'(?:href|src)="([^"]*)"', page.read_text(encoding="utf-8")):
+                  ref = html.unescape(ref)
+                  if re.match(r"[a-zA-Z][a-zA-Z0-9+.-]*:|//", ref):
+                      continue
+                  links += 1
+                  path, _, fragment = ref.partition("#")
+                  path = urllib.parse.unquote(path.split("?")[0])
+                  if path.startswith("/"):
+                      target = site / path.removeprefix("/cd-formalization").lstrip("/")
+                  else:
+                      target = page.parent / path if path else page
+                  if target.is_dir():
+                      target = target / "index.html"
+                  if not target.is_file():
+                      errors.append(f"{page.relative_to(site)}: broken link {ref}")
+                  elif fragment and target.suffix == ".html" and fragment not in anchors(target):
+                      errors.append(f"{page.relative_to(site)}: missing anchor {ref}")
+
+          retired = ["artifacts/aristotle", "drafts/", "VERIFICATION_AUDIT", "debt.md",
+                     "CLAUDE.md", "upstream-strategy", "docs/internal", "mathlib_issue_schaefer"]
+          for f in site.rglob("*"):
+              if f.is_file() and f.suffix in {".html", ".json", ".xml", ".js", ".css", ".txt"}:
+                  text = f.read_text(encoding="utf-8", errors="replace")
+                  errors += [f"{f.relative_to(site)}: mentions {r}" for r in retired if r in text]
+
+          if errors:
+              sys.exit("site check failed:\n  " + "\n  ".join(errors))
+          print(f"{len(nav)} nav pages built; {len(pages)} pages; {links} local links and "
+                "fragments resolve; no retired paths.")
+      - name: Upload Pages artifact
+        if: >-
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           path: site
 
   deploy:
-    needs: build
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: docs
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
