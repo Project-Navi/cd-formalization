@@ -5,13 +5,6 @@ Authors: Nelson Spence
 -/
 import CdFormal.Basic
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle
-
 /-!
 # Operator Consequence Lemmas
 
@@ -27,9 +20,12 @@ These validate that the operator contract is well-formed and non-vacuous.
 
 ## References
 
-- Aristotle run `41cee644-80f9-4122-9c7d-c32dc1b571d6` (original proofs against
-  pre-Phase 2 axiom set, adapted here for current axioms).
+- [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
+
+noncomputable section
+
+open scoped Manifold Bundle
 
 variable {n : ℕ} {M : Type*}
   [TopologicalSpace M]
@@ -42,8 +38,7 @@ variable {n : ℕ} {M : Type*}
 /-- The Laplacian of the zero function is zero.
     From `laplacian_smul` with c = 0.
 
-    Axiom dependencies: `SemioticOperators.laplacian_smul`.
-    Upstream candidate: trivial consequence of linearity. -/
+    Axiom dependencies: `SemioticOperators.laplacian_smul`. -/
 @[simp]
 lemma laplacian_zero :
     ops.laplacian (fun _ : M ↦ (0 : ℝ)) = fun _ ↦ 0 := by
@@ -53,8 +48,7 @@ lemma laplacian_zero :
     Composed from `laplacian_add` and `laplacian_smul`.
 
     Axiom dependencies: `SemioticOperators.laplacian_add`,
-    `SemioticOperators.laplacian_smul`.
-    Upstream candidate: standard consequence of linearity. -/
+    `SemioticOperators.laplacian_smul`. -/
 lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
     ops.laplacian (fun x ↦ c * f x + g x) =
     fun x ↦ c * ops.laplacian f x + ops.laplacian g x := by
@@ -63,8 +57,7 @@ lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
 /-- The gradient norm of the zero function is zero.
     Direct consequence of `gradNorm_const` with a = 0.
 
-    Axiom dependencies: `SemioticOperators.gradNorm_const`.
-    Upstream candidate: trivial consequence of homogeneity. -/
+    Axiom dependencies: `SemioticOperators.gradNorm_const`. -/
 @[simp]
 lemma gradNorm_zero (x : M) :
     ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0 :=

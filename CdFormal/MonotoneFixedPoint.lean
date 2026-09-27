@@ -5,9 +5,6 @@ Authors: Nelson Spence
 -/
 import Mathlib.Order.FixedPoints
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
 /-!
 # Monotone Fixed Point Between Sub and Super-Fixed Points
 

@@ -7,13 +7,6 @@ import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle BigOperators Real Nat Pointwise
-
 /-!
 # Creative Determinant Framework — Core Definitions
 
@@ -36,6 +29,10 @@ boundary value problem, and weak coherent configuration.
 - [Spence2026] N. Spence, "The Creative Determinant: Autopoietic Closure as a
   Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions," 2026.
 -/
+
+noncomputable section
+
+open scoped Manifold Bundle BigOperators Real Nat Pointwise
 
 /-! ## Semiotic Manifold -/
 

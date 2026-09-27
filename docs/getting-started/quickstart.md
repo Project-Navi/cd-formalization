@@ -1,118 +1,39 @@
 # Quickstart
 
-Build and verify the Creative Determinant formalization in Lean 4.
-
----
-
 ## Prerequisites
 
-- **Lean 4** (v4.28.0) --- installed via [elan](https://github.com/leanprover/elan)
-- **Mathlib** (v4.28.0) --- fetched automatically by Lake
+- [elan](https://github.com/leanprover/elan), which installs the toolchain pinned in `lean-toolchain` (Lean v4.28.0).
+- Mathlib v4.28.0, which Lake fetches.
 
-```bash
-# Install elan (Lean version manager)
-curl https://elan-init.netlify.app/elan-init.sh -sSf | sh
-```
-
----
-
-## Build
+## Build and verify
 
 ```bash
 git clone https://github.com/Project-Navi/cd-formalization.git
 cd cd-formalization
-lake build
+lake exe cache get                                         # prebuilt Mathlib
+lake build --wfail                                         # warnings, including sorry, are errors
+lake lint                                                  # Mathlib environment linters
+lake env lean -DwarningAsError=true CdFormal/Verify.lean   # axiom dashboard
 ```
 
-First build fetches Mathlib and compiles all dependencies. This takes several minutes. Subsequent builds are incremental.
+`CdFormal/Verify.lean` runs `#print axioms` on the headline results and on the declarations these pages cite. Each should depend only on `propext`, `Classical.choice` and `Quot.sound`. Hypotheses such as `PDEInfra` are not axioms and do not appear in this output; read them in the theorem signatures.
 
----
-
-## Verify
-
-The primary verification command fails on any warning, including `sorry`:
-
-```bash
-lake build --wfail
-```
-
-If this succeeds, every theorem in the formalization is fully proved --- no gaps, no trust-me markers.
-
-To inspect the axiom dependency surface:
-
-```bash
-lake build CdFormal.Verify
-```
-
-This runs `#print axioms` on all 15 theorems plus definitions. Confirm that **no `sorryAx` appears** --- every theorem depends only on:
-
-- Core Lean axioms: `propext`, `Classical.choice`, `Quot.sound`
-- `SemioticOperators` field axioms (linearity, homogeneity)
-- `SemioticContext` bounds (\(\kappa, \gamma, \mu \in [0,1]\), \(p > 1\))
-- `PDEInfra` typeclass (five classical PDE results)
-
----
-
-## Lint
-
-Run the Mathlib linter suite:
-
-```bash
-lake lint
-```
-
----
-
-## Project structure
+## Project layout
 
 ```
-cd-formalization/
-├── CdFormal/
-│   ├── Basic.lean              — Core definitions
-│   │                             SemioticManifold, SemioticContext,
-│   │                             SemioticOperators, SemioticBVP,
-│   │                             IsWeakCoherentConfiguration
-│   ├── Axioms.lean             — PDE infrastructure typeclass
-│   │                             SolutionOperator, PrincipalEigendata,
-│   │                             PDEInfra (5 axioms)
-│   ├── Theorems.lean           — Existence theorems
-│   │                             spectral_characterization_1d,
-│   │                             exists_isWeakCoherentConfiguration (Thm 3.12),
-│   │                             exists_pos_isWeakCoherentConfiguration (Thm 3.16)
-│   ├── OperatorLemmas.lean     — Δ(0) = 0, Δ linearity, |∇0| = 0
-│   ├── CoefficientLemmas.lean  — a(x) ≥ 0, a(x) ≤ 1, p − 1 > 0
-│   ├── ScalingUniqueness.lean  — kΦ impossible for k > 1 (PDE-level)
-│   ├── LinftyAlgebraic.lean    — bv ≥ cv^p ⟹ v ≤ (b/c)^{1/(p−1)}
-│   ├── MonotoneFixedPoint.lean — Knaster-Tarski between sub/super
-│   └── Verify.lean             — Axiom dependency dashboard
-├── CdFormal.lean               — Root import (all modules)
-├── artifacts/aristotle/         — Theorem prover raw outputs
-├── drafts/                      — Mathlib issue drafts, proof sketches
-├── lakefile.toml                — Lake config (Mathlib v4.28.0)
-├── lake-manifest.json           — Dependency lock
-└── lean-toolchain               — leanprover/lean4:v4.28.0
+CdFormal/
+  Basic.lean               definitions: manifold, coefficients, operators, BVP
+  Axioms.lean              hypotheses: SolutionOperator, PrincipalEigendata, PDEInfra
+  Theorems.lean            conditional existence theorems; 1D spectral algebra
+  OperatorLemmas.lean      consequences of the SemioticOperators fields
+  CoefficientLemmas.lean   bounds on a = κγμ and on p
+  ScalingUniqueness.lean   no solution kΦ with k > 1
+  LinftyAlgebraic.lean     b·v ≥ c·vᵖ implies v ≤ (b/c)^(1/(p−1))
+  MonotoneFixedPoint.lean  fixed point between a sub- and a super-fixed point
+  Verify.lean              axiom dashboard
+CdFormal.lean              root import
 ```
 
-### File dependency graph
+## Continuous integration
 
-```
-Basic.lean
-  ├── Axioms.lean
-  │     └── Theorems.lean
-  ├── OperatorLemmas.lean
-  │     └── ScalingUniqueness.lean
-  └── CoefficientLemmas.lean
-
-LinftyAlgebraic.lean     (standalone — Mathlib only)
-MonotoneFixedPoint.lean   (standalone — Mathlib only)
-
-Verify.lean               (imports all of the above)
-```
-
-`LinftyAlgebraic.lean` and `MonotoneFixedPoint.lean` depend only on Mathlib --- they are pure mathematics with no domain-specific imports, making them candidates for upstream contribution.
-
----
-
-## CI
-
-GitHub Actions runs `lake build --wfail` on every push and PR, plus a sorry contamination check against `Verify.lean`. See [`.github/workflows/lean_action_ci.yml`](https://github.com/Project-Navi/cd-formalization/blob/main/.github/workflows/lean_action_ci.yml).
+The required `build` job builds every module with warnings as errors, runs the Mathlib linters, checks the axiom dashboard (exactly one record per selected declaration, using only the three axioms above), resolves every Lean name quoted in the README and on these pages, and fails if `sorry` appears anywhere in the sources. The `docs` job builds this site and checks its navigation, local links and anchors; it does not check external links.

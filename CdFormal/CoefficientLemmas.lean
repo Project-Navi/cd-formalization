@@ -5,13 +5,6 @@ Authors: Nelson Spence
 -/
 import CdFormal.Basic
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle
-
 /-!
 # Coefficient Bound Lemmas
 
@@ -31,6 +24,10 @@ building blocks for PDE estimates.
   Definitions 2.2 and 3.1.
 -/
 
+noncomputable section
+
+open scoped Manifold Bundle
+
 variable {n : ℕ} {M : Type*}
   [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
@@ -45,16 +42,14 @@ variable (ctx : SemioticContext n M)
 /-- The creative drive a(x) = κ(x)·γ(x)·μ(x) is nonneg,
     since each factor lies in [0,1].
 
-    Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`.
-    Upstream candidate: no — paper-specific coefficient structure. -/
+    Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`. -/
 theorem a_nonneg (x : M) : 0 ≤ ctx.a x :=
   mul_nonneg (mul_nonneg (ctx.κ_bounds x).1 (ctx.γ_bounds x).1) (ctx.μ_bounds x).1
 
 /-- The creative drive a(x) = κ(x)·γ(x)·μ(x) ≤ 1,
     since each factor lies in [0,1].
 
-    Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`.
-    Upstream candidate: no — paper-specific coefficient structure. -/
+    Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`. -/
 theorem a_le_one (x : M) : ctx.a x ≤ 1 :=
   mul_le_one₀ (mul_le_one₀ (ctx.κ_bounds x).2 (ctx.γ_bounds x).1 (ctx.γ_bounds x).2)
     (ctx.μ_bounds x).1 (ctx.μ_bounds x).2
@@ -62,8 +57,7 @@ theorem a_le_one (x : M) : ctx.a x ≤ 1 :=
 /-- The saturation exponent satisfies p - 1 > 0.
     Direct consequence of `one_lt_p`.
 
-    Axiom dependencies: `one_lt_p`.
-    Upstream candidate: no — paper-specific (wraps `SemioticContext.one_lt_p`). -/
+    Axiom dependencies: `one_lt_p`. -/
 theorem p_sub_one_pos : 0 < ctx.p - 1 := sub_pos.mpr ctx.one_lt_p
 
 end SemioticContext

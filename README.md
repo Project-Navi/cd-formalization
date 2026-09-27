@@ -1,125 +1,22 @@
-[![CI](https://github.com/Project-Navi/cd-formalization/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Project-Navi/cd-formalization/actions/workflows/lean_action_ci.yml)
-![Lean v4.28.0](https://img.shields.io/badge/Lean-v4.28.0-blue)
-![Mathlib](https://img.shields.io/badge/Mathlib-dep-blue)
-![sorry-free](https://img.shields.io/badge/sorry--free-%E2%9C%93-brightgreen)
-![axiom boundary](https://img.shields.io/badge/axiom%20boundary-5%20classical-yellow)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-orange)](LICENSE)
+# Creative Determinant: Lean 4 formalization
 
-# Creative Determinant — Lean 4 Formalization
+A Lean 4 and Mathlib (v4.28.0) formalization of the existence theory in N. Spence, *The Creative Determinant: Autopoietic Closure as a Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions* (2026). The problem is −ΔΦ = a|∇Φ| + bΦ − c(Φ₊)ᵖ in M with Φ = 0 on ∂M, where a = κγμ and p > 1. Documentation: [project-navi.github.io/cd-formalization](https://project-navi.github.io/cd-formalization/).
 
-Formal verification of the existence theory from:
+- **Conditional results.** `SemioticBVP.exists_isWeakCoherentConfiguration` gives a nonnegative solution, and `SemioticBVP.exists_pos_isWeakCoherentConfiguration` gives a nonnegative solution that is positive at some interior point when a supplied principal eigenvalue is negative. Both are derived from the hypotheses `PDEInfra` and `SolutionOperator`, which stand in for compactness, maximum-principle, fixed-point and sub/super-solution results that are not proved here. The manifold's Laplacian, gradient norm and boundary are abstract data, not constructed from its geometry.
+- **Unconditional results.** Supporting lemmas, including `spectral_characterization_1d` (algebra), `linfty_bound_algebraic`, `monotone_fixed_point_between` (Knaster–Tarski) and `scaling_uniqueness`: if Φ solves the equation with Φ(x₀) > 0 and c(x₀) > 0, then kΦ does not for any k > 1.
 
-> N. Spence, "The Creative Determinant: Autopoietic Closure as a Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions," 2026.
+The [assumption boundary](https://project-navi.github.io/cd-formalization/explanation/axiom-boundary/) page states what each hypothesis says and what is not formalized.
 
-## What is verified
-
-Fifteen theorems and lemmas proved with zero `sorry`, organized in five dependency tiers:
-
-### Tier 1 — Pure mathematics (no domain axioms)
-
-| Result | Declaration | File | Topic |
-|--------|-------------|------|-------|
-| Spectral characterization (1D) | `spectral_characterization_1d` | `Theorems` | Algebra |
-| Scaling algebraic contradiction | `scaling_algebraic_contradiction` | `Theorems` | Algebra |
-| v^{p−1} ≤ b/c from PDE inequality | `rpow_le_of_mul_rpow_le` | `LinftyAlgebraic` | Real analysis |
-| v ≤ (b/c)^{1/(p−1)} | `linfty_bound_algebraic` | `LinftyAlgebraic` | Real analysis |
-| nextFixed ≤ super-fixed point | `OrderHom.nextFixed_le_of_le` | `MonotoneFixedPoint` | Order theory |
-| Fixed point between sub/super | `monotone_fixed_point_between` | `MonotoneFixedPoint` | Order theory |
-
-### Tier 2 — Operator lemmas (from abstract linearity/homogeneity)
-
-| Result | Declaration | File |
-|--------|-------------|------|
-| Laplacian of zero | `laplacian_zero` | `OperatorLemmas` |
-| Laplacian linearity | `laplacian_linear` | `OperatorLemmas` |
-| Gradient norm of zero | `gradNorm_zero` | `OperatorLemmas` |
-
-### Tier 3 — Coefficient bounds (from [0,1] field constraints)
-
-| Result | Declaration | File |
-|--------|-------------|------|
-| a(x) nonneg | `SemioticContext.a_nonneg` | `CoefficientLemmas` |
-| a(x) ≤ 1 | `SemioticContext.a_le_one` | `CoefficientLemmas` |
-| p − 1 > 0 | `SemioticContext.p_sub_one_pos` | `CoefficientLemmas` |
-
-### Tier 4 — PDE-level results (from `SemioticOperators` / `PDEInfra`)
-
-| Result | Declaration | File | Dependencies |
-|--------|-------------|------|--------------|
-| Scaling uniqueness (kΦ impossible for k > 1) | `scaling_uniqueness` | `ScalingUniqueness` | `SemioticOperators` axioms |
-| Existence of weak coherent configurations | `SemioticBVP.exists_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
-| Nontrivial configurations | `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | `Theorems` | `PDEInfra` |
-
-All definitions (semiotic manifold, BVP, operators, weak coherent configuration) are machine-checked against Mathlib.
-
-The monotone fixed-point theorems depend only on `[propext, Quot.sound]` — no `Classical.choice` — making them candidates for constructive upstream contribution.
-
-## Axiom boundary
-
-The `PDEInfra` typeclass in `CdFormal/Axioms.lean` packages five classical PDE results not yet in Mathlib:
-
-| Axiom | Classical source | Mathlib status |
-|-------|-----------------|----------------|
-| `T_compact` | Schauder estimates + Arzelà–Ascoli | Uses `IsVonNBounded` + `IsCompact` (bornological typing, [credit: Aaron Lin](https://leanprover.zulipchat.com)) |
-| `linfty_bound` | Maximum principle (Gilbarg–Trudinger) | No max. principle for manifolds |
-| `schaefer` | Schaefer 1955 | Not in Mathlib ([draft issue](drafts/mathlib_issue_schaefer.md)) |
-| `fixed_point_nonneg` | Strong maximum principle | No max. principle for manifolds |
-| `monotone_iteration` | Amann 1976 | No sub-/super-solution theory |
-
-The existence theorems explicitly carry `[PDEInfra bvp solOp]` so the axiom surface is visible to Lean's kernel. Run `#print axioms` in `CdFormal/Verify.lean` to confirm no `sorryAx` — all theorems depend only on `[propext, Classical.choice, Quot.sound]` (monotone fixed-point theorems use only `[propext, Quot.sound]`).
-
-## Building
-
-Requires Lean 4 (v4.28.0) and Mathlib.
+## Verify
 
 ```bash
-lake build
-lake build --wfail   # fail on any sorry or warning
+lake exe cache get
+lake build --wfail
+lake env lean -DwarningAsError=true CdFormal/Verify.lean
 ```
 
-## Project structure
+`CdFormal/Verify.lean` prints the axioms of the headline results and the declarations the documentation cites; CI requires each to use only `propext`, `Classical.choice` and `Quot.sound`. This check cannot see hypotheses: `PDEInfra` appears in the signatures of the conditional theorems.
 
-```
-CdFormal/
-  Basic.lean              — Definitions (manifold, coefficients, operators, BVP)
-  Axioms.lean             — PDEInfra typeclass (explicit axiom surface)
-  Theorems.lean           — Existence and algebraic theorems
-  OperatorLemmas.lean     — Laplacian/gradient-norm derived properties
-  CoefficientLemmas.lean  — Bounds from [0,1] field constraints
-  ScalingUniqueness.lean  — PDE-level scaling impossibility
-  MonotoneFixedPoint.lean — Knaster-Tarski fixed point between sub/super
-  LinftyAlgebraic.lean    — L∞ bound algebraic core (Paper Lemma 3.10)
-  Verify.lean             — #print axioms dashboard (17 declarations)
-artifacts/
-  aristotle/              — Proved outputs from the Aristotle theorem prover
-drafts/                   — Mathlib issue drafts + Lean proof sketches
-  mathlib_issue_schaefer.md, BornologyBridge_sorry.lean
-  MonotoneFixedPoint_sorry.lean, LinftyAlgebraic.lean, OperatorLemmas.lean
-  ScalingUniqueness.lean, ScalingUniqueness_v2.lean, ScalingUniqueness_v3.lean
-```
+## Credit and license
 
-## Development Process
-
-**What the author did**: The original equations, proof strategy, and formalization
-architecture — choosing to axiomatize via `PDEInfra`, identifying which five
-classical PDE results to package, designing the typeclass hierarchy, and structuring
-the Schaefer → L∞ bound → existence → sub/super-solution → nontriviality proof
-chain — are the core intellectual contribution. These are mathematical architecture
-decisions that require understanding where the real difficulty lies. The underlying
-equations and theory are documented in the [paper](../paper/creative_determinant.pdf).
-
-**What AI tools did**: Claude Opus assisted with Lean 4 syntax, Mathlib API
-navigation, and proof term synthesis. Aristotle (Harmonic.fun) automated proving
-of standalone algebraic lemmas. These roles are analogous to `omega`, `aesop`, and
-other proof automation — the strategy is human, the term-level search is machine-assisted.
-
-**Verification**: The final arbiter is the Lean compiler, not trust:
-```bash
-lake build --wfail   # type-checks or it doesn't — zero sorry
-```
-Run `#print axioms` in `CdFormal/Verify.lean` to confirm the axiom surface.
-Every assumption is explicit in `PDEInfra`. Nothing is hidden.
-
-## License
-
-Copyright 2026 Nelson Spence. Licensed under [Apache 2.0](LICENSE).
+Formalization by Nelson Spence. Aristotle (Harmonic) proved several leaf lemmas and Claude assisted with Lean. The bornological form of `PDEInfra.T_compact` follows a suggestion by Yongxi (Aaron) Lin on the Lean Zulip. To cite this work, see [CITATION.cff](CITATION.cff). Apache 2.0; see [LICENSE](LICENSE).

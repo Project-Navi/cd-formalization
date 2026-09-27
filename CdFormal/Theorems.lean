@@ -6,13 +6,6 @@ Authors: Nelson Spence
 import CdFormal.Axioms
 import Mathlib.Tactic
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle
-
 /-!
 # Creative Determinant — Theorems
 
@@ -36,6 +29,10 @@ via `[PDEInfra bvp solOp]` and `#print axioms` in `CdFormal.Verify`.
 - [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
 
+noncomputable section
+
+open scoped Manifold Bundle
+
 variable {n : ℕ} {M : Type*}
   [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
@@ -47,15 +44,11 @@ variable {n : ℕ} {M : Type*}
 
 For constant viability b on [0,L], the principal eigenvalue is
   eigval = (π/L)² - β·b
-The condition eigval < 0 is equivalent to β > β* := (π/L)²/b.
-
-Proved independently by Aristotle in runs 8654be8c and 017f6779.
-No axiom dependencies — pure algebra. -/
+The condition eigval < 0 is equivalent to β > β* := (π/L)²/b. -/
 
 /-- The viability threshold β* = (π/L)² / b for constant viability b on [0,L].
 
-    Axiom dependencies: none (pure algebra).
-    Upstream candidate: deferred — needs Sturm-Liouville eigenvalue context in Mathlib. -/
+    Axiom dependencies: none (pure algebra). -/
 def viabilityThreshold (L : ℝ) (b : ℝ) : ℝ :=
   (Real.pi / L) ^ 2 / b
 
@@ -64,8 +57,7 @@ def viabilityThreshold (L : ℝ) (b : ℝ) : ℝ :=
     constant-coefficient case on [0,L]; the general manifold statement
     requires Courant–Fischer theory not yet in Mathlib.
 
-    Axiom dependencies: none (pure algebra).
-    Upstream candidate: deferred — needs Sturm-Liouville eigenvalue context in Mathlib. -/
+    Axiom dependencies: none (pure algebra). -/
 theorem spectral_characterization_1d
     (L : ℝ) (b : ℝ) (beta : ℝ) (hb : b > 0) :
     let beta_star := viabilityThreshold L b
@@ -74,9 +66,7 @@ theorem spectral_characterization_1d
 
 /-! ## Scaling Algebraic Contradiction
 
-If p > 1, k > 1, c > 0, Φ > 0, then k < k^p (used in uniqueness arguments).
-
-Proved by Aristotle in run 017f6779. No axiom dependencies — pure algebra. -/
+If p > 1, k > 1, c > 0, Φ > 0, then k < k^p (used in uniqueness arguments). -/
 
 /-- If p > 1, k > 1, c > 0, Φ > 0, and -c·k·Φᵖ ≤ -c·kᵖ·Φᵖ, then False.
     The core fact is k < kᵖ for k > 1 and p > 1
@@ -103,8 +93,7 @@ All axiom dependencies are visible via `[PDEInfra bvp solOp]`. -/
 
     Axiom dependencies: `PDEInfra.T_compact`,
     `PDEInfra.linfty_bound`, `PDEInfra.schaefer`,
-    `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point`.
-    Upstream candidate: no — paper-specific composition of PDE axioms. -/
+    `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point`. -/
 theorem SemioticBVP.exists_isWeakCoherentConfiguration
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
@@ -123,7 +112,6 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
 
     Axiom dependencies: `PDEInfra.monotone_iteration`,
     `PDEInfra.fixed_point_nonneg`, `SolutionOperator.T_fixed_point`.
-    Upstream candidate: no — paper-specific composition of PDE axioms.
 
     Note: The paper's Thm 3.16 says "assume the hypotheses of Thm 3.12"
     (including bounded b). This Lean statement omits `B`/`hB` because

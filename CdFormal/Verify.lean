@@ -11,51 +11,38 @@ import CdFormal.MonotoneFixedPoint
 import CdFormal.LinftyAlgebraic
 
 /-!
-# Axiom Dependency Map
+# Axiom Dashboard
 
-Run `lake build CdFormal.Verify` to confirm axiom dependencies.
-If `sorryAx` appears anywhere, the proof is incomplete.
+Prints the axioms used by the headline results and the declarations the documentation cites.
+Run `lake env lean -DwarningAsError=true CdFormal/Verify.lean`; CI requires one record per
+line below, each using only `propext`, `Classical.choice` and `Quot.sound`.
 
-## Categories
-
-- **Pure algebra**: Only `[propext, Classical.choice, Quot.sound]`.
-  These are upstream candidates (see per-theorem annotations).
-- **PDEInfra-dependent**: Additionally shows `PDEInfra` fields.
-  Paper-specific — not upstream candidates.
-- **Definitions**: Should be axiom-free beyond `[propext, Quot.sound]`.
+`#print axioms` lists Lean axioms only. Hypotheses are not axioms: the class `PDEInfra` and
+the structures `SolutionOperator` and `PrincipalEigendata` appear in the signatures of the
+continuum existence theorems, not in this output.
 -/
 
--- § Pure algebra (upstream candidates)
--- No PDEInfra axioms. Depend only on core Lean axioms.
+-- Algebra and real analysis
 #print axioms viabilityThreshold
 #print axioms spectral_characterization_1d
 #print axioms scaling_algebraic_contradiction
-
--- § Derived operator lemmas (from SemioticOperators axioms)
-#print axioms laplacian_zero
-#print axioms laplacian_linear
-#print axioms gradNorm_zero
-
--- § Scaling uniqueness (from SemioticOperators + SemioticContext)
-#print axioms scaling_uniqueness
-
--- § Coefficient bound lemmas (from SemioticContext bounds)
-#print axioms SemioticContext.a_nonneg
-#print axioms SemioticContext.a_le_one
-#print axioms SemioticContext.p_sub_one_pos
-
--- § L∞ bound algebraic core (pure real analysis)
 #print axioms rpow_le_of_mul_rpow_le
 #print axioms linfty_bound_algebraic
 
--- § Monotone fixed point (from Knaster-Tarski, pure order theory)
+-- Order theory (Knaster–Tarski)
 #print axioms OrderHom.nextFixed_le_of_le
 #print axioms monotone_fixed_point_between
 
--- § PDEInfra-dependent (paper-specific)
--- Should show PDEInfra fields but NO sorryAx.
+-- Consequences of the `SemioticOperators` and `SemioticContext` fields
+#print axioms laplacian_zero
+#print axioms laplacian_linear
+#print axioms gradNorm_zero
+#print axioms SemioticContext.a_nonneg
+#print axioms SemioticContext.a_le_one
+#print axioms SemioticContext.p_sub_one_pos
+#print axioms scaling_uniqueness
+
+-- Continuum existence, conditional on `PDEInfra` and `SolutionOperator`
+#print axioms IsWeakCoherentConfiguration
 #print axioms SemioticBVP.exists_isWeakCoherentConfiguration
 #print axioms SemioticBVP.exists_pos_isWeakCoherentConfiguration
-
--- § Definitions (axiom-free)
-#print axioms IsWeakCoherentConfiguration

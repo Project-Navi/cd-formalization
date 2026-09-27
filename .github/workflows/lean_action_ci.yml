@@ -154,13 +154,38 @@ jobs:
           for name in sorted(names):
               print(f"#check @{name}")
           EOF
-          cat "$RUNNER_TEMP/DocNames.lean"
-          if ! lake env lean -DwarningAsError=true "$RUNNER_TEMP/DocNames.lean" > "$RUNNER_TEMP/docnames.txt" 2>&1; then
-            cat "$RUNNER_TEMP/docnames.txt"
+          if ! lake env lean -DwarningAsError=true "$RUNNER_TEMP/DocNames.lean" 2>&1 | tee "$RUNNER_TEMP/docnames.txt"; then
             echo "::error::a documented name does not resolve"
             exit 1
           fi
           echo "$(grep -c '^#check' "$RUNNER_TEMP/DocNames.lean") documented names resolve."
+
+      # Mathlib's header linter only runs inside Mathlib, so check the layout here: copyright
+      # header, then imports, then the module docstring.
+      - name: Check file headers
+        if: ${{ !cancelled() }}
+        shell: python
+        run: |
+          import pathlib, re, subprocess, sys
+          files = subprocess.run(["git", "ls-files", "CdFormal.lean", "CdFormal/*.lean"],
+                                 capture_output=True, text=True, check=True).stdout.split()
+          header = re.compile(r"/-\nCopyright \(c\) 20\d\d [^\n]+\. All rights reserved\.\n"
+                              r"Released under Apache 2\.0 license as described in the file LICENSE\.\n"
+                              r"Authors: [^\n]*[^.\n]\n-/\n")
+          bad = []
+          for f in files:
+              text = pathlib.Path(f).read_text(encoding="utf-8")
+              m = header.match(text)
+              if not m:
+                  bad.append(f"{f}: copyright header")
+                  continue
+              rest = [l for l in text[m.end():].splitlines() if l.strip()]
+              body = [l for l in rest if not l.startswith("import ")]
+              if body and not body[0].startswith("/-!"):
+                  bad.append(f"{f}: the first command after the imports is not a module docstring")
+          if not files or bad:
+              sys.exit("header check failed:\n  " + "\n  ".join(bad or ["no files"]))
+          print(f"{len(files)} files have a copyright header and a module docstring after the imports.")
 
       # 'sorry' and 'sorryAx' may not appear anywhere in the Lean sources, comments included.
       - name: Audit placeholders

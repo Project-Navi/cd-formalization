@@ -5,11 +5,6 @@ Authors: Nelson Spence
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
 /-!
 # L∞ Bound — Algebraic Core (Paper Lemma 3.10)
 
@@ -37,10 +32,10 @@ Together these decompose Paper Lemma 3.10 into:
   *Elliptic PDEs of Second Order*, Ch. 3.
 -/
 
-/-- From the PDE inequality `b·v ≥ c·v^p` at an interior max, divide
-    by `c·v` to get `v^{p-1} ≤ b/c`.
+noncomputable section
 
-    Provenance: Aristotle run `224a0625`. -/
+/-- From the PDE inequality `b·v ≥ c·v^p` at an interior max, divide
+    by `c·v` to get `v^{p-1} ≤ b/c`. -/
 lemma rpow_le_of_mul_rpow_le
     (v b c p : ℝ) (hv : v > 0) (hc : c > 0)
     (h : b * v ≥ c * v ^ p) :
@@ -49,9 +44,7 @@ lemma rpow_le_of_mul_rpow_le
   rw [div_le_div_iff₀] <;> linarith
 
 /-- From `b·v ≥ c·v^p` conclude `v ≤ (b/c)^{1/(p-1)}` by taking the
-    `(p-1)`-th root. This is the algebraic core of Paper Lemma 3.10.
-
-    Provenance: Aristotle run `224a0625`. -/
+    `(p-1)`-th root. This is the algebraic core of Paper Lemma 3.10. -/
 theorem linfty_bound_algebraic
     (v b c p : ℝ) (hv : v > 0) (hc : c > 0) (hp : p > 1)
     (h : b * v ≥ c * v ^ p) :

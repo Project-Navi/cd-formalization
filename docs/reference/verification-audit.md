@@ -1,165 +1,43 @@
 # Verification Audit
 
-Machine-verified correspondence between the paper and the Lean formalization. Last updated against Lean 4 v4.28.0, Mathlib v4.28.0.
-
----
+What is checked, how, and what remains outside the formalization. Toolchain and Mathlib are pinned at v4.28.0.
 
 ## Paper-to-Lean alignment
 
-| Paper result | Lean declaration | Status |
-|-------------|-----------------|--------|
-| Definition 2.1 (Semiotic Manifold) | `SemioticManifold` | Verified definition |
-| Definition 2.2 (Coefficients) | `SemioticContext` | Verified definition |
-| Definition 3.1 (BVP V1') | `SemioticBVP` | Verified definition |
-| Definition 3.1 (Creative drive) | `SemioticContext.a` | Verified definition |
-| Definition 3.3 (Canonical viability) | `SemioticContext.canonicalViability` | Verified definition |
-| Section 3.2 (Weak coherent configuration) | `IsWeakCoherentConfiguration` | Verified definition |
-| Definition 3.13 (Principal eigenvalue) | `PrincipalEigendata` | Verified structure |
-| Lemma 3.7 (Compactness of T) | `PDEInfra.T_compact` | **Axiom** |
-| Lemma 3.10 (L∞ bound, analytic) | `PDEInfra.linfty_bound` | **Axiom** |
-| Lemma 3.10 (L∞ bound, algebraic) | `linfty_bound_algebraic` | **Proved** |
-| Lemma 3.11 (\(C^{1,\alpha}\) bound) | --- | Not formalized |
-| Theorem 3.12 (Existence) | `SemioticBVP.exists_isWeakCoherentConfiguration` | **Proved** (conditional on `PDEInfra`) |
-| Theorem 3.16 (Nontriviality) | `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | **Proved** (conditional on `PDEInfra`) |
-| Section 3.4 (Spectral, 1D) | `spectral_characterization_1d` | **Proved** (pure algebra) |
-| Open Problem #3 (Uniqueness) | `scaling_uniqueness` | **Proved** (proportional-class; full uniqueness open) |
-| Knaster-Tarski core | `monotone_fixed_point_between` | **Proved** (pure order theory) |
+| Paper | Lean | Status |
+|-------|------|--------|
+| Definition 2.1 (semiotic manifold) | `SemioticManifold` | Definition; see [the model](../explanation/axiom-boundary.md#the-model) |
+| Definitions 2.2, 3.1 (coefficients, creative drive) | `SemioticContext`, `SemioticContext.a` | Definitions |
+| Definition 3.3 (canonical viability) | `SemioticContext.canonicalViability` | Definition |
+| Definition 3.1 (BVP V1′) | `SemioticBVP` | Definition; the equation is an overridable field |
+| Section 3.2 (weak coherent configuration) | `IsWeakCoherentConfiguration` | Definition |
+| Definition 3.13 (principal eigenvalue) | `PrincipalEigendata` | Supplied data, not constructed |
+| Lemma 3.7 (compactness of \(T\)) | `PDEInfra.T_compact` | Hypothesis |
+| Lemma 3.10 (L∞ bound) | `PDEInfra.linfty_bound`; `linfty_bound_algebraic` | Hypothesis; algebraic step proved |
+| Lemma 3.11 (\(C^{1,\alpha}\) bound) | none | Not formalized |
+| Theorem 3.12 (existence) | `SemioticBVP.exists_isWeakCoherentConfiguration` | Proved from `PDEInfra` |
+| Theorem 3.16 (nontrivial existence) | `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | Proved from `PDEInfra`; positive at one interior point |
+| Section 3.4 (spectral condition, 1D) | `spectral_characterization_1d` | Algebraic inequality proved; eigenvalue identification not formalized |
+| Open Problem 3 (uniqueness) | `scaling_uniqueness` | Rules out solution multiples \(k\Phi\), \(k > 1\); uniqueness open |
 
----
+## What CI checks
 
-## Axiom dependency dashboard
+The required `build` job, on every pull request and on `main`:
 
-Run `lake build CdFormal.Verify` to reproduce. The output of `#print axioms` for each declaration:
+- builds `CdFormal.lean` and every tracked module under `CdFormal/` with warnings as errors, and fails if a module is not imported by `CdFormal.lean`;
+- runs the Mathlib environment linters (`lake lint`);
+- runs `CdFormal/Verify.lean` with warnings as errors and requires exactly one `#print axioms` record for each listed declaration, each using only `propext`, `Classical.choice` and `Quot.sound`;
+- resolves, with `#check`, every Lean name quoted in inline code in the README and on these pages;
+- fails if `sorry` or `sorryAx` appears anywhere in the Lean sources, comments included.
 
-### Pure algebra --- no domain axioms
+The `docs` job builds this site, checks that every navigation page is built and every built page is in the navigation, and checks local links, assets and anchors. It does not check external links.
 
-| Declaration | Axioms |
-|------------|--------|
-| `viabilityThreshold` | `[propext, Quot.sound]` |
-| `spectral_characterization_1d` | `[propext, Classical.choice, Quot.sound]` |
-| `scaling_algebraic_contradiction` | `[propext, Classical.choice, Quot.sound]` |
-
-### Operator lemmas --- from SemioticOperators
-
-| Declaration | Axioms |
-|------------|--------|
-| `laplacian_zero` | `[propext, Classical.choice, Quot.sound]` |
-| `laplacian_linear` | `[propext, Classical.choice, Quot.sound]` |
-| `gradNorm_zero` | `[propext, Classical.choice, Quot.sound]` |
-
-### Scaling uniqueness --- from SemioticOperators + SemioticContext
-
-| Declaration | Axioms |
-|------------|--------|
-| `scaling_uniqueness` | `[propext, Classical.choice, Quot.sound]` |
-
-### Coefficient bounds --- from SemioticContext
-
-| Declaration | Axioms |
-|------------|--------|
-| `SemioticContext.a_nonneg` | `[propext, Classical.choice, Quot.sound]` |
-| `SemioticContext.a_le_one` | `[propext, Classical.choice, Quot.sound]` |
-| `SemioticContext.p_sub_one_pos` | `[propext, Classical.choice, Quot.sound]` |
-
-### L∞ bound algebraic core --- pure real analysis
-
-| Declaration | Axioms |
-|------------|--------|
-| `rpow_le_of_mul_rpow_le` | `[propext, Classical.choice, Quot.sound]` |
-| `linfty_bound_algebraic` | `[propext, Classical.choice, Quot.sound]` |
-
-### Monotone fixed point --- pure order theory
-
-| Declaration | Axioms |
-|------------|--------|
-| `OrderHom.nextFixed_le_of_le` | `[propext, Quot.sound]` |
-| `monotone_fixed_point_between` | `[propext, Quot.sound]` |
-
-!!! note "No Classical.choice"
-    The monotone fixed-point theorems use only `[propext, Quot.sound]`, making them candidates for **constructive** upstream contribution to Mathlib.
-
-### PDE-level existence --- from PDEInfra
-
-| Declaration | Axioms |
-|------------|--------|
-| `SemioticBVP.exists_isWeakCoherentConfiguration` | `[propext, Classical.choice, Quot.sound]` + `PDEInfra` fields |
-| `SemioticBVP.exists_pos_isWeakCoherentConfiguration` | `[propext, Classical.choice, Quot.sound]` + `PDEInfra` fields |
-
-!!! warning "No sorryAx"
-    If `sorryAx` appears in any output above, the proof is **incomplete**. This is checked automatically in CI.
-
-### Definitions --- axiom-free
-
-| Declaration | Axioms |
-|------------|--------|
-| `IsWeakCoherentConfiguration` | `[propext, Quot.sound]` |
-
----
-
-## Machine-checked definitions
-
-### SemioticManifold (Definition 2.1)
-
-A compact, connected, smooth Riemannian manifold --- the space of possible meanings.
-
-```lean
-class SemioticManifold (n : ℕ) (M : Type*)
-    [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℝ (Fin n)) M]
-    [IsManifold (SemioticModel n) ⊤ M]
-    [MetricSpace M] [CompactSpace M] [ConnectedSpace M] where
-  riemannianMetric : Bundle.RiemannianMetric
-    (fun (_ : M) ↦ EuclideanSpace ℝ (Fin n))
-```
-
-### SemioticContext (Definitions 2.2, 3.1)
-
-The coefficient fields with explicit bounds:
-
-- Care \(\kappa : M \to [0,1]\)
-- Coherence \(\gamma : M \to [0,1]\)
-- Contradiction \(\mu : M \to [0,1]\)
-- Viability potential \(b : M \to \mathbb{R}\)
-- Carrying capacity \(c : M \to \mathbb{R}\) with \(c(x) \geq c_0 > 0\)
-- Saturation exponent \(p > 1\)
-
-### SemioticBVP (Definition 3.1, V1')
-
-The boundary value problem encoding:
-
-\[
--\Delta\Phi(x) = a(x)\,|\nabla\Phi(x)| + b(x)\,\Phi(x) - c(x)\,(\max(\Phi(x), 0))^p
-\]
-
-with \(\Phi = 0\) on \(\partial M\). The positive part \(\Phi_+ = \max(\Phi, 0)\) follows the operator formulation in Paper Section 3.2.
-
-### IsWeakCoherentConfiguration (Section 3.2)
-
-A weak coherent configuration is simply a function \(\Phi : M \to \mathbb{R}\) satisfying both the PDE and the boundary condition:
-
-```lean
-def IsWeakCoherentConfiguration (bvp : SemioticBVP n M) (Φ : M → ℝ) : Prop :=
-  bvp.equation Φ ∧ bvp.boundary_condition Φ
-```
-
----
-
-## Aristotle prover artifacts
-
-Results originally proved by the [Aristotle](https://harmonic.fun) theorem prover, integrated into the main build after manual adaptation for Lean 4.28.0:
-
-| Artifact | Aristotle ID | Status |
-|----------|-------------|--------|
-| L∞ bound algebraic core | `224a0625` | Proved and integrated (`LinftyAlgebraic.lean`) |
-| Scaling uniqueness | `1c3414f4`, `60ec288c` | Proved and integrated (`ScalingUniqueness.lean`) |
-| Operator lemmas | `41cee644` | Partially proved; `gradNorm_const` added as axiom |
-
----
+These checks establish that the proofs compile against the pinned Mathlib and use no further axioms. They do not discharge hypotheses such as `PDEInfra`, and resolving a name does not show that the prose describes the statement; the statements on these pages are copied from the source.
 
 ## Known limitations
 
-1. **Boundary encoding.** `SemioticBVP.boundary` is an unstructured `Set M` with no requirement that it equals the topological boundary. Encoding manifold-with-boundary requires infrastructure not yet in Mathlib.
-
-2. **Lemma 3.11 not formalized.** The \(C^{1,\alpha}\) interpolation bound requires H&ouml;lder space types.
-
-3. **Full uniqueness open.** `scaling_uniqueness` proves uniqueness within the class of proportional rescalings only. Full uniqueness (Paper Open Problem #3) would require comparison principles not available in Mathlib.
+1. **Abstract model.** The Laplacian and gradient norm are structure fields, not constructed from the metric, and the boundary is an arbitrary set; the manifold itself has no boundary.
+2. **Overridable equation.** `SemioticBVP.equation` and `SemioticBVP.boundary_condition` default to the displayed problem but can be replaced.
+3. **Assumed analysis.** The fields of `PDEInfra` and `SolutionOperator` are assumed, and some differ from the classical results they stand in for; see [the assumption boundary](../explanation/axiom-boundary.md).
+4. **Lemma 3.11** is not formalized.
+5. **Uniqueness** is open; `scaling_uniqueness` covers only multiples of a solution.

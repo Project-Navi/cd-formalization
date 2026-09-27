@@ -9,12 +9,13 @@ authors:
     affiliation: Project Navi LLC
 repository-code: "https://github.com/Project-Navi/cd-formalization"
 abstract: >-
-  Lean 4 + Mathlib formalization of the Creative Determinant framework.
-  Fifteen theorems proved with zero sorry, CI-enforced via lake build --wfail.
-  Covers spectral characterization, operator algebra, coefficient bounds,
-  scaling uniqueness, L-infinity algebraic bounds, monotone fixed-point
-  existence, and PDE existence/nontriviality conditional on five classical
-  axioms (Schaefer, Schauder, maximum principle, Amann iteration).
+  Lean 4 and Mathlib formalization of the Creative Determinant boundary
+  value problem. Existence of a nonnegative solution, and of one that is
+  positive at an interior point when a principal eigenvalue is negative,
+  is derived from explicit hypotheses (the PDEInfra class and a solution
+  operator) that stand in for classical elliptic results not proved here.
+  Supporting algebraic, real-analytic and order-theoretic lemmas are
+  proved outright.
 keywords:
   - Lean 4
   - Mathlib

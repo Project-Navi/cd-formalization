@@ -25,7 +25,7 @@ nav = [
   ]},
   {"Explanation" = [
     {"Proof Strategy" = "explanation/proof-strategy.md"},
-    {"Axiom Boundary" = "explanation/axiom-boundary.md"},
+    {"Assumption Boundary" = "explanation/axiom-boundary.md"},
   ]},
   {"Reference" = [
     {"Theorem Catalog" = "reference/theorems.md"},

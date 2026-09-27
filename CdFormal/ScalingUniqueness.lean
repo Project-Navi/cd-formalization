@@ -5,13 +5,6 @@ Authors: Nelson Spence
 -/
 import CdFormal.OperatorLemmas
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle
-
 /-!
 # Scaling Uniqueness — Proportional Solutions Are Impossible
 
@@ -31,9 +24,12 @@ in the paper) remains open.
 
 ## References
 
-- Aristotle runs `1c3414f4` (original), `60ec288c`, `ead91a0d`.
 - [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
+
+noncomputable section
+
+open scoped Manifold Bundle
 
 variable {n : ℕ} {M : Type*}
   [TopologicalSpace M]

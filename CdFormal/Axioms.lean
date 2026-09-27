@@ -6,13 +6,6 @@ Authors: Nelson Spence
 import CdFormal.Basic
 import Mathlib.Analysis.LocallyConvex.Bounded
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle
-
 /-!
 # PDE Infrastructure Axioms
 
@@ -43,6 +36,10 @@ dependence via `[PDEInfra bvp solOp]`. The axiom surface consists of:
 - [Amann1976] H. Amann, "Fixed point equations and nonlinear eigenvalue problems," 1976.
 - [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
+
+noncomputable section
+
+open scoped Manifold Bundle
 
 variable {n : ℕ} {M : Type*}
   [TopologicalSpace M]
@@ -129,8 +126,7 @@ class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop whe
       If T is compact (`T_compact`) and the Schaefer set
       S = {u : u = τT(u), τ ∈ [0,1]} is bounded, then T has a fixed point.
 
-    Mathlib status: Schaefer's fixed-point theorem is not in Mathlib.
-    Draft issue: `drafts/mathlib_issue_schaefer.md`. -/
+    Mathlib status: Schaefer's fixed-point theorem is not in Mathlib. -/
   schaefer :
     (∀ S : Set (M → ℝ), Bornology.IsVonNBounded ℝ S →
       IsCompact (closure (solOp.T '' S))) →
