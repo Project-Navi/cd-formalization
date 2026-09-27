@@ -8,9 +8,7 @@ import CdFormal.Basic
 /-!
 # Coefficient Bound Lemmas
 
-Derived properties of `SemioticContext` coefficients from the bounds
-in `Basic.lean`. These validate the coefficient contract and provide
-building blocks for PDE estimates.
+Consequences of the coefficient bounds in `SemioticContext` (`Basic.lean`).
 
 ## Main statements
 
@@ -39,25 +37,19 @@ namespace SemioticContext
 
 variable (ctx : SemioticContext n M)
 
-/-- The creative drive a(x) = κ(x)·γ(x)·μ(x) is nonneg,
-    since each factor lies in [0,1].
-
-    Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`. -/
+/-- The creative drive a(x) = κ(x)·γ(x)·μ(x) is nonnegative,
+    since each factor lies in [0,1]. -/
 theorem a_nonneg (x : M) : 0 ≤ ctx.a x :=
   mul_nonneg (mul_nonneg (ctx.κ_bounds x).1 (ctx.γ_bounds x).1) (ctx.μ_bounds x).1
 
 /-- The creative drive a(x) = κ(x)·γ(x)·μ(x) ≤ 1,
-    since each factor lies in [0,1].
-
-    Axiom dependencies: `κ_bounds`, `γ_bounds`, `μ_bounds`. -/
+    since each factor lies in [0,1]. -/
 theorem a_le_one (x : M) : ctx.a x ≤ 1 :=
   mul_le_one₀ (mul_le_one₀ (ctx.κ_bounds x).2 (ctx.γ_bounds x).1 (ctx.γ_bounds x).2)
     (ctx.μ_bounds x).1 (ctx.μ_bounds x).2
 
 /-- The saturation exponent satisfies p - 1 > 0.
-    Direct consequence of `one_lt_p`.
-
-    Axiom dependencies: `one_lt_p`. -/
+    Direct consequence of `one_lt_p`. -/
 theorem p_sub_one_pos : 0 < ctx.p - 1 := sub_pos.mpr ctx.one_lt_p
 
 end SemioticContext

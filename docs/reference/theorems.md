@@ -50,7 +50,7 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
       (∀ x, Phi x ≥ 0)
 ```
 
-Uses `PDEInfra.T_compact`, `PDEInfra.linfty_bound`, `PDEInfra.schaefer`, `PDEInfra.fixed_point_nonneg` and `SolutionOperator.T_fixed_point`. With the default equation, \(\Phi \equiv 0\) is already such a solution.
+Uses `PDEInfra.T_compact`, `PDEInfra.linfty_bound`, `PDEInfra.schaefer`, `PDEInfra.fixed_point_nonneg` and `SolutionOperator.T_fixed_point`. With the default equation, \(\Phi \equiv 0\) is already such a solution (`zero_solves_equation`, below).
 
 ### Solution positive at an interior point (Paper Theorem 3.16)
 
@@ -80,6 +80,9 @@ theorem spectral_characterization_1d
     (L : ℝ) (b : ℝ) (beta : ℝ) (hb : b > 0) :
     let beta_star := viabilityThreshold L b
     beta > beta_star → (Real.pi / L) ^ 2 - beta * b < 0
+
+theorem viabilityThreshold_lt_iff (L : ℝ) {b : ℝ} (hb : 0 < b) (beta : ℝ) :
+    viabilityThreshold L b < beta ↔ (Real.pi / L) ^ 2 - beta * b < 0
 ```
 
 `spectral_characterization_1d` is an inequality about the expression \((\pi/L)^2 - \beta b\), which for constant \(b\) is the principal Dirichlet eigenvalue of \(-d^2/dx^2 - \beta b\) on \([0, L]\); that identification is not formalized.
@@ -136,6 +139,10 @@ lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
 
 @[simp] lemma gradNorm_zero (x : M) :
     ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0
+
+theorem zero_solves_equation (ctx : SemioticContext n M) (x : M) :
+    -(ops.laplacian (fun _ ↦ 0) x) =
+      ctx.a x * ops.gradNorm (fun _ ↦ 0) x + ctx.b x * 0 - ctx.c x * max (0 : ℝ) 0 ^ ctx.p
 
 theorem SemioticContext.a_nonneg (x : M) : 0 ≤ ctx.a x
 theorem SemioticContext.a_le_one (x : M) : ctx.a x ≤ 1

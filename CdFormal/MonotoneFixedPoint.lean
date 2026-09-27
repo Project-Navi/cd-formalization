@@ -14,9 +14,9 @@ and `f super ≤ super` (super-fixed point) with `sub ≤ super`, then `f` has
 a fixed point `x` with `sub ≤ x ∧ x ≤ super`.
 
 This is the order-theoretic skeleton of the sub/super-solution method
-(Amann 1976) used in nonlinear elliptic PDE theory. The PDE content
-(monotonicity of T, construction of sub/super-solutions, nontriviality)
-remains axiomatic in `PDEInfra`.
+(Amann 1976) used in nonlinear elliptic PDE theory. For the continuum problem the PDE content
+(monotonicity of T, construction of sub/super-solutions, nontriviality) remains assumed in
+`PDEInfra.monotone_iteration`.
 
 ## Main statements
 

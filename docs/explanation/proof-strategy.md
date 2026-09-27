@@ -27,7 +27,7 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
 
 `PDEInfra.linfty_bound` bounds the Schaefer set, `PDEInfra.schaefer` turns that bound and `PDEInfra.T_compact` into a fixed point of \(T\), and `SolutionOperator.T_fixed_point` and `PDEInfra.fixed_point_nonneg` make it a nonnegative solution.
 
-The zero function already solves the displayed problem, which is the default value of `SemioticBVP.equation`: \(\Delta 0 = 0\) and \(|\nabla 0| = 0\) by `laplacian_zero` and `gradNorm_zero`, and \(0^p = 0\). The informative statement is the next one.
+The zero function already solves the displayed problem, which is the default value of `SemioticBVP.equation` (`zero_solves_equation`: \(\Delta 0 = 0\), \(|\nabla 0| = 0\) and \(0^p = 0\)). The informative statement is the next one.
 
 ## A solution that is positive somewhere (Paper Theorem 3.16)
 
@@ -62,6 +62,6 @@ The maximum-principle half remains inside `PDEInfra.linfty_bound`.
 
 **Sub/super-solution core.** `monotone_fixed_point_between`: a monotone map \(f\) on a complete lattice with \(\mathrm{sub} \leq f(\mathrm{sub})\), \(f(\mathrm{super}) \leq \mathrm{super}\) and \(\mathrm{sub} \leq \mathrm{super}\) has a fixed point between them. The proof takes `OrderHom.nextFixed` of the sub-fixed point and bounds it with `OrderHom.nextFixed_le_of_le`. It uses only `propext` and `Quot.sound`.
 
-**One-dimensional spectral inequality.** `spectral_characterization_1d`: if \(b > 0\) and \(\beta > (\pi/L)^2/b\), then \((\pi/L)^2 - \beta b < 0\). For constant \(b\), \((\pi/L)^2 - \beta b\) is the principal Dirichlet eigenvalue of \(-d^2/dx^2 - \beta b\) on \([0, L]\); that identification is classical and not formalized.
+**One-dimensional spectral inequality.** `spectral_characterization_1d`: if \(b > 0\) and \(\beta > (\pi/L)^2/b\), then \((\pi/L)^2 - \beta b < 0\); `viabilityThreshold_lt_iff` gives the converse. For constant \(b\), \((\pi/L)^2 - \beta b\) is the principal Dirichlet eigenvalue of \(-d^2/dx^2 - \beta b\) on \([0, L]\); that identification is classical and not formalized.
 
 **Scaling.** `scaling_uniqueness`: if \(\Phi\) and \(k\Phi\) with \(k > 1\) both satisfy the displayed equation, and \(c(x_0) > 0\), \(\Phi(x_0) > 0\) at some point, then linearity of \(\Delta\), homogeneity of \(|\nabla\cdot|\) and \((k\Phi)^p = k^p \Phi^p\) give \(k = k^p\), contradicting `Real.self_lt_rpow_of_one_lt`. This rules out solution multiples of a solution; it is not uniqueness among all solutions.

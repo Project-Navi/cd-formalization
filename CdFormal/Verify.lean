@@ -25,6 +25,7 @@ continuum existence theorems, not in this output.
 -- Algebra and real analysis
 #print axioms viabilityThreshold
 #print axioms spectral_characterization_1d
+#print axioms viabilityThreshold_lt_iff
 #print axioms scaling_algebraic_contradiction
 #print axioms rpow_le_of_mul_rpow_le
 #print axioms linfty_bound_algebraic
@@ -33,10 +34,13 @@ continuum existence theorems, not in this output.
 #print axioms OrderHom.nextFixed_le_of_le
 #print axioms monotone_fixed_point_between
 
--- Consequences of the `SemioticOperators` and `SemioticContext` fields
+-- Definitions and consequences of the `SemioticOperators` and `SemioticContext` fields
+#print axioms SemioticContext.a
+#print axioms SemioticContext.canonicalViability
 #print axioms laplacian_zero
 #print axioms laplacian_linear
 #print axioms gradNorm_zero
+#print axioms zero_solves_equation
 #print axioms SemioticContext.a_nonneg
 #print axioms SemioticContext.a_le_one
 #print axioms SemioticContext.p_sub_one_pos

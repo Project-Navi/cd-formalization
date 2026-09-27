@@ -13,10 +13,10 @@ At an interior maximum of a solution Φ, the maximum principle gives
 
 The algebraic consequence is `v ≤ (B/c₀)^{1/(p-1)}`. This file proves
 that algebraic step. The maximum-principle argument ("at interior max,
-∇Φ = 0 and ΔΦ ≤ 0") remains an axiom in `PDEInfra.linfty_bound`.
+∇Φ = 0 and ΔΦ ≤ 0") remains assumed, inside `PDEInfra.linfty_bound`.
 
 Together these decompose Paper Lemma 3.10 into:
-- **Axiom** (maximum principle): the PDE inequality `b·v ≥ c·v^p` holds
+- **Assumed** (maximum principle): the PDE inequality `b·v ≥ c·v^p` holds
   at an interior maximum
 - **Proved** (this file): `b·v ≥ c·v^p` implies `v ≤ (b/c)^{1/(p-1)}`
 
