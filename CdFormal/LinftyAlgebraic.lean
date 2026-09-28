@@ -5,11 +5,6 @@ Authors: Nelson Spence
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
 /-!
 # L∞ Bound — Algebraic Core (Paper Lemma 3.10)
 
@@ -18,17 +13,19 @@ At an interior maximum of a solution Φ, the maximum principle gives
 
 The algebraic consequence is `v ≤ (B/c₀)^{1/(p-1)}`. This file proves
 that algebraic step. The maximum-principle argument ("at interior max,
-∇Φ = 0 and ΔΦ ≤ 0") remains an axiom in `PDEInfra.linfty_bound`.
+∇Φ = 0 and ΔΦ ≤ 0") remains assumed, inside `PDEInfra.linfty_bound`.
 
 Together these decompose Paper Lemma 3.10 into:
-- **Axiom** (maximum principle): the PDE inequality `b·v ≥ c·v^p` holds
+- **Assumed** (maximum principle): the PDE inequality `b·v ≥ c·v^p` holds
   at an interior maximum
-- **Proved** (this file): `b·v ≥ c·v^p` implies `v ≤ (b/c)^{1/(p-1)}`
+- **Proved** (this file): for v > 0, c > 0 and p > 1, `b·v ≥ c·v^p` implies
+  `v ≤ (b/c)^{1/(p-1)}`
 
 ## Main statements
 
-- `rpow_le_of_mul_rpow_le` — from `b·v ≥ c·v^p` to `v^{p-1} ≤ b/c`
-- `linfty_bound_algebraic` — from `b·v ≥ c·v^p` to `v ≤ (b/c)^{1/(p-1)}`
+- `rpow_le_of_mul_rpow_le` — for v > 0 and c > 0, from `b·v ≥ c·v^p` to `v^{p-1} ≤ b/c`
+- `linfty_bound_algebraic` — for v > 0, c > 0 and p > 1, from `b·v ≥ c·v^p` to
+  `v ≤ (b/c)^{1/(p-1)}`
 
 ## References
 
@@ -37,10 +34,10 @@ Together these decompose Paper Lemma 3.10 into:
   *Elliptic PDEs of Second Order*, Ch. 3.
 -/
 
-/-- From the PDE inequality `b·v ≥ c·v^p` at an interior max, divide
-    by `c·v` to get `v^{p-1} ≤ b/c`.
+noncomputable section
 
-    Provenance: Aristotle run `224a0625`. -/
+/-- From the PDE inequality `b·v ≥ c·v^p` at an interior max, divide
+    by `c·v` to get `v^{p-1} ≤ b/c`. -/
 lemma rpow_le_of_mul_rpow_le
     (v b c p : ℝ) (hv : v > 0) (hc : c > 0)
     (h : b * v ≥ c * v ^ p) :
@@ -49,9 +46,7 @@ lemma rpow_le_of_mul_rpow_le
   rw [div_le_div_iff₀] <;> linarith
 
 /-- From `b·v ≥ c·v^p` conclude `v ≤ (b/c)^{1/(p-1)}` by taking the
-    `(p-1)`-th root. This is the algebraic core of Paper Lemma 3.10.
-
-    Provenance: Aristotle run `224a0625`. -/
+    `(p-1)`-th root. This is the algebraic core of Paper Lemma 3.10. -/
 theorem linfty_bound_algebraic
     (v b c p : ℝ) (hv : v > 0) (hc : c > 0) (hp : p > 1)
     (h : b * v ≥ c * v ^ p) :

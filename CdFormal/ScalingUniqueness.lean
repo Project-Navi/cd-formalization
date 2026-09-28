@@ -5,13 +5,6 @@ Authors: Nelson Spence
 -/
 import CdFormal.OperatorLemmas
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle
-
 /-!
 # Scaling Uniqueness — Proportional Solutions Are Impossible
 
@@ -20,20 +13,22 @@ linearity of Δ and homogeneity of |∇·|, the saturation term forces
 k·c·Φ^p = c·k^p·Φ^p. At a point where c > 0 and Φ > 0 this gives
 k = k^p, contradicting k > 1 with p > 1.
 
-This is a partial uniqueness result: solutions are unique within
-the class of proportional rescalings. Full uniqueness (Open Problem #3
-in the paper) remains open.
+So a solution positive at a point where c > 0 has no solution multiple kΦ with k > 1.
+This is not uniqueness among all solutions, which the paper leaves open (Open Problem #3).
 
 ## Main statements
 
-- `scaling_uniqueness` — if Φ and kΦ both solve the CD equation,
+- `scaling_uniqueness` — if Φ and kΦ with k > 1 both solve the CD equation,
   contradiction at any point with c > 0 and Φ > 0.
 
 ## References
 
-- Aristotle runs `1c3414f4` (original), `60ec288c`, `ead91a0d`.
 - [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
+
+noncomputable section
+
+open scoped Manifold Bundle
 
 variable {n : ℕ} {M : Type*}
   [TopologicalSpace M]
@@ -55,7 +50,7 @@ variable {n : ℕ} {M : Type*}
     4. k < k^p when k > 1, p > 1
        (`Real.self_lt_rpow_of_one_lt`).
 
-    Axiom dependencies: `SemioticOperators` fields only (no PDEInfra). -/
+    Uses the fields of `SemioticOperators` and `SemioticContext.one_lt_p`; no `PDEInfra`. -/
 theorem scaling_uniqueness
     (ops : SemioticOperators n M)
     (ctx : SemioticContext n M)

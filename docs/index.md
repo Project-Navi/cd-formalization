@@ -6,9 +6,7 @@ hide:
 
 # cd-formalization
 
-**Machine-checked existence theory for coherent presence on Riemannian manifolds.**
-
-15 theorems. Zero sorry. Five explicit axioms. CI-enforced via `lake build --wfail`.
+**A Lean 4 formalization of the Creative Determinant existence theory.**
 
 [Get Started](getting-started/quickstart.md){ .md-button .md-button--primary }
 [Theorem Catalog](reference/theorems.md){ .md-button }
@@ -17,60 +15,29 @@ hide:
 
 ## What this formalizes
 
-The Creative Determinant framework models coherent presence as a solution to a nonlinear elliptic boundary value problem on a compact Riemannian manifold \(M\):
+The Creative Determinant models coherent presence as a solution of the boundary value problem
 
 \[
--\Delta\Phi = a(x)\,|\nabla\Phi| + b(x)\,\Phi - c(x)\,\Phi_+^{\,p}
+-\Delta\Phi = a(x)\,|\nabla\Phi| + b(x)\,\Phi - c(x)\,\Phi_+^{\,p} \quad \text{in } M, \qquad \Phi = 0 \quad \text{on } \partial M,
 \]
 
-where \(\Phi = 0\) on \(\partial M\), and the coefficient fields encode care (\(\kappa\)), coherence (\(\gamma\)), and contradiction (\(\mu\)).
+where care \(\kappa\), coherence \(\gamma\) and contradiction \(\mu\) take values in \([0,1]\), the creative drive is \(a = \kappa\gamma\mu\), \(b\) is the viability potential, the capacity satisfies \(c \geq c_0 > 0\), and \(p > 1\).
 
-This Lean 4 + Mathlib formalization verifies the **existence theory** --- the proof that nontrivial solutions exist when viability exceeds dissipation.
+- **Conditional existence.** Two theorems derive solutions from the hypotheses `PDEInfra` and `SolutionOperator`, which stand in for classical elliptic results that are not proved here. The [assumption boundary](explanation/axiom-boundary.md) states what each one says.
+- **Unconditional lemmas.** The algebraic, real-analytic and order-theoretic steps are proved outright. See the [theorem catalog](reference/theorems.md).
+- **Finite-graph existence.** For the discretization selected here, on a finite weighted graph, `SemioticGraph.exists_pos_graph` proves that the discrete problem has a solution positive at every interior vertex when the interior graph is connected, the principal eigenvalue of \(L - \operatorname{diag}(b)\) is negative, and \(a(x) \le \sqrt{w(x,y)}\) and \(a(y) \le \sqrt{w(x,y)}\) for every edge of positive weight between distinct interior vertices \(x\) and \(y\). Every operator and the principal eigendata are constructed. See the [proof strategy](explanation/proof-strategy.md#finite-graph-existence).
 
----
-
-## Theorem summary
-
-| Tier | What's proved | Count | Axiom dependencies |
-|------|--------------|-------|--------------------|
-| **Pure algebra** | Spectral characterization, scaling contradiction | 2 | `propext`, `Quot.sound`, `Classical.choice` |
-| **Real analysis** | \(bv \geq cv^p \Rightarrow v \leq (b/c)^{1/(p-1)}\) | 2 | `propext`, `Quot.sound`, `Classical.choice` |
-| **Order theory** | Knaster-Tarski between sub/super-fixed points | 2 | `propext`, `Quot.sound` --- **no** `Classical.choice` |
-| **Operator lemmas** | \(\Delta(0) = 0\), \(\Delta\) linearity, \(\|\nabla 0\| = 0\) | 3 | `SemioticOperators` axioms |
-| **Coefficient bounds** | \(a(x) \geq 0\), \(a(x) \leq 1\), \(p - 1 > 0\) | 3 | `SemioticContext` bounds |
-| **PDE existence** | Nonneg solutions exist (Thm 3.12), positive solutions exist (Thm 3.16), scaling uniqueness | 3 | `PDEInfra` typeclass |
-| **Total** | | **15** | |
-
----
-
-## Key equations in Lean
-
-| Paper concept | Lean definition | LaTeX |
-|--------------|----------------|-------|
-| Creative drive | `SemioticContext.a` | \(a(x) = \kappa(x)\,\gamma(x)\,\mu(x)\) |
-| Viability potential | `SemioticContext.canonicalViability` | \(b(x) = \kappa\gamma - \lambda\mu\) |
-| BVP (V1') | `SemioticBVP.equation` | \(-\Delta\Phi = a\|\nabla\Phi\| + b\Phi - c\Phi_+^p\) |
-| Viability threshold | `viabilityThreshold` | \(\beta^* = (\pi/L)^2 / b\) |
-| L∞ bound | `linfty_bound_algebraic` | \(v \leq (b/c)^{1/(p-1)}\) |
-| Spectral condition | `spectral_characterization_1d` | \(\lambda_1 = (\pi/L)^2 - \beta b < 0\) |
-
----
-
-## The axiom boundary
-
-Five classical PDE results --- not yet in Mathlib for abstract Riemannian manifolds --- are packaged as the [`PDEInfra`](explanation/axiom-boundary.md) typeclass. Every theorem that depends on these axioms carries `[PDEInfra bvp solOp]` in its signature, making the assumption surface visible to Lean's kernel.
-
-The [axiom boundary](explanation/axiom-boundary.md) page documents each axiom, its classical source, and its Mathlib status.
+Every module compiles under `lake build --wfail`, and CI checks the axioms of the selected declarations against `propext`, `Classical.choice` and `Quot.sound`. That check cannot see hypotheses, so it does not discharge `PDEInfra`.
 
 ---
 
 ## Documentation
 
-| Section | What you'll find |
-|---------|-----------------|
-| **[Quickstart](getting-started/quickstart.md)** | Build, verify, project structure |
-| **[Proof Strategy](explanation/proof-strategy.md)** | How the proof chain works --- from definitions to existence |
-| **[Axiom Boundary](explanation/axiom-boundary.md)** | The five PDEInfra axioms --- what's proved, what's assumed, and why |
-| **[Theorem Catalog](reference/theorems.md)** | All 15 theorems with Lean signatures and LaTeX statements |
-| **[Verification Audit](reference/verification-audit.md)** | Paper-to-Lean alignment table and axiom dependency dashboard |
-| **[Changelog](reference/changelog.md)** | Release history |
+| Page | Contents |
+|------|----------|
+| [Quickstart](getting-started/quickstart.md) | Build, verify, project layout |
+| [Proof strategy](explanation/proof-strategy.md) | How each result is proved |
+| [Assumption boundary](explanation/axiom-boundary.md) | What each hypothesis says, and what is not formalized |
+| [Theorem catalog](reference/theorems.md) | Statements and Lean signatures |
+| [Verification audit](reference/verification-audit.md) | Paper-to-Lean alignment and what CI checks |
+| [Changelog](reference/changelog.md) | Version history |

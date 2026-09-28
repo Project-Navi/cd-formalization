@@ -1,40 +1,31 @@
-# The Axiom Boundary
+# The Assumption Boundary
 
-The `PDEInfra` typeclass packages five classical results from elliptic PDE theory that are not yet available in Mathlib for abstract Riemannian manifolds. This page documents each axiom, explains why it cannot currently be proved in Lean, and tracks its Mathlib status.
+The continuum existence theorems are conditional. Their analytic inputs are hypotheses: the class `PDEInfra`, the structure `SolutionOperator`, and, for the second theorem, a `PrincipalEigendata` argument. None of these is a Lean `axiom`. `#print axioms` therefore reports only `propext`, `Classical.choice` and `Quot.sound` for both theorems; the hypotheses are visible in their signatures instead. This page states what each hypothesis says in Lean, how that compares with the classical result it stands in for, and what the model leaves abstract.
 
----
+## The model
 
-## Design philosophy
+- **Manifold.** `SemioticManifold` requires a compact, connected space with an analytic atlas (`IsManifold (SemioticModel n) ⊤ M`, where `⊤` is \(C^\omega\)) modelled on \(\mathbb{R}^n\), so \(M\) has no manifold boundary. Its field `SemioticManifold.riemannianMetric` is a family of inner products on the fibres \(\mathbb{R}^n\); nothing ties it to the `MetricSpace` instance, to smoothness in the base point, or to the operators.
+- **Operators.** `SemioticOperators` is abstract data: a map `SemioticOperators.laplacian` that is additive and homogeneous, and a map `SemioticOperators.gradNorm` that is nonnegative, absolutely homogeneous and zero on constants. Neither is constructed from the metric.
+- **Boundary.** `SemioticBVP.boundary` is an arbitrary set with nonempty complement; it stands in for \(\partial M\).
+- **Equation.** `SemioticBVP.equation` and `SemioticBVP.boundary_condition` are structure fields whose default values are the displayed problem, imposed at every point of \(M\), boundary points included. A `SemioticBVP` may override them, and `IsWeakCoherentConfiguration` refers to the supplied fields, so a theorem about an arbitrary `SemioticBVP` is about the displayed PDE only when the defaults are used.
 
-The axiom boundary is the most important architectural decision in this formalization. The guiding principles are:
+## `SolutionOperator`
 
-1. **Nothing hidden.** Every assumption is an explicit field of a typeclass, not a `sorry` buried in a proof.
-2. **Dependency visible.** Theorems that use PDE axioms carry `[PDEInfra bvp solOp]` in their signature. Run `#print axioms` to confirm.
-3. **Minimize the surface.** Prove everything that can be proved. Only axiomatize what genuinely requires missing Mathlib infrastructure.
-4. **Use real mathematics.** The axiom types are not arbitrary --- they carry genuine mathematical content (bornological compactness, eigenvalue structure).
-
----
-
-## The typeclass
+A map `SolutionOperator.T` on `M → ℝ` with `SolutionOperator.T_boundary` (\(T u = 0\) on the boundary) and
 
 ```lean
-class PDEInfra (bvp : SemioticBVP n M) (solOp : SolutionOperator bvp) : Prop where
-  T_compact        : ...   -- Lemma 3.7
-  linfty_bound     : ...   -- Lemma 3.10
-  schaefer         : ...   -- Theorem 3.12
-  fixed_point_nonneg : ... -- Theorem 3.12
-  monotone_iteration : ... -- Theorem 3.16
+T_fixed_point : ∀ Φ, T Φ = Φ → IsWeakCoherentConfiguration bvp Φ
 ```
 
-The `Prop`-valued typeclass ensures that axioms are **proof obligations**, not data --- a `PDEInfra` instance witnesses that the five results hold, but carries no computational content.
+The correspondence between fixed points and solutions is assumed, not derived from a definition of \(T\).
 
----
+## `PrincipalEigendata`
 
-## Axiom 1: T_compact --- Compactness of the solution operator
+`PrincipalEigendata bvp beta` is supplied data: a number `PrincipalEigendata.eigval` and a function that is positive off the boundary, zero on it, and satisfies \(-\Delta\varphi - \beta b \varphi = \lambda \varphi\) at every point. It is not constructed from the operators.
 
-**Paper reference:** Lemma 3.7
+## `PDEInfra`
 
-**Classical source:** Schauder estimates + Arzel&agrave;-Ascoli
+### `PDEInfra.T_compact` (Paper Lemma 3.7)
 
 ```lean
 T_compact : ∀ S : Set (M → ℝ),
@@ -42,19 +33,9 @@ T_compact : ∀ S : Set (M → ℝ),
   IsCompact (closure (solOp.T '' S))
 ```
 
-**What it says:** The solution operator \(T\) maps von Neumann bounded sets to relatively compact sets. In functional analysis terms, \(T\) is a compact operator.
+The bornological formulation follows a suggestion by Yongxi (Aaron) Lin on the Lean Zulip. On `M → ℝ`, whose topology is the product topology, a set is von Neumann bounded exactly when it is pointwise bounded, and its image has compact closure exactly when the image is pointwise bounded. So in this setting the field says that \(T\) maps pointwise-bounded sets to pointwise-bounded sets. That is a different condition from the compactness in Hölder norms that Lemma 3.7 provides: it constrains every pointwise-bounded set, and asks only that the image be pointwise bounded.
 
-**Why bornological typing?** Mathlib's `Bornology.IsVonNBounded` provides a rigorous characterization of bounded sets in locally convex spaces. This follows an approach suggested by Yongxi Lin (Aaron) on Lean Zulip --- the axiom carries real mathematical content, not just a placeholder.
-
-**Why it can't be proved now:** Requires \(C^{k,\alpha}\) H&ouml;lder spaces on Riemannian manifolds, Schauder estimates (\(\|u\|_{C^{2,\alpha}} \leq C(\|f\|_{C^{0,\alpha}} + \|u\|_{C^0})\)), and Arzel&agrave;-Ascoli for manifold function spaces. None of these exist in Mathlib as of v4.28.0.
-
----
-
-## Axiom 2: linfty_bound --- L∞ bound for the Schaefer set
-
-**Paper reference:** Lemma 3.10
-
-**Classical source:** Maximum principle (Gilbarg-Trudinger, Chapter 3)
+### `PDEInfra.linfty_bound` (Paper Lemma 3.10)
 
 ```lean
 linfty_bound :
@@ -65,24 +46,9 @@ linfty_bound :
     ∀ x, |u x| ≤ K
 ```
 
-**What it says:** If \(u = \tau T(u)\) for \(\tau \in [0,1]\), then \(\|u\|_\infty \leq K\). The bound \(K = (B/c_0)^{1/(p-1)}\) comes from evaluating the PDE at an interior maximum.
+A uniform bound on the Schaefer set. Classically it comes from the maximum principle at an interior maximum, where the equation reduces to \(b v \geq c v^p\); that algebraic step is proved as `linfty_bound_algebraic`, and the maximum-principle step is assumed here.
 
-**Decomposition:** This axiom has two parts:
-
-| Part | Status | Content |
-|------|--------|---------|
-| Maximum principle: at interior max, \(\nabla u = 0\) and \(\Delta u \leq 0\) | **Axiom** | Requires strong maximum principle on manifolds |
-| Algebraic: \(bv \geq cv^p \Rightarrow v \leq (b/c)^{1/(p-1)}\) | **Proved** | `linfty_bound_algebraic` in `LinftyAlgebraic.lean` |
-
-The algebraic core is fully machine-checked. Only the analytic step (maximum principle) remains axiomatic.
-
----
-
-## Axiom 3: schaefer --- Schaefer's fixed-point theorem
-
-**Paper reference:** Theorem 3.12
-
-**Classical source:** Schaefer (1955); Deimling (1985)
+### `PDEInfra.schaefer` (Paper Theorem 3.12)
 
 ```lean
 schaefer :
@@ -95,36 +61,17 @@ schaefer :
   ∃ Φ : M → ℝ, solOp.T Φ = Φ
 ```
 
-**What it says:** If \(T\) is compact and the Schaefer set \(\{u : u = \tau T(u),\; \tau \in [0,1]\}\) is bounded, then \(T\) has a fixed point.
+Schaefer's theorem also needs \(T\) to be continuous on a Banach space; no continuity is assumed here. The field is therefore an assumption about this particular \(T\), named after the theorem it stands in for.
 
-**Structural note:** The first argument is `T_compact` --- at the call site, `infra.T_compact` is passed explicitly. This makes the dependency chain structurally visible: compactness feeds into Schaefer's theorem, not just logically but in the Lean proof term.
-
-**Why it can't be proved now:** Mathlib has Banach space basics but no Schaefer's fixed-point theorem (or Leray-Schauder degree theory). A draft Mathlib issue is at [`drafts/mathlib_issue_schaefer.md`](https://github.com/Project-Navi/cd-formalization/blob/main/drafts/mathlib_issue_schaefer.md).
-
----
-
-## Axiom 4: fixed_point_nonneg --- Maximum principle for fixed points
-
-**Paper reference:** Theorem 3.12 (nonnegativity step)
-
-**Classical source:** Strong maximum principle
+### `PDEInfra.fixed_point_nonneg` (Paper Theorem 3.12)
 
 ```lean
-fixed_point_nonneg :
-  ∀ (Φ : M → ℝ), solOp.T Φ = Φ → ∀ x, Φ x ≥ 0
+fixed_point_nonneg : ∀ (Φ : M → ℝ), solOp.T Φ = Φ → ∀ x, Φ x ≥ 0
 ```
 
-**What it says:** Fixed points of \(T\) are nonnegative. This follows from the \(\Phi_+\) truncation in the saturation term and standard maximum principle arguments.
+Nonnegativity of fixed points, classically a maximum-principle consequence of the positive part \(\Phi_+\) in the saturation term.
 
-**Why it can't be proved now:** Requires the strong maximum principle for elliptic operators on Riemannian manifolds. Mathlib has no maximum principle infrastructure.
-
----
-
-## Axiom 5: monotone_iteration --- Sub/super-solution method
-
-**Paper reference:** Theorem 3.16
-
-**Classical source:** Amann (1976)
+### `PDEInfra.monotone_iteration` (Paper Theorem 3.16)
 
 ```lean
 monotone_iteration :
@@ -133,37 +80,26 @@ monotone_iteration :
     ∃ Φ : M → ℝ, solOp.T Φ = Φ ∧ (∃ x, x ∉ bvp.boundary ∧ Φ x > 0)
 ```
 
-**What it says:** When the principal eigenvalue \(\lambda_1 < 0\):
+Classically: \(\varepsilon\varphi_1\) is a sub-solution, a large constant is a super-solution, and monotone iteration between them gives a solution. The field asserts positivity at one interior point only. It is stated for every `beta`, while the equation uses \(b\) itself (\(\beta = 1\)); for other values it assumes more than the classical result. For example, when \(a \equiv 0\) and \(c > 0\) a positive solution exists only if the principal eigenvalue of \(-\Delta - b\) is negative, and that does not follow from negativity for \(-\Delta - \beta b\) with \(\beta > 1\). `SemioticBVP.exists_pos_isWeakCoherentConfiguration` inherits this through its `beta` argument.
 
-1. \(\varepsilon\varphi_1\) is a sub-solution for small \(\varepsilon\) (Paper Thm 3.16, Step 1)
-2. A large constant \(K\) is a super-solution (Step 2)
-3. Monotone iteration between them converges to a nontrivial fixed point with \(\Phi > 0\) in the interior (Step 3)
+## What the fields would need
 
-**Order-theoretic skeleton proved.** The abstract Knaster-Tarski result --- that a monotone map on a complete lattice has a fixed point between sub and super-fixed points --- is fully proved in `MonotoneFixedPoint.lean`. Only the PDE content (monotonicity of \(T\), construction of sub/super-solutions, nontriviality) remains axiomatic.
+| Field | Classical source | Missing from Mathlib (v4.28.0) |
+|-------|------------------|--------------------------------|
+| `PDEInfra.T_compact` | Schauder estimates, Arzelà–Ascoli | Hölder spaces and Schauder theory on manifolds |
+| `PDEInfra.linfty_bound` | Maximum principle | Maximum principles for elliptic operators on manifolds |
+| `PDEInfra.schaefer` | [Schaefer1955] | Schaefer's and Schauder's fixed-point theorems |
+| `PDEInfra.fixed_point_nonneg` | Maximum principle | As above |
+| `PDEInfra.monotone_iteration` | [Amann1976] | Sub/super-solution theory in ordered Banach spaces |
+| `PrincipalEigendata` | Krein–Rutman or variational theory | Principal eigenvalues of elliptic operators on manifolds |
 
-**Why it can't be proved now:** Requires sub/super-solution existence in ordered Banach spaces, comparison principles, and the strong maximum principle for interior positivity. None of these are in Mathlib.
+Replacing a field by a proof would also require the operators to be constructed from the metric and the boundary to be the boundary of a manifold with boundary.
 
----
+## The finite-graph theorem
 
-## What's not in Mathlib (v4.28.0)
+`SemioticGraph.exists_pos_graph` takes no hypothesis of the kind above. On a finite graph the Laplacian and the gradient norm are defined from the weights, the principal eigenvalue is defined as an infimum, attained when the interior is nonempty, and shown to have a positive eigenvector when the interior graph is connected, and the fixed point comes from `monotone_fixed_point_between`. Its hypotheses (a connected interior graph, a negative principal eigenvalue, and the edge-dominance condition) are mathematical conditions stated in its signature; see the [theorem catalog](../reference/theorems.md#finite-graph-existence).
 
-| Missing infrastructure | Required by | Mathlib status |
-|-----------------------|-------------|----------------|
-| H&ouml;lder spaces on manifolds | `T_compact` | No \(C^{k,\alpha}\) type |
-| Schauder estimates | `T_compact` | No Schauder theory |
-| Strong maximum principle | `linfty_bound`, `fixed_point_nonneg`, `monotone_iteration` | No max principle |
-| Schaefer's fixed-point theorem | `schaefer` | No Leray-Schauder theory |
-| Sub/super-solution theory | `monotone_iteration` | No ordered-cone iteration |
-| Principal eigenvalue existence | `PrincipalEigendata` | No Krein-Rutman theorem |
-| Arzel&agrave;-Ascoli on manifolds | `T_compact` | Exists for metric spaces, not H&ouml;lder embeddings |
+## References
 
----
-
-## Verification
-
-Run `lake build CdFormal.Verify` and confirm:
-
-- `exists_isWeakCoherentConfiguration` shows `PDEInfra` fields but **no `sorryAx`**
-- `exists_pos_isWeakCoherentConfiguration` shows `PDEInfra` fields but **no `sorryAx`**
-- Pure algebra results show only `[propext, Classical.choice, Quot.sound]`
-- Monotone fixed-point results show only `[propext, Quot.sound]` (no `Classical.choice`)
+- [Schaefer1955] H. Schaefer, "Über die Methode der a priori-Schranken," 1955.
+- [Amann1976] H. Amann, "Fixed point equations and nonlinear eigenvalue problems in ordered Banach spaces," 1976.

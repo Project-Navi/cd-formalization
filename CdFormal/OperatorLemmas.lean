@@ -5,18 +5,10 @@ Authors: Nelson Spence
 -/
 import CdFormal.Basic
 
-set_option relaxedAutoImplicit false
-set_option autoImplicit false
-
-noncomputable section
-
-open scoped Manifold Bundle
-
 /-!
 # Operator Consequence Lemmas
 
-Derived properties of `SemioticOperators` from the axioms in `Basic.lean`.
-These validate that the operator contract is well-formed and non-vacuous.
+Consequences of the fields of `SemioticOperators` in `Basic.lean`.
 
 ## Main statements
 
@@ -24,12 +16,16 @@ These validate that the operator contract is well-formed and non-vacuous.
 - `laplacian_linear` — Δ(c·f + g) = c·Δf + Δg (from `laplacian_add` +
   `laplacian_smul`)
 - `gradNorm_zero` — |∇(0)| = 0 (from `gradNorm_const` with a = 0)
+- `zero_solves_equation` — Φ ≡ 0 satisfies the displayed equation at every point
 
 ## References
 
-- Aristotle run `41cee644-80f9-4122-9c7d-c32dc1b571d6` (original proofs against
-  pre-Phase 2 axiom set, adapted here for current axioms).
+- [Spence2026] N. Spence, "The Creative Determinant," 2026.
 -/
+
+noncomputable section
+
+open scoped Manifold Bundle
 
 variable {n : ℕ} {M : Type*}
   [TopologicalSpace M]
@@ -42,8 +38,7 @@ variable {n : ℕ} {M : Type*}
 /-- The Laplacian of the zero function is zero.
     From `laplacian_smul` with c = 0.
 
-    Axiom dependencies: `SemioticOperators.laplacian_smul`.
-    Upstream candidate: trivial consequence of linearity. -/
+    Uses `SemioticOperators.laplacian_smul`. -/
 @[simp]
 lemma laplacian_zero :
     ops.laplacian (fun _ : M ↦ (0 : ℝ)) = fun _ ↦ 0 := by
@@ -52,9 +47,7 @@ lemma laplacian_zero :
 /-- Full linearity of the Laplacian: Δ(c·f + g) = c·Δf + Δg.
     Composed from `laplacian_add` and `laplacian_smul`.
 
-    Axiom dependencies: `SemioticOperators.laplacian_add`,
-    `SemioticOperators.laplacian_smul`.
-    Upstream candidate: standard consequence of linearity. -/
+    Uses `SemioticOperators.laplacian_add` and `SemioticOperators.laplacian_smul`. -/
 lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
     ops.laplacian (fun x ↦ c * f x + g x) =
     fun x ↦ c * ops.laplacian f x + ops.laplacian g x := by
@@ -63,11 +56,18 @@ lemma laplacian_linear (f g : M → ℝ) (c : ℝ) :
 /-- The gradient norm of the zero function is zero.
     Direct consequence of `gradNorm_const` with a = 0.
 
-    Axiom dependencies: `SemioticOperators.gradNorm_const`.
-    Upstream candidate: trivial consequence of homogeneity. -/
+    Uses `SemioticOperators.gradNorm_const`. -/
 @[simp]
 lemma gradNorm_zero (x : M) :
     ops.gradNorm (fun _ : M ↦ (0 : ℝ)) x = 0 :=
   ops.gradNorm_const 0 x
+
+/-- Φ ≡ 0 satisfies the displayed equation at every point. With the default
+    `SemioticBVP.equation` the zero function is therefore a weak coherent configuration, so the
+    substantive existence statement is the one with a solution positive somewhere. -/
+theorem zero_solves_equation (ctx : SemioticContext n M) (x : M) :
+    -(ops.laplacian (fun _ ↦ 0) x) =
+      ctx.a x * ops.gradNorm (fun _ ↦ 0) x + ctx.b x * 0 - ctx.c x * max (0 : ℝ) 0 ^ ctx.p := by
+  simp [Real.zero_rpow (zero_lt_one.trans ctx.one_lt_p).ne']
 
 end
