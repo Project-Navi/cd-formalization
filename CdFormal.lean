@@ -11,4 +11,9 @@ import CdFormal.CoefficientLemmas
 import CdFormal.ScalingUniqueness
 import CdFormal.MonotoneFixedPoint
 import CdFormal.LinftyAlgebraic
+import CdFormal.Graph.Basic
+import CdFormal.Graph.Spectral
+import CdFormal.Graph.FixedPoint
+import CdFormal.Graph.Existence
+import CdFormal.Graph.Example
 import CdFormal.Verify

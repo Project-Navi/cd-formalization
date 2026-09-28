@@ -9,6 +9,8 @@ import CdFormal.CoefficientLemmas
 import CdFormal.ScalingUniqueness
 import CdFormal.MonotoneFixedPoint
 import CdFormal.LinftyAlgebraic
+import CdFormal.Graph.Existence
+import CdFormal.Graph.Example
 
 /-!
 # Axiom Dashboard
@@ -19,7 +21,8 @@ line below, each using only `propext`, `Classical.choice` and `Quot.sound`.
 
 `#print axioms` lists Lean axioms only. Hypotheses are not axioms: the class `PDEInfra` and
 the structures `SolutionOperator` and `PrincipalEigendata` appear in the signatures of the
-continuum existence theorems, not in this output.
+continuum existence theorems, not in this output. The finite-graph theorem takes no such
+structure; its hypotheses are stated in its signature.
 -/
 
 -- Algebra and real analysis
@@ -50,3 +53,21 @@ continuum existence theorems, not in this output.
 #print axioms IsWeakCoherentConfiguration
 #print axioms SemioticBVP.exists_isWeakCoherentConfiguration
 #print axioms SemioticBVP.exists_pos_isWeakCoherentConfiguration
+
+-- Finite-graph existence (no assumed analysis)
+#print axioms SemioticGraph.gradNorm_nonneg
+#print axioms SemioticGraph.gradNorm_smul
+#print axioms SemioticGraph.gradNorm_const
+#print axioms SemioticGraph.IsSolution
+#print axioms SemioticGraph.principalEigenvalue
+#print axioms SemioticGraph.principalEigenvalue_mul_le
+#print axioms SemioticGraph.principalEigenvalue_neg
+#print axioms SemioticGraph.exists_pos_eigenvector
+#print axioms SemioticGraph.isSolution_of_fixedPointMap_eq
+#print axioms SemioticGraph.fixedPointMap_mono
+#print axioms SemioticGraph.exists_isSolution_between
+#print axioms SemioticGraph.smul_subsolution
+#print axioms SemioticGraph.plateau_supersolution
+#print axioms SemioticGraph.exists_pos_graph
+#print axioms SemioticGraph.exists_pos_graph_of_unweighted
+#print axioms SemioticGraph.exists_pos_triangle
