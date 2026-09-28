@@ -7,7 +7,7 @@ The continuum existence theorems are conditional. Their analytic inputs are hypo
 - **Manifold.** `SemioticManifold` requires a compact, connected space with an analytic atlas (`IsManifold (SemioticModel n) ⊤ M`, where `⊤` is \(C^\omega\)) modelled on \(\mathbb{R}^n\), so \(M\) has no manifold boundary. Its field `SemioticManifold.riemannianMetric` is a family of inner products on the fibres \(\mathbb{R}^n\); nothing ties it to the `MetricSpace` instance, to smoothness in the base point, or to the operators.
 - **Operators.** `SemioticOperators` is abstract data: a map `SemioticOperators.laplacian` that is additive and homogeneous, and a map `SemioticOperators.gradNorm` that is nonnegative, absolutely homogeneous and zero on constants. Neither is constructed from the metric.
 - **Boundary.** `SemioticBVP.boundary` is an arbitrary set with nonempty complement; it stands in for \(\partial M\).
-- **Equation.** `SemioticBVP.equation` and `SemioticBVP.boundary_condition` are structure fields whose default values are the displayed problem, imposed at every point of \(M\), boundary points included. A `SemioticBVP` may override them, and `IsWeakCoherentConfiguration` refers to the supplied fields, so a theorem about an arbitrary `SemioticBVP` is about the displayed PDE only when the defaults are used.
+- **Equation.** `SemioticBVP.equation` and `SemioticBVP.boundaryCondition` are structure fields whose default values are the displayed problem, imposed at every point of \(M\), boundary points included. A `SemioticBVP` may override them, and `IsWeakCoherentConfiguration` refers to the supplied fields, so a theorem about an arbitrary `SemioticBVP` is about the displayed PDE only when the defaults are used.
 
 ## `SolutionOperator`
 
@@ -84,7 +84,7 @@ Classically: \(\varepsilon\varphi_1\) is a sub-solution, a large constant is a s
 
 ## What the fields would need
 
-| Field | Classical source | Missing from Mathlib (v4.28.0) |
+| Field | Classical source | Missing from Mathlib (v4.34.1) |
 |-------|------------------|--------------------------------|
 | `PDEInfra.T_compact` | Schauder estimates, Arzelà–Ascoli | Hölder spaces and Schauder theory on manifolds |
 | `PDEInfra.linfty_bound` | Maximum principle | Maximum principles for elliptic operators on manifolds |

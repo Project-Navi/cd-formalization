@@ -1,6 +1,6 @@
 # Verification Audit
 
-What is checked, how, and what remains outside the formalization. Toolchain and Mathlib are pinned at v4.28.0.
+What is checked, how, and what remains outside the formalization. Toolchain and Mathlib are pinned at v4.34.1.
 
 ## Paper-to-Lean alignment
 
@@ -43,7 +43,7 @@ These checks establish that the proofs compile against the pinned Mathlib and us
 ## Known limitations
 
 1. **Abstract model.** The Laplacian and gradient norm are structure fields, not constructed from the metric, and the boundary is an arbitrary set; the manifold itself has no boundary.
-2. **Overridable equation.** `SemioticBVP.equation` and `SemioticBVP.boundary_condition` default to the displayed problem but can be replaced.
+2. **Overridable equation.** `SemioticBVP.equation` and `SemioticBVP.boundaryCondition` default to the displayed problem but can be replaced.
 3. **Assumed analysis.** The fields of `PDEInfra` and `SolutionOperator` are assumed, and some differ from the classical results they stand in for; see [the assumption boundary](../explanation/axiom-boundary.md).
 4. **Lemma 3.11** is not formalized.
 5. **Uniqueness** is open; `scaling_uniqueness` covers only multiples of a solution.

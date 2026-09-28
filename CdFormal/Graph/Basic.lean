@@ -102,8 +102,9 @@ theorem a_nonneg (x : V) : 0 ≤ G.a x :=
   mul_nonneg (mul_nonneg (G.κ_bounds x).1 (G.γ_bounds x).1) (G.μ_bounds x).1
 
 theorem a_le_one (x : V) : G.a x ≤ 1 :=
-  mul_le_one₀ (mul_le_one₀ (G.κ_bounds x).2 (G.γ_bounds x).1 (G.γ_bounds x).2)
-    (G.μ_bounds x).1 (G.μ_bounds x).2
+  (mul_le_of_le_one_left (G.μ_bounds x).1
+    ((mul_le_of_le_one_left (G.γ_bounds x).1 (G.κ_bounds x).2).trans (G.γ_bounds x).2)).trans
+    (G.μ_bounds x).2
 
 /-- The interior support graph: vertices off the boundary, adjacent when joined by an edge of
     positive weight. -/

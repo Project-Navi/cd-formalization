@@ -23,8 +23,8 @@ are implicit where they appear.
 | `SemioticContext.a` | \(a(x) = \kappa(x)\gamma(x)\mu(x)\) |
 | `SemioticContext.canonicalViability` | \(\kappa(x)\gamma(x) - \lambda\mu(x)\), for a parameter \(\lambda\) |
 | `SemioticOperators` | abstract Laplacian and gradient norm |
-| `SemioticBVP` | coefficients, operators, a boundary set, and the fields `SemioticBVP.equation` and `SemioticBVP.boundary_condition` |
-| `IsWeakCoherentConfiguration` | `bvp.equation Φ ∧ bvp.boundary_condition Φ` |
+| `SemioticBVP` | coefficients, operators, a boundary set, and the fields `SemioticBVP.equation` and `SemioticBVP.boundaryCondition` |
+| `IsWeakCoherentConfiguration` | `bvp.equation Φ ∧ bvp.boundaryCondition Φ` |
 
 The default `SemioticBVP.equation` is
 

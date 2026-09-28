@@ -134,7 +134,7 @@ theorem exists_pos_graph (hconn : G.interiorGraph.Connected)
       by_cases hy : y ∈ G.boundary
       · simp [(G.mem_unitSphere.mp hφ).1 y hy, G.plateau_of_mem hy]
       · rw [G.plateau_of_notMem hy]
-        exact (mul_le_one₀ hε1 (hφnn y) (hφ1 y)).trans hM1)
+        exact ((mul_le_of_le_one_left (hφnn y) hε1).trans (hφ1 y)).trans hM1)
     (G.plateau_le (by linarith))
     (fun y hy ↦ by simp [(G.mem_unitSphere.mp hφ).1 y hy])
     (fun y hy ↦ G.plateau_of_mem hy)
