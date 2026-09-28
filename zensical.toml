@@ -5,7 +5,7 @@
 name = "cd-formalization"
 site_name = "cd-formalization"
 description = "Lean 4 formalization of the Creative Determinant framework"
-site_url = "https://project-navi.github.io/cd-formalization"
+site_url = "https://docs.projectnavi.ai/cd-formalization"
 repo_url = "https://github.com/Project-Navi/cd-formalization"
 repo_name = "Project-Navi/cd-formalization"
 copyright = "Copyright 2025-2026 Nelson Spence"
