@@ -209,7 +209,7 @@ theorem SemioticGraph.exists_pos_graph_of_unweighted (hw : ∀ x y, G.w x y = 0 
     ∃ u : V → ℝ, G.IsSolution u ∧ ∀ x, x ∉ G.boundary → 0 < u x
 ```
 
-The solution is positive at every interior vertex. The edge-dominance hypothesis `hdom` is what makes the fixed-point map in the proof monotone; it is a sufficient condition for this proof, not a condition shown to be necessary for existence. For weights in \(\{0, 1\}\) it follows from \(0 \le a \le 1\), so `SemioticGraph.exists_pos_graph_of_unweighted` does not assume it.
+The solution is positive at every interior vertex. The edge-dominance hypothesis `hdom` ranges over ordered pairs, so for every edge of positive weight between distinct interior vertices \(x\) and \(y\) it requires both \(a(x) \le \sqrt{w(x,y)}\) and \(a(y) \le \sqrt{w(x,y)}\). It is what makes the fixed-point map in the proof monotone; it is a sufficient condition for this proof, not a condition shown to be necessary for existence. For weights in \(\{0, 1\}\) it follows from \(0 \le a \le 1\), so `SemioticGraph.exists_pos_graph_of_unweighted` does not assume it.
 
 ### Gradient norm
 
@@ -231,6 +231,11 @@ theorem SemioticGraph.principalEigenvalue_mul_le {u : V → ℝ}
     (hu : ∀ x ∈ G.boundary, u x = 0) :
     G.principalEigenvalue * ∑ x, u x ^ 2 ≤ G.energy u
 
+theorem SemioticGraph.principalEigenvalue_le_of_laplacian_eq {u : V → ℝ} {μ : ℝ}
+    (hu : ∀ x ∈ G.boundary, u x = 0) (hne : ∃ x, u x ≠ 0)
+    (heq : ∀ x, x ∉ G.boundary → G.laplacian u x = G.b x * u x + μ * u x) :
+    G.principalEigenvalue ≤ μ
+
 theorem SemioticGraph.exists_pos_eigenvector (hconn : G.interiorGraph.Connected) :
     ∃ φ ∈ G.unitSphere, (∀ x, x ∉ G.boundary → 0 < φ x) ∧
       ∀ x, x ∉ G.boundary → G.laplacian φ x = G.b x * φ x + G.principalEigenvalue * φ x
@@ -239,10 +244,17 @@ theorem SemioticGraph.principalEigenvalue_neg {u : V → ℝ} (hu : ∀ x ∈ G.
     (hneg : G.energy u < 0) : G.principalEigenvalue < 0
 ```
 
+`SemioticGraph.principalEigenvalue_le_of_laplacian_eq` says that no Dirichlet eigenvalue of \(L - \operatorname{diag}(b)\) is smaller than `SemioticGraph.principalEigenvalue`.
+
 ### Sub- and supersolutions
 
-`SemioticGraph.fixedPointMap` is the fixed-point map of the proof, `SemioticGraph.fixedPointMap_mono` its monotonicity, `SemioticGraph.isSolution_of_fixedPointMap_eq` the passage from fixed points to solutions, and `SemioticGraph.exists_isSolution_between` gives a solution between an ordered subsolution and supersolution. The barriers are `SemioticGraph.smul_subsolution` and `SemioticGraph.plateau_supersolution`. See the [proof strategy](../explanation/proof-strategy.md#finite-graph-existence).
+```lean
+theorem SemioticGraph.fixedPointMap_eq_iff_isSolution {K : ℝ} (hK : 0 < K) {u : V → ℝ} :
+    G.fixedPointMap K u = u ↔ G.IsSolution u
+```
+
+`SemioticGraph.fixedPointMap` is the fixed-point map of the proof; for \(K > 0\) its fixed points are exactly the solutions. `SemioticGraph.fixedPointMap_mono` is its monotonicity, and `SemioticGraph.exists_isSolution_between` gives a solution between an ordered subsolution and supersolution. The barriers are `SemioticGraph.smul_subsolution` and `SemioticGraph.plateau_supersolution`. See the [proof strategy](../explanation/proof-strategy.md#finite-graph-existence).
 
 ### Example
 
-`SemioticGraph.triangle` is the complete graph on three vertices with unit weights and one boundary vertex, with \(\kappa = \gamma = \mu = 1\), \(b = 2\), \(c = 1\) and \(p = 2\). `SemioticGraph.exists_pos_triangle` applies `SemioticGraph.exists_pos_graph_of_unweighted` to it, so the hypotheses of the graph theorem can all be met.
+`SemioticGraph.triangle` is the complete graph on three vertices with unit weights and one boundary vertex (its weights are also 1 on the diagonal, which does not affect the Laplacian, the gradient norm or the energy), with \(\kappa = \gamma = \mu = 1\), \(b = 2\), \(c = 1\) and \(p = 2\). `SemioticGraph.exists_pos_triangle` applies `SemioticGraph.exists_pos_graph_of_unweighted` to it, so the hypotheses of the graph theorem can all be met.

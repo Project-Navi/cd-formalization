@@ -16,8 +16,10 @@ a fixed point `x` with `sub ≤ x ∧ x ≤ super`.
 This is the order-theoretic skeleton of the sub/super-solution method
 (Amann 1976) used in nonlinear elliptic PDE theory. For the continuum problem the PDE content
 (monotonicity of T, construction of sub/super-solutions, nontriviality) remains assumed in
-`PDEInfra.monotone_iteration`. For the finite-graph problem it is proved in
-`CdFormal.Graph.FixedPoint`, which applies `monotone_fixed_point_between` on an order interval.
+`PDEInfra.monotone_iteration`. For the finite-graph problem these steps are proved: monotonicity
+and the sub- and supersolutions in `CdFormal.Graph.FixedPoint`, which applies
+`monotone_fixed_point_between` on an order interval, and nontriviality in `CdFormal.Graph.Spectral`
+and `CdFormal.Graph.Existence`.
 
 ## Main statements
 

@@ -22,7 +22,7 @@ What is checked, how, and what remains outside the formalization. Toolchain and 
 
 ## Finite-graph results
 
-These are not in the paper. `SemioticGraph.exists_pos_graph` proves that the discrete problem on a finite weighted graph has a solution positive at every interior vertex, with the operators, the principal eigendata, the barriers and the fixed point all constructed. Its hypotheses are that the interior graph is connected, that the principal eigenvalue is negative, and that \(a(x) \le \sqrt{w(x,y)}\) on every edge of positive weight between distinct interior vertices. The last condition is sufficient for the proof; it is not claimed to be necessary. `SemioticGraph.exists_pos_triangle` shows that the hypotheses can be met.
+These are not in the paper. `SemioticGraph.exists_pos_graph` proves that the selected discrete problem on a finite weighted graph has a solution positive at every interior vertex, with the operators, the principal eigendata, the barriers and the fixed point all constructed. Its hypotheses are that the interior graph is connected, that the principal eigenvalue is negative, and that \(a(x) \le \sqrt{w(x,y)}\) and \(a(y) \le \sqrt{w(x,y)}\) for every edge of positive weight between distinct interior vertices \(x\) and \(y\). The last condition is sufficient for the proof; it is not claimed to be necessary. `SemioticGraph.exists_pos_triangle` shows that the hypotheses can be met.
 
 ## What CI checks
 

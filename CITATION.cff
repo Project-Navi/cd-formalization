@@ -14,10 +14,11 @@ abstract: >-
   positive at an interior point when a principal eigenvalue is negative,
   is derived from explicit hypotheses (the PDEInfra class and a solution
   operator) that stand in for classical elliptic results not proved here.
-  For a discretization on finite weighted graphs, existence of a solution
-  positive at every interior vertex is proved outright under connectivity,
-  spectral and edge-weight conditions. Supporting algebraic, real-analytic
-  and order-theoretic lemmas are proved outright.
+  For a discretization on finite weighted graphs selected for this
+  formalization, existence of a solution positive at every interior vertex
+  is proved outright under connectivity, spectral and edge-weight
+  conditions. Supporting algebraic, real-analytic and order-theoretic
+  lemmas are proved outright.
 keywords:
   - Lean 4
   - Mathlib

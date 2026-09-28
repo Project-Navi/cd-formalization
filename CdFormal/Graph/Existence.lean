@@ -10,8 +10,8 @@ import CdFormal.Graph.FixedPoint
 # A positive solution on a finite graph
 
 If the interior graph is connected, the principal Dirichlet eigenvalue of L - diag(b) is negative,
-and every edge of positive weight between distinct interior vertices satisfies
-a(x) ≤ √w(x,y), then the problem of `CdFormal.Graph.Basic` has a solution that is positive at
+and a(x) ≤ √w(x,y) and a(y) ≤ √w(x,y) for every edge of positive weight between distinct interior
+vertices x and y, then the problem of `CdFormal.Graph.Basic` has a solution that is positive at
 every interior vertex (`SemioticGraph.exists_pos_graph`).
 
 The subsolution is ε·φ for the positive principal eigenvector φ of
@@ -38,10 +38,11 @@ one selected for this formalization.
 ## Acknowledgment
 
 The finite-graph formulation of the problem and the proof route (finite-dimensional inverse
-positivity, positive principal eigendata, then the order-theoretic fixed-point core
+positivity, positive principal eigendata, then the existing order-theoretic fixed-point core
 `monotone_fixed_point_between`) were proposed by Andrew Edmark (@aedmark). Here inverse positivity
-takes the form of the Jacobi splitting in `CdFormal.Graph.FixedPoint`. The specific discretization
-and the edge-dominance hypothesis were chosen for this formalization and are not claimed to be his.
+takes the form of the Jacobi splitting in `CdFormal.Graph.FixedPoint`. The specific discretization,
+that splitting and the edge-dominance hypothesis were chosen for this formalization and are not
+claimed to be his.
 
 ## References
 
@@ -57,9 +58,9 @@ namespace SemioticGraph
 variable {V : Type*} [Fintype V] (G : SemioticGraph V)
 
 /-- **Positive solution on a finite graph.** If the interior graph is connected, a(x) ≤ √w(x,y)
-for every edge of positive weight between distinct interior vertices x and y, and the principal
-eigenvalue of L - diag(b) is negative, then there is a solution that is positive at every interior
-vertex. -/
+whenever x and y are distinct interior vertices with w(x,y) > 0 (so the bound holds at both ends of
+each such edge), and the principal eigenvalue of L - diag(b) is negative, then there is a solution
+that is positive at every interior vertex. -/
 theorem exists_pos_graph (hconn : G.interiorGraph.Connected)
     (hdom : ∀ x y, x ∉ G.boundary → y ∉ G.boundary → x ≠ y → 0 < G.w x y →
       G.a x ≤ √(G.w x y))

@@ -21,8 +21,8 @@ and to 0 on the boundary. For K > 0 its fixed points are exactly the solutions
 (`SemioticGraph.fixedPointMap_eq_iff_isSolution`).
 
 For functions with values in [0, M] that vanish on the boundary, the map is monotone when K is
-large, provided a(x) ≤ √w(x,y) for every edge of positive weight between distinct interior
-vertices (`SemioticGraph.fixedPointMap_mono`). Between an ordered subsolution and supersolution,
+large, provided a(x) ≤ √w(x,y) whenever x and y are distinct interior vertices with w(x,y) > 0
+(`SemioticGraph.fixedPointMap_mono`). Between an ordered subsolution and supersolution,
 `monotone_fixed_point_between` on the order interval then gives a solution
 (`SemioticGraph.exists_isSolution_between`).
 

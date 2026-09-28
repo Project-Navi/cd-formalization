@@ -25,7 +25,7 @@ where care \(\kappa\), coherence \(\gamma\) and contradiction \(\mu\) take value
 
 - **Conditional existence.** Two theorems derive solutions from the hypotheses `PDEInfra` and `SolutionOperator`, which stand in for classical elliptic results that are not proved here. The [assumption boundary](explanation/axiom-boundary.md) states what each one says.
 - **Unconditional lemmas.** The algebraic, real-analytic and order-theoretic steps are proved outright. See the [theorem catalog](reference/theorems.md).
-- **Finite-graph existence.** On a finite weighted graph, `SemioticGraph.exists_pos_graph` proves that the discrete problem has a solution positive at every interior vertex, with every operator and the principal eigendata constructed. See the [proof strategy](explanation/proof-strategy.md#finite-graph-existence).
+- **Finite-graph existence.** For the discretization selected here, on a finite weighted graph, `SemioticGraph.exists_pos_graph` proves that the discrete problem has a solution positive at every interior vertex when the interior graph is connected, the principal eigenvalue of \(L - \operatorname{diag}(b)\) is negative, and \(a(x) \le \sqrt{w(x,y)}\) and \(a(y) \le \sqrt{w(x,y)}\) for every edge of positive weight between distinct interior vertices \(x\) and \(y\). Every operator and the principal eigendata are constructed. See the [proof strategy](explanation/proof-strategy.md#finite-graph-existence).
 
 Every module compiles under `lake build --wfail`, and CI checks the axioms of the selected declarations against `propext`, `Classical.choice` and `Quot.sound`. That check cannot see hypotheses, so it does not discharge `PDEInfra`.
 
