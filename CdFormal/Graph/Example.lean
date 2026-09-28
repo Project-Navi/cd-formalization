@@ -15,6 +15,10 @@ eigenvalue is negative. `SemioticGraph.exists_pos_triangle` applies
 `SemioticGraph.exists_pos_graph_of_unweighted` to it, which shows that the hypotheses of the graph
 theorem can be met.
 
+Separately, `SemioticGraph.triangle_isSolution` checks directly that (0, 2, 2), which is positive at
+both interior vertices, is a solution. Its gradient norm there is 2
+(`SemioticGraph.triangle_gradNorm`), so the gradient term of the equation is active.
+
 ## Main definitions
 
 - `SemioticGraph.triangle` — the example
@@ -23,6 +27,8 @@ theorem can be met.
 
 - `SemioticGraph.exists_pos_triangle` — a solution on the example that is positive at both
   interior vertices
+- `SemioticGraph.triangle_isSolution` — (0, 2, 2) is a solution
+- `SemioticGraph.triangle_gradNorm` — its gradient norm is 2 at both interior vertices
 
 ## Implementation notes
 
@@ -89,6 +95,39 @@ theorem exists_pos_triangle :
     ∃ u : Fin 3 → ℝ, triangle.IsSolution u ∧ ∀ x, x ∉ triangle.boundary → 0 < u x :=
   triangle.exists_pos_graph_of_unweighted (fun _ _ ↦ Or.inr rfl) triangle_connected
     triangle_principalEigenvalue_neg
+
+theorem triangle_a (x : Fin 3) : triangle.a x = 1 := by
+  change (1 : ℝ) * 1 * 1 = 1
+  norm_num
+
+theorem triangle_c (x : Fin 3) : triangle.c x = 1 := rfl
+
+theorem triangle_p : triangle.p = 2 := rfl
+
+/-- The function (0, 2, 2) equals 2 at both interior vertices. -/
+private theorem sol_eq_two {x : Fin 3} (hx : x ∉ triangle.boundary) :
+    (![0, 2, 2] : Fin 3 → ℝ) x = 2 := by
+  have key : ∀ y : Fin 3, y ≠ 0 → y = 1 ∨ y = 2 := by decide
+  rcases key x (mt mem_triangle_boundary.mpr hx) with rfl | rfl <;> rfl
+
+/-- The gradient norm of (0, 2, 2) is 2 at both interior vertices. -/
+theorem triangle_gradNorm {x : Fin 3} (hx : x ∉ triangle.boundary) :
+    triangle.gradNorm ![0, 2, 2] x = 2 := by
+  rw [gradNorm, Fin.sum_univ_three, sol_eq_two hx, Real.sqrt_eq_iff_mul_self_eq_of_pos two_pos]
+  norm_num [triangle_w, Matrix.cons_val_two]
+
+/-- **An explicit solution.** (0, 2, 2) solves the example. At each interior vertex the Laplacian
+and the gradient norm are both 2, so the equation reads 2 = 1·2 + 2·2 - 1·2², with a nonzero
+gradient term. -/
+theorem triangle_isSolution : triangle.IsSolution ![0, 2, 2] := by
+  refine ⟨fun x hx ↦ ?_, fun x hx ↦ by simp [mem_triangle_boundary.mp hx]⟩
+  have hu := sol_eq_two hx
+  have hL : triangle.laplacian ![0, 2, 2] x = 2 := by
+    rw [laplacian, Fin.sum_univ_three, hu]
+    norm_num [triangle_w, Matrix.cons_val_two]
+  rw [hL, triangle_gradNorm hx, hu, triangle_a, triangle_b, triangle_c, triangle_p,
+    max_eq_left (zero_le_two : (0 : ℝ) ≤ 2), Real.rpow_two]
+  norm_num
 
 end SemioticGraph
 

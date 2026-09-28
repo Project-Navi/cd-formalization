@@ -258,3 +258,12 @@ theorem SemioticGraph.fixedPointMap_eq_iff_isSolution {K : ℝ} (hK : 0 < K) {u 
 ### Example
 
 `SemioticGraph.triangle` is the complete graph on three vertices with unit weights and one boundary vertex (its weights are also 1 on the diagonal, which does not affect the Laplacian, the gradient norm or the energy), with \(\kappa = \gamma = \mu = 1\), \(b = 2\), \(c = 1\) and \(p = 2\). `SemioticGraph.exists_pos_triangle` applies `SemioticGraph.exists_pos_graph_of_unweighted` to it, so the hypotheses of the graph theorem can all be met.
+
+```lean
+theorem SemioticGraph.triangle_isSolution : triangle.IsSolution ![0, 2, 2]
+
+theorem SemioticGraph.triangle_gradNorm {x : Fin 3} (hx : x ∉ triangle.boundary) :
+    triangle.gradNorm ![0, 2, 2] x = 2
+```
+
+These check directly that \((0, 2, 2)\), which is positive at both interior vertices, is a solution. The gradient norm there is \(2\), so the gradient term of the equation is active: at each interior vertex the equation reads \(2 = 1 \cdot 2 + 2 \cdot 2 - 1 \cdot 2^2\).

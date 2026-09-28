@@ -81,3 +81,5 @@ structure; its hypotheses are stated in its signature.
 #print axioms SemioticGraph.exists_pos_graph_of_unweighted
 #print axioms SemioticGraph.triangle
 #print axioms SemioticGraph.exists_pos_triangle
+#print axioms SemioticGraph.triangle_gradNorm
+#print axioms SemioticGraph.triangle_isSolution
