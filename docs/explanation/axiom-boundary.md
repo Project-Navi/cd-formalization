@@ -88,9 +88,9 @@ Classically: \(\varepsilon\varphi_1\) is a sub-solution, a large constant is a s
 |-------|------------------|--------------------------------|
 | `PDEInfra.T_compact` | Schauder estimates, Arzelà–Ascoli | Hölder spaces and Schauder theory on manifolds |
 | `PDEInfra.linfty_bound` | Maximum principle | Maximum principles for elliptic operators on manifolds |
-| `PDEInfra.schaefer` | Schaefer (1955) | Schaefer's and Schauder's fixed-point theorems |
+| `PDEInfra.schaefer` | [Schaefer1955] | Schaefer's and Schauder's fixed-point theorems |
 | `PDEInfra.fixed_point_nonneg` | Maximum principle | As above |
-| `PDEInfra.monotone_iteration` | Amann (1976) | Sub/super-solution theory in ordered Banach spaces |
+| `PDEInfra.monotone_iteration` | [Amann1976] | Sub/super-solution theory in ordered Banach spaces |
 | `PrincipalEigendata` | Krein–Rutman or variational theory | Principal eigenvalues of elliptic operators on manifolds |
 
 Replacing a field by a proof would also require the operators to be constructed from the metric and the boundary to be the boundary of a manifold with boundary.
@@ -98,3 +98,8 @@ Replacing a field by a proof would also require the operators to be constructed 
 ## The finite-graph theorem
 
 `SemioticGraph.exists_pos_graph` takes no hypothesis of the kind above. On a finite graph the Laplacian and the gradient norm are defined from the weights, the principal eigenvalue is defined as an infimum, attained when the interior is nonempty, and shown to have a positive eigenvector when the interior graph is connected, and the fixed point comes from `monotone_fixed_point_between`. Its hypotheses (a connected interior graph, a negative principal eigenvalue, and the edge-dominance condition) are mathematical conditions stated in its signature; see the [theorem catalog](../reference/theorems.md#finite-graph-existence).
+
+## References
+
+- [Schaefer1955] H. Schaefer, "Über die Methode der a priori-Schranken," 1955.
+- [Amann1976] H. Amann, "Fixed point equations and nonlinear eigenvalue problems in ordered Banach spaces," 1976.
