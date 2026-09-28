@@ -85,8 +85,9 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: lake lint
 
-      # Verify.lean lists the selected declarations. Each needs exactly one record, and every
-      # record may use only propext, Classical.choice and Quot.sound.
+      # Verify.lean lists the selected declarations, which must include the headline results named
+      # below. Each needs exactly one record, and every record may use only propext,
+      # Classical.choice and Quot.sound.
       - name: Check axioms
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
@@ -115,6 +116,16 @@ jobs:
                   errors.append(f"{m[1]} uses {sorted(used - allowed)}")
           if not expected:
               errors.append("Verify.lean selects no declarations")
+          # Kept here, not in Verify.lean, so that deselecting a headline result fails the check.
+          headline = ["SemioticBVP.exists_isWeakCoherentConfiguration",
+                      "SemioticBVP.exists_pos_isWeakCoherentConfiguration",
+                      "SemioticGraph.exists_pos_graph",
+                      "SemioticGraph.exists_pos_graph_of_unweighted",
+                      "spectral_characterization_1d", "linfty_bound_algebraic",
+                      "monotone_fixed_point_between", "scaling_uniqueness"]
+          for name in headline:
+              if name not in expected:
+                  errors.append(f"headline result {name} is not selected in Verify.lean")
           for name, n in collections.Counter(expected).items():
               if n > 1:
                   errors.append(f"{name} is selected {n} times")
@@ -127,8 +138,8 @@ jobs:
               print("::error::axiom check failed")
               print("\n".join(errors))
               sys.exit(1)
-          print(f"{len(expected)} selected declarations, one record each, "
-                "using only propext, Classical.choice and Quot.sound.")
+          print(f"{len(expected)} selected declarations, including all {len(headline)} headline "
+                "results, one record each, using only propext, Classical.choice and Quot.sound.")
           EOF
 
       # Every Lean name written in inline code in the README and the docs must resolve.
@@ -181,8 +192,8 @@ jobs:
                   continue
               rest = [l for l in text[m.end():].splitlines() if l.strip()]
               body = [l for l in rest if not l.startswith("import ")]
-              if body and not body[0].startswith("/-!"):
-                  bad.append(f"{f}: the first command after the imports is not a module docstring")
+              if not body or not body[0].startswith("/-!"):
+                  bad.append(f"{f}: no module docstring directly after the imports")
           if not files or bad:
               sys.exit("header check failed:\n  " + "\n  ".join(bad or ["no files"]))
           print(f"{len(files)} files have a copyright header and a module docstring after the imports.")
