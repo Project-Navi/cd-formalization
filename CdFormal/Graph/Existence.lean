@@ -94,16 +94,16 @@ theorem exists_pos_graph (hconn : G.interiorGraph.Connected)
     exact htc x
   -- The supersolution: `G.plateau M` with a(x)²/4 + b(x) ≤ c(x)·M^(p-1) for every x.
   obtain ⟨M, hM1, hMc⟩ : ∃ M : ℝ, 1 ≤ M ∧ ∀ x, G.a x ^ 2 / 4 + G.b x ≤ G.c x * M ^ (G.p - 1) := by
-    have hR0 : 0 ≤ ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y :=
-      Finset.sum_nonneg fun y _ ↦ div_nonneg (by positivity) (G.c_pos y).le
+    have hnn : ∀ y ∈ Finset.univ, 0 ≤ (|G.b y| + G.a y ^ 2 / 4) / G.c y := fun y _ ↦
+      div_nonneg (by positivity) (G.c_pos y).le
+    have hR0 : 0 ≤ ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y := Finset.sum_nonneg hnn
     have hR : ∀ x, G.a x ^ 2 / 4 + G.b x ≤
         G.c x * (1 + ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y) := by
       intro x
       have hcx := G.c_pos x
       have hterm : (|G.b x| + G.a x ^ 2 / 4) / G.c x ≤
           ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y :=
-        Finset.single_le_sum (fun y _ ↦ div_nonneg (by positivity) (G.c_pos y).le)
-          (Finset.mem_univ x)
+        Finset.single_le_sum hnn (Finset.mem_univ x)
       calc G.a x ^ 2 / 4 + G.b x ≤ |G.b x| + G.a x ^ 2 / 4 := by
             linarith [le_abs_self (G.b x)]
         _ = G.c x * ((|G.b x| + G.a x ^ 2 / 4) / G.c x) := (mul_div_cancel₀ _ hcx.ne').symm
