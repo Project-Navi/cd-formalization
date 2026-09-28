@@ -35,6 +35,10 @@ both interior vertices, is a solution. Its gradient norm there is 2
 The weights are 1 on the diagonal too. Diagonal weights do not enter the Laplacian, the gradient
 norm or the energy.
 
+## References
+
+- [Spence2026] N. Spence, "The Creative Determinant," 2026.
+
 ## Tags
 
 graph Laplacian, example

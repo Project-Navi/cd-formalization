@@ -395,7 +395,9 @@ theorem plateau_supersolution {M : ℝ} (hM : 0 < M)
   have hG : G.gradNorm (G.plateau M) x = √(M * ∑ y, G.w x y * (M - G.plateau M y)) := by
     rw [gradNorm, hpx, Finset.mul_sum]
     congr 1
-    exact Finset.sum_congr rfl fun y _ ↦ by rw [hsq]; ring
+    exact Finset.sum_congr rfl fun y _ ↦ by
+      rw [hsq]
+      ring
   have hMp : M ^ G.p = M ^ (G.p - 1) * M := by
     rw [← Real.rpow_add_one hM.ne', sub_add_cancel]
   have hr := mul_sqrt_mul_le (a := G.a x) hM hS

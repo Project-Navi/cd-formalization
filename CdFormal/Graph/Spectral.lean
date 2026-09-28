@@ -98,7 +98,8 @@ theorem sum_sq_add_smul (φ h : V → ℝ) (t : ℝ) :
     ∑ x, (φ x + t * h x) ^ 2 = ∑ x, φ x ^ 2 + 2 * t * ∑ x, φ x * h x + t ^ 2 * ∑ x, h x ^ 2 := by
   have h1 : ∀ x, (φ x + t * h x) ^ 2 = φ x ^ 2 + 2 * t * (φ x * h x) + t ^ 2 * h x ^ 2 :=
     fun x ↦ by ring
-  simp only [h1, Finset.sum_add_distrib, ← Finset.mul_sum]
+  rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  exact Finset.sum_congr rfl fun x _ ↦ h1 x
 
 /-- The energy is a quadratic form: E(c·u) = c²·E(u). -/
 theorem energy_smul (c : ℝ) (u : V → ℝ) : G.energy (fun x ↦ c * u x) = c ^ 2 * G.energy u := by
