@@ -74,7 +74,7 @@ theorem triangle_connected : triangle.interiorGraph.Connected := by
   · exact SimpleGraph.Adj.reachable ⟨hv, Or.inl zero_lt_one⟩
 
 theorem triangle_energy : triangle.energy ![0, 1, 1] = -2 := by
-  norm_num [energy, Fin.sum_univ_three, triangle_w, triangle_b]
+  norm_num [energy, Fin.sum_univ_three, triangle_w, triangle_b, Matrix.cons_val_two]
 
 /-- The principal eigenvalue of the example is negative. -/
 theorem triangle_principalEigenvalue_neg : triangle.principalEigenvalue < 0 := by
