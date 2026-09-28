@@ -17,8 +17,8 @@ d(x) = ∑_y w(x,y) and a constant K > 0, the equation at an interior vertex x i
   u(x) = (∑_y w(x,y)·u(y) + a(x)·|∇u|(x) + (b(x) + K)·u(x) - c(x)·max(u(x), 0)^p) / (d(x) + K),
 
 and `SemioticGraph.fixedPointMap` is the map sending u to this right-hand side at interior vertices
-and to 0 on the boundary. Its fixed points are exactly the solutions it can produce
-(`SemioticGraph.isSolution_of_fixedPointMap_eq`).
+and to 0 on the boundary. For K > 0 its fixed points are exactly the solutions
+(`SemioticGraph.fixedPointMap_eq_iff_isSolution`).
 
 For functions with values in [0, M] that vanish on the boundary, the map is monotone when K is
 large, provided a(x) ≤ √w(x,y) for every edge of positive weight between distinct interior
@@ -39,7 +39,7 @@ nonzero next to the boundary; the proof bounds it by completing the square.
 
 ## Main statements
 
-- `SemioticGraph.isSolution_of_fixedPointMap_eq` — fixed points are solutions
+- `SemioticGraph.fixedPointMap_eq_iff_isSolution` — fixed points are exactly the solutions
 - `SemioticGraph.fixedPointMap_mono` — monotonicity on [0, M]-valued functions
 - `SemioticGraph.exists_isSolution_between` — a solution between a subsolution and a
   supersolution
@@ -155,6 +155,15 @@ theorem isSolution_of_fixedPointMap_eq {K : ℝ} (hK : 0 < K) {u : V → ℝ}
   · have h := congrFun hu x
     rw [fixedPointMap, if_pos hx] at h
     exact h.symm
+
+/-- For K > 0, the fixed points of the map are exactly the solutions. -/
+theorem fixedPointMap_eq_iff_isSolution {K : ℝ} (hK : 0 < K) {u : V → ℝ} :
+    G.fixedPointMap K u = u ↔ G.IsSolution u := by
+  refine ⟨G.isSolution_of_fixedPointMap_eq hK, fun hu ↦ funext fun x ↦ ?_⟩
+  by_cases hx : x ∈ G.boundary
+  · rw [fixedPointMap, if_pos hx, hu.2 x hx]
+  · rw [fixedPointMap, if_neg hx, div_eq_iff (G.denom_pos hK x).ne']
+    linarith [G.mul_sub_numer K u x, hu.1 x hx]
 
 theorem le_fixedPointMap_of_subsolution {K : ℝ} (hK : 0 < K) {u : V → ℝ} {x : V}
     (hx : x ∉ G.boundary)
@@ -336,8 +345,8 @@ theorem exists_isSolution_between
   have hfix : G.fixedPointMap K u = u := congrArg Subtype.val hu
   exact ⟨u, G.isSolution_of_fixedPointMap_eq hK hfix, fun y ↦ ⟨u.2.1 y, u.2.2 y⟩⟩
 
-/-- **Subsolution.** If φ ≥ 0, φ ≤ 1, (L φ)(x) = b(x)·φ(x) + μ·φ(x) at interior vertices and
-c(x)·ε^(p-1) ≤ -μ for every x, then ε·φ is a subsolution. -/
+/-- **Subsolution.** If 0 ≤ φ ≤ 1, (L φ)(x) = b(x)·φ(x) + μ·φ(x) at interior vertices, ε > 0
+and c(x)·ε^(p-1) ≤ -μ for every x, then ε·φ is a subsolution. -/
 theorem smul_subsolution {φ : V → ℝ} {μ ε : ℝ} (hφ : ∀ y, 0 ≤ φ y) (hφ1 : ∀ y, φ y ≤ 1)
     (heq : ∀ x, x ∉ G.boundary → G.laplacian φ x = G.b x * φ x + μ * φ x) (hε : 0 < ε)
     (hεc : ∀ x, G.c x * ε ^ (G.p - 1) ≤ -μ) {x : V} (hx : x ∉ G.boundary) :

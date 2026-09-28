@@ -23,7 +23,7 @@ with the unnormalized weighted graph Laplacian and gradient norm
 
 Both sums run over all vertices, so edges to the boundary contribute through the value 0 there.
 The linear part of the problem is L - diag(b) (the case β = 1 of `PrincipalEigendata`); its
-principal eigenvalue is defined here as the minimum of the associated quadratic form over unit
+principal eigenvalue is defined here as the infimum of the associated quadratic form over unit
 functions that vanish on the boundary.
 
 ## Main definitions
@@ -33,7 +33,7 @@ functions that vanish on the boundary.
 - `SemioticGraph.IsSolution` — the equation at interior vertices and zero boundary values
 - `SemioticGraph.interiorGraph` — interior vertices joined by edges of positive weight
 - `SemioticGraph.energy`, `SemioticGraph.principalEigenvalue` — the quadratic form of
-  L - diag(b) and its minimum over `SemioticGraph.unitSphere`
+  L - diag(b) and its infimum over `SemioticGraph.unitSphere`
 
 ## Main statements
 
@@ -154,8 +154,9 @@ theorem mem_unitSphere {u : V → ℝ} :
   .rfl
 
 /-- The principal Dirichlet eigenvalue of L - diag(b): the infimum of `energy` over
-    `unitSphere`. When the interior is nonempty it is attained, it is an eigenvalue at every
-    interior vertex, and no Dirichlet eigenvalue is smaller (see `CdFormal.Graph.Spectral`). -/
+    `unitSphere`. When the interior is nonempty the infimum is attained, and a minimizer
+    satisfies the eigenvalue equation at every interior vertex. No Dirichlet eigenvalue is
+    smaller (see `CdFormal.Graph.Spectral`). -/
 def principalEigenvalue : ℝ := sInf (G.energy '' G.unitSphere)
 
 end SemioticGraph

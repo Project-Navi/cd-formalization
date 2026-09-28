@@ -11,15 +11,18 @@ import Mathlib.Topology.Order.Compact
 # The principal eigenvector on a finite graph
 
 The principal Dirichlet eigenvalue λ₁ of L - diag(b) (`SemioticGraph.principalEigenvalue`) is
-attained on the unit sphere, and a minimizer satisfies (L φ)(x) = b(x)·φ(x) + λ₁·φ(x) at every
-interior vertex. If φ is a minimizer, so is |φ|; when the interior graph is connected, |φ| is
-positive at every interior vertex, because a zero of a nonnegative eigenvector spreads to every
-neighbour.
+defined as an infimum over the unit sphere. When the interior is nonempty it is attained, and a
+minimizer satisfies (L φ)(x) = b(x)·φ(x) + λ₁·φ(x) at every interior vertex. If φ is a
+minimizer, so is |φ|; when the interior graph is connected, |φ| is positive at every interior
+vertex, because a zero of a nonnegative eigenvector spreads to every neighbour. No Dirichlet
+eigenvalue is smaller than λ₁.
 
 ## Main statements
 
 - `SemioticGraph.principalEigenvalue_mul_le` — λ₁·∑ u² ≤ E(u) for every `u` vanishing on the
   boundary
+- `SemioticGraph.principalEigenvalue_le_of_laplacian_eq` — λ₁ ≤ μ for every Dirichlet
+  eigenvalue μ
 - `SemioticGraph.exists_pos_eigenvector` — if the interior graph is connected, a unit
   eigenvector for λ₁ that vanishes on the boundary and is positive at every interior vertex
 - `SemioticGraph.principalEigenvalue_neg` — λ₁ < 0 when some `u` vanishing on the boundary has
@@ -27,7 +30,8 @@ neighbour.
 
 ## Implementation notes
 
-The unit sphere is a closed subset of the cube [-1, 1]^V, so the energy attains its minimum on it.
+The unit sphere is a closed subset of the cube [-1, 1]^V, so the energy attains its minimum on it
+when it is nonempty.
 The eigenvalue equation is the first-order condition at the minimizer: for `h` vanishing on the
 boundary, t ↦ E(φ + t·h) - λ₁·∑ (φ + t·h)² is a nonnegative quadratic with no constant term, so
 its linear coefficient vanishes (`discrim_le_zero`).
@@ -110,6 +114,19 @@ theorem energy_eq_zero_of_sum_sq_eq_zero {u : V → ℝ} (h : ∑ x, u x ^ 2 = 0
   have hu : ∀ x, u x = 0 := fun x ↦ (pow_eq_zero_iff two_ne_zero).mp
     ((Finset.sum_eq_zero_iff_of_nonneg fun y _ ↦ sq_nonneg (u y)).mp h x (Finset.mem_univ x))
   simp [energy, hu]
+
+/-- The energy through the operator: E(u) = ∑_x u(x)·((L u)(x) - b(x)·u(x)). -/
+theorem energy_eq_sum_mul (u : V → ℝ) :
+    G.energy u = ∑ x, u x * (G.laplacian u x - G.b x * u x) := by
+  have h1 : ∑ x, ∑ y, G.w x y * (u x - u y) ^ 2 = 2 * ∑ x, u x * G.laplacian u x := by
+    rw [← G.sum_sum_mul_sub_mul_sub u u]
+    exact Finset.sum_congr rfl fun x _ ↦ Finset.sum_congr rfl fun y _ ↦ by ring
+  have h2 : ∑ x, u x * (G.laplacian u x - G.b x * u x) =
+      ∑ x, u x * G.laplacian u x - ∑ x, G.b x * u x ^ 2 := by
+    rw [← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl fun x _ ↦ by ring
+  rw [energy, h1, h2]
+  ring
 
 theorem continuous_energy : Continuous G.energy := by
   have h : G.energy = fun u ↦ (∑ x, ∑ y, G.w x y * (u x - u y) ^ 2) / 2 - ∑ x, G.b x * u x ^ 2 :=
@@ -198,6 +215,27 @@ theorem principalEigenvalue_neg {u : V → ℝ} (hu : ∀ x ∈ G.boundary, u x 
   by_contra h
   have := mul_nonneg (not_lt.mp h) hS.le
   linarith
+
+/-- No Dirichlet eigenvalue of L - diag(b) is below λ₁: if `u` vanishes on the boundary, is not
+identically zero, and (L u)(x) = b(x)·u(x) + μ·u(x) at every interior vertex, then λ₁ ≤ μ. -/
+theorem principalEigenvalue_le_of_laplacian_eq {u : V → ℝ} {μ : ℝ}
+    (hu : ∀ x ∈ G.boundary, u x = 0) (hne : ∃ x, u x ≠ 0)
+    (heq : ∀ x, x ∉ G.boundary → G.laplacian u x = G.b x * u x + μ * u x) :
+    G.principalEigenvalue ≤ μ := by
+  have hE : G.energy u = μ * ∑ x, u x ^ 2 := by
+    rw [G.energy_eq_sum_mul, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun x _ ↦ ?_
+    by_cases hx : x ∈ G.boundary
+    · rw [hu x hx]
+      ring
+    · rw [heq x hx]
+      ring
+  obtain ⟨x₀, hx₀⟩ := hne
+  have hS : 0 < ∑ x, u x ^ 2 := (sq_pos_iff.mpr hx₀).trans_le
+    (Finset.single_le_sum (fun y _ ↦ sq_nonneg (u y)) (Finset.mem_univ x₀))
+  have hle := G.principalEigenvalue_mul_le hu
+  rw [hE] at hle
+  exact le_of_mul_le_mul_right hle hS
 
 /-- First-order condition at a minimizer: ∑ h·(L φ - b·φ - E(φ)·φ) = 0 for every `h` vanishing
 on the boundary. -/

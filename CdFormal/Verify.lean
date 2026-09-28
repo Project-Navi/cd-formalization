@@ -55,19 +55,29 @@ structure; its hypotheses are stated in its signature.
 #print axioms SemioticBVP.exists_pos_isWeakCoherentConfiguration
 
 -- Finite-graph existence (no assumed analysis)
+#print axioms SemioticGraph.a
+#print axioms SemioticGraph.laplacian
+#print axioms SemioticGraph.gradNorm
 #print axioms SemioticGraph.gradNorm_nonneg
 #print axioms SemioticGraph.gradNorm_smul
 #print axioms SemioticGraph.gradNorm_const
 #print axioms SemioticGraph.IsSolution
+#print axioms SemioticGraph.interiorGraph
+#print axioms SemioticGraph.energy
+#print axioms SemioticGraph.unitSphere
 #print axioms SemioticGraph.principalEigenvalue
 #print axioms SemioticGraph.principalEigenvalue_mul_le
+#print axioms SemioticGraph.principalEigenvalue_le_of_laplacian_eq
 #print axioms SemioticGraph.principalEigenvalue_neg
 #print axioms SemioticGraph.exists_pos_eigenvector
+#print axioms SemioticGraph.fixedPointMap
 #print axioms SemioticGraph.isSolution_of_fixedPointMap_eq
+#print axioms SemioticGraph.fixedPointMap_eq_iff_isSolution
 #print axioms SemioticGraph.fixedPointMap_mono
 #print axioms SemioticGraph.exists_isSolution_between
 #print axioms SemioticGraph.smul_subsolution
 #print axioms SemioticGraph.plateau_supersolution
 #print axioms SemioticGraph.exists_pos_graph
 #print axioms SemioticGraph.exists_pos_graph_of_unweighted
+#print axioms SemioticGraph.triangle
 #print axioms SemioticGraph.exists_pos_triangle
