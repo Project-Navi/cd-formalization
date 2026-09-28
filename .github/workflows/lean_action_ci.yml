@@ -35,7 +35,7 @@ jobs:
           PR_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           echo "event: $EVENT"
-          echo "checked out: $(git rev-parse HEAD) (parents: $(git log -1 --format=%P HEAD))"
+          echo "checked out: $(git rev-parse HEAD)"
           if [ "$EVENT" = pull_request ]; then
             echo "pull request head: $PR_HEAD, base: $PR_BASE"
           fi
@@ -50,7 +50,7 @@ jobs:
 
       # Pinned dependencies only, under an exact key; project modules are always rebuilt.
       - name: Cache Lake packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .lake/packages
           key: lake-packages-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'lake-manifest.json') }}
@@ -177,6 +177,45 @@ jobs:
           fi
           echo "$(grep -c '^#check' "$RUNNER_TEMP/DocNames.lean") documented names resolve."
 
+      # No axiom may be declared in any CdFormal module, even one that no selected declaration
+      # uses. The check reads the compiled environment, so it cannot be fooled by layout. It first
+      # proves it can fail: a module declaring a two-line axiom must be reported.
+      - name: Check that no axiom is declared
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          cat > "$RUNNER_TEMP/axiom_check.lean" <<'EOF'
+          open Lean in
+          #eval show CoreM Unit from do
+            let env ← getEnv
+            let mut found := #[]
+            let mut modules := 0
+            for mod in env.header.moduleNames, data in env.header.moduleData do
+              if mod.getRoot == `CdFormal then
+                modules := modules + 1
+                for c in data.constants do
+                  if c matches .axiomInfo _ then found := found.push c.name
+            unless found.isEmpty do throwError "axioms declared in CdFormal: {found}"
+            IO.println s!"no axiom declared in any of {modules} CdFormal modules"
+          EOF
+          fixture=CdFormal/CiAxiomFixture.lean
+          trap 'rm -f "$fixture" .lake/build/lib/lean/CdFormal/CiAxiomFixture.*' EXIT
+          printf 'import CdFormal.Basic\n\naxiom\n  ciAxiomFixture : False\n' > "$fixture"
+          lake build CdFormal.CiAxiomFixture
+          { echo 'import CdFormal.CiAxiomFixture'; cat "$RUNNER_TEMP/axiom_check.lean"; } \
+            > "$RUNNER_TEMP/SelfTest.lean"
+          # Detection must be the reason for failure: require a nonzero exit and the exact report.
+          status=0
+          lake env lean "$RUNNER_TEMP/SelfTest.lean" > "$RUNNER_TEMP/selftest.txt" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/selftest.txt"
+          if [ "$status" -eq 0 ] ||
+              ! grep -qF 'axioms declared in CdFormal: [ciAxiomFixture]' "$RUNNER_TEMP/selftest.txt"; then
+            echo "::error::the axiom self-test did not report ciAxiomFixture"
+            exit 1
+          fi
+          rm -f "$fixture" .lake/build/lib/lean/CdFormal/CiAxiomFixture.*
+          { echo 'import CdFormal'; cat "$RUNNER_TEMP/axiom_check.lean"; } > "$RUNNER_TEMP/NoAxioms.lean"
+          lake env lean "$RUNNER_TEMP/NoAxioms.lean"
+
       # Mathlib's header linter only runs inside Mathlib, so check the layout here: copyright
       # header, then imports, then the module docstring.
       - name: Check file headers
@@ -206,7 +245,7 @@ jobs:
 
       # 'sorry' and 'sorryAx' may not appear anywhere in the Lean sources, comments included, and
       # no axiom may be declared.
-      - name: Audit placeholders and axioms
+      - name: Audit placeholders
         if: ${{ !cancelled() }}
         run: |
           files=$(git ls-files 'CdFormal.lean' 'CdFormal/*.lean')
@@ -223,16 +262,4 @@ jobs:
             echo "::error::placeholder audit did not run (git grep exit $status)"
             exit 1
           fi
-          # No axiom may be declared, even one that no selected declaration uses.
-          status=0
-          git grep -n -E \
-            '^[[:space:]]*(@\[[^]]*\][[:space:]]*)?((private|protected|noncomputable|unsafe)[[:space:]]+)*axiom[[:space:]]' \
-            -- 'CdFormal.lean' 'CdFormal/*.lean' || status=$?
-          if [ "$status" -eq 0 ]; then
-            echo "::error::an axiom is declared in the Lean sources"
-            exit 1
-          elif [ "$status" -ne 1 ]; then
-            echo "::error::axiom audit did not run (git grep exit $status)"
-            exit 1
-          fi
-          echo "$(echo "$files" | wc -l) files audited; no 'sorry', 'sorryAx' or axiom declaration."
+          echo "$(echo "$files" | wc -l) files audited; no 'sorry' or 'sorryAx'."
