@@ -30,6 +30,12 @@ CdFormal/
   ScalingUniqueness.lean   no solution kΦ with k > 1
   LinftyAlgebraic.lean     b·v ≥ c·vᵖ implies v ≤ (b/c)^(1/(p−1))
   MonotoneFixedPoint.lean  fixed point between a sub- and a super-fixed point
+  Graph/
+    Basic.lean             finite graphs: operators, equation, energy, principal eigenvalue
+    Spectral.lean          principal eigenvector, positive on a connected interior
+    FixedPoint.lean        fixed-point map, monotonicity, sub- and supersolutions
+    Existence.lean         existence of a positive solution on a finite graph
+    Example.lean           a three-vertex instance
   Verify.lean              axiom dashboard
 CdFormal.lean              root import
 ```

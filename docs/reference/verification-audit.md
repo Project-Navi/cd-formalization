@@ -20,6 +20,10 @@ What is checked, how, and what remains outside the formalization. Toolchain and 
 | Section 3.4 (spectral condition, 1D) | `spectral_characterization_1d` | Algebraic inequality proved; eigenvalue identification not formalized |
 | Open Problem 3 (uniqueness) | `scaling_uniqueness` | Rules out solution multiples \(k\Phi\), \(k > 1\); uniqueness open |
 
+## Finite-graph results
+
+These are not in the paper. `SemioticGraph.exists_pos_graph` proves that the discrete problem on a finite weighted graph has a solution positive at every interior vertex, with the operators, the principal eigendata, the barriers and the fixed point all constructed. Its hypotheses are that the interior graph is connected, that the principal eigenvalue is negative, and that \(a(x) \le \sqrt{w(x,y)}\) on every edge of positive weight between distinct interior vertices. The last condition is sufficient for the proof; it is not claimed to be necessary. `SemioticGraph.exists_pos_triangle` shows that the hypotheses can be met.
+
 ## What CI checks
 
 The required `build` job, on every pull request and on `main`:
@@ -41,3 +45,4 @@ These checks establish that the proofs compile against the pinned Mathlib and us
 3. **Assumed analysis.** The fields of `PDEInfra` and `SolutionOperator` are assumed, and some differ from the classical results they stand in for; see [the assumption boundary](../explanation/axiom-boundary.md).
 4. **Lemma 3.11** is not formalized.
 5. **Uniqueness** is open; `scaling_uniqueness` covers only multiples of a solution.
+6. **Graph model.** The finite-graph theorem is about the discretization chosen for the formalization (unnormalized weights, the symmetric gradient norm, zero boundary values entering through boundary edges). Nothing relates it to the continuum problem: no convergence is formalized, and it is not claimed to match a deployed model.

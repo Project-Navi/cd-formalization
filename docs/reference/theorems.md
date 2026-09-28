@@ -1,8 +1,8 @@
 # Theorem Catalog
 
-Statements as they appear in the source. Every declaration compiles under `lake build --wfail`; the axioms of those listed in `CdFormal/Verify.lean` are checked in CI.
+Statements as they appear in the source. Every declaration compiles under `lake build --wfail`; the axioms of those listed in `CdFormal/Verify.lean` are checked in CI. The continuum results come first; the [finite-graph results](#finite-graph-existence) are at the end.
 
-Throughout, `n`, `M` and the instance arguments
+Throughout the continuum sections, `n`, `M` and the instance arguments
 
 ```lean
 variable {n : ℕ} {M : Type*}
@@ -170,3 +170,79 @@ theorem scaling_uniqueness
 ```
 
 A solution \(\Phi\) with \(\Phi(x_0) > 0\) and \(c(x_0) > 0\) has no solution multiple \(k\Phi\) with \(k > 1\). This is not uniqueness among all solutions, which the paper leaves open.
+
+## Finite-graph existence
+
+For a finite type `V` with `[Fintype V]` and `G : SemioticGraph V`. Here every operator is defined from the data, and no hypothesis stands in for analysis.
+
+| Declaration | Meaning |
+|-------------|---------|
+| `SemioticGraph` | weights \(w(x,y) = w(y,x) \geq 0\), a boundary set, \(\kappa, \gamma, \mu : V \to [0,1]\), \(b\), \(c > 0\), \(p > 1\) |
+| `SemioticGraph.a` | \(a(x) = \kappa(x)\gamma(x)\mu(x)\) |
+| `SemioticGraph.laplacian` | \((L u)(x) = \sum_y w(x,y)\,(u(x) - u(y))\) |
+| `SemioticGraph.gradNorm` | \(\lvert\nabla u\rvert(x) = \sqrt{\sum_y w(x,y)\,(u(y) - u(x))^2}\) |
+| `SemioticGraph.IsSolution` | the equation at every interior vertex, and \(u = 0\) on the boundary |
+| `SemioticGraph.interiorGraph` | interior vertices, adjacent when joined by an edge of positive weight |
+| `SemioticGraph.energy` | \(\tfrac12 \sum_x \sum_y w(x,y)\,(u(x) - u(y))^2 - \sum_x b(x)\,u(x)^2\), the quadratic form of \(L - \operatorname{diag}(b)\) |
+| `SemioticGraph.principalEigenvalue` | the infimum of `SemioticGraph.energy` over `SemioticGraph.unitSphere`, the functions that vanish on the boundary with \(\sum_x u(x)^2 = 1\) |
+
+```lean
+def IsSolution (u : V → ℝ) : Prop :=
+  (∀ x, x ∉ G.boundary →
+    G.laplacian u x = G.a x * G.gradNorm u x + G.b x * u x - G.c x * max (u x) 0 ^ G.p) ∧
+  ∀ x ∈ G.boundary, u x = 0
+```
+
+The sums run over all vertices, so the boundary values, which are zero, enter through boundary edges. The weights are not normalized and there is no vertex measure. This is the discretization chosen for the formalization; it is not claimed to match any deployed model.
+
+### Positive solution
+
+```lean
+theorem SemioticGraph.exists_pos_graph (hconn : G.interiorGraph.Connected)
+    (hdom : ∀ x y, x ∉ G.boundary → y ∉ G.boundary → x ≠ y → 0 < G.w x y →
+      G.a x ≤ √(G.w x y))
+    (hneg : G.principalEigenvalue < 0) :
+    ∃ u : V → ℝ, G.IsSolution u ∧ ∀ x, x ∉ G.boundary → 0 < u x
+
+theorem SemioticGraph.exists_pos_graph_of_unweighted (hw : ∀ x y, G.w x y = 0 ∨ G.w x y = 1)
+    (hconn : G.interiorGraph.Connected) (hneg : G.principalEigenvalue < 0) :
+    ∃ u : V → ℝ, G.IsSolution u ∧ ∀ x, x ∉ G.boundary → 0 < u x
+```
+
+The solution is positive at every interior vertex. The edge-dominance hypothesis `hdom` is what makes the fixed-point map in the proof monotone; it is a sufficient condition for this proof, not a condition shown to be necessary for existence. For weights in \(\{0, 1\}\) it follows from \(0 \le a \le 1\), so `SemioticGraph.exists_pos_graph_of_unweighted` does not assume it.
+
+### Gradient norm
+
+```lean
+theorem SemioticGraph.gradNorm_nonneg (u : V → ℝ) (x : V) : 0 ≤ G.gradNorm u x
+
+theorem SemioticGraph.gradNorm_smul (c : ℝ) (u : V → ℝ) (x : V) :
+    G.gradNorm (fun y ↦ c * u y) x = |c| * G.gradNorm u x
+
+theorem SemioticGraph.gradNorm_const (k : ℝ) (x : V) : G.gradNorm (fun _ ↦ k) x = 0
+```
+
+These are the laws that `SemioticOperators` imposes on its gradient norm.
+
+### Principal eigendata
+
+```lean
+theorem SemioticGraph.principalEigenvalue_mul_le {u : V → ℝ}
+    (hu : ∀ x ∈ G.boundary, u x = 0) :
+    G.principalEigenvalue * ∑ x, u x ^ 2 ≤ G.energy u
+
+theorem SemioticGraph.exists_pos_eigenvector (hconn : G.interiorGraph.Connected) :
+    ∃ φ ∈ G.unitSphere, (∀ x, x ∉ G.boundary → 0 < φ x) ∧
+      ∀ x, x ∉ G.boundary → G.laplacian φ x = G.b x * φ x + G.principalEigenvalue * φ x
+
+theorem SemioticGraph.principalEigenvalue_neg {u : V → ℝ} (hu : ∀ x ∈ G.boundary, u x = 0)
+    (hneg : G.energy u < 0) : G.principalEigenvalue < 0
+```
+
+### Sub- and supersolutions
+
+`SemioticGraph.fixedPointMap` is the fixed-point map of the proof, `SemioticGraph.fixedPointMap_mono` its monotonicity, `SemioticGraph.isSolution_of_fixedPointMap_eq` the passage from fixed points to solutions, and `SemioticGraph.exists_isSolution_between` gives a solution between an ordered subsolution and supersolution. The barriers are `SemioticGraph.smul_subsolution` and `SemioticGraph.plateau_supersolution`. See the [proof strategy](../explanation/proof-strategy.md#finite-graph-existence).
+
+### Example
+
+`SemioticGraph.triangle` is the complete graph on three vertices with unit weights and one boundary vertex, with \(\kappa = \gamma = \mu = 1\), \(b = 2\), \(c = 1\) and \(p = 2\). `SemioticGraph.exists_pos_triangle` applies `SemioticGraph.exists_pos_graph_of_unweighted` to it, so the hypotheses of the graph theorem can all be met.

@@ -94,3 +94,7 @@ Classically: \(\varepsilon\varphi_1\) is a sub-solution, a large constant is a s
 | `PrincipalEigendata` | Krein–Rutman or variational theory | Principal eigenvalues of elliptic operators on manifolds |
 
 Replacing a field by a proof would also require the operators to be constructed from the metric and the boundary to be the boundary of a manifold with boundary.
+
+## The finite-graph theorem
+
+`SemioticGraph.exists_pos_graph` takes no hypothesis of the kind above. On a finite graph the Laplacian and the gradient norm are defined from the weights, the principal eigenvalue is defined as a minimum and shown to have a positive eigenvector, and the fixed point comes from `monotone_fixed_point_between`. Its hypotheses (a connected interior graph, a negative principal eigenvalue, and the edge-dominance condition) are mathematical conditions stated in its signature; see the [theorem catalog](../reference/theorems.md#finite-graph-existence).

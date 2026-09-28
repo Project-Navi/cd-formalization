@@ -2,8 +2,9 @@
 
 A Lean 4 and Mathlib (v4.28.0) formalization of the existence theory in N. Spence, *The Creative Determinant: Autopoietic Closure as a Nonlinear Elliptic Boundary Value Problem with Lean 4-Verified Existence Conditions* (2026). The problem is −ΔΦ = a|∇Φ| + bΦ − c(Φ₊)ᵖ in M with Φ = 0 on ∂M, where a = κγμ and p > 1. Documentation: [project-navi.github.io/cd-formalization](https://project-navi.github.io/cd-formalization/).
 
-- **Conditional results.** `SemioticBVP.exists_isWeakCoherentConfiguration` gives a nonnegative solution, and `SemioticBVP.exists_pos_isWeakCoherentConfiguration` gives a nonnegative solution that is positive at some interior point when a supplied principal eigenvalue is negative. Both are derived from the hypotheses `PDEInfra` and `SolutionOperator`, which stand in for compactness, maximum-principle, fixed-point and sub/super-solution results that are not proved here. The manifold's Laplacian, gradient norm and boundary are abstract data, not constructed from its geometry.
-- **Unconditional results.** Supporting lemmas, including `spectral_characterization_1d` (algebra), `linfty_bound_algebraic`, `monotone_fixed_point_between` (Knaster–Tarski) and `scaling_uniqueness`: if Φ solves the equation with Φ(x₀) > 0 and c(x₀) > 0, then kΦ does not for any k > 1.
+- **Continuum results (conditional).** `SemioticBVP.exists_isWeakCoherentConfiguration` gives a nonnegative solution, and `SemioticBVP.exists_pos_isWeakCoherentConfiguration` one that is positive at some interior point when a supplied principal eigenvalue is negative. Both are derived from the hypotheses `PDEInfra` and `SolutionOperator`, which stand in for elliptic results not proved here; the manifold's Laplacian, gradient norm and boundary are abstract data.
+- **Finite graphs (proved).** For a discretization on a finite weighted graph with a Dirichlet boundary, `SemioticGraph.exists_pos_graph` gives a solution positive at every interior vertex when the interior graph is connected, the principal eigenvalue of L − diag(b) is negative, and a(x) ≤ √w(x,y) on every edge of positive weight between distinct interior vertices. The operators and eigendata are constructed. The edge condition is sufficient for this proof, not claimed necessary, and holds for 0/1 weights (`SemioticGraph.exists_pos_graph_of_unweighted`).
+- **Supporting lemmas**, among them `spectral_characterization_1d`, `linfty_bound_algebraic`, `monotone_fixed_point_between` (Knaster–Tarski) and `scaling_uniqueness`.
 
 The [assumption boundary](https://project-navi.github.io/cd-formalization/explanation/axiom-boundary/) page states what each hypothesis says and what is not formalized.
 
@@ -19,4 +20,4 @@ lake env lean -DwarningAsError=true CdFormal/Verify.lean
 
 ## Credit and license
 
-Formalization by Nelson Spence. Aristotle (Harmonic) proved several leaf lemmas and Claude assisted with Lean. The bornological form of `PDEInfra.T_compact` follows a suggestion by Yongxi (Aaron) Lin on the Lean Zulip. To cite this work, see [CITATION.cff](CITATION.cff). Apache 2.0; see [LICENSE](LICENSE).
+Formalization by Nelson Spence. The finite-graph formulation and proof route were proposed by Andrew Edmark (@aedmark). Aristotle (Harmonic) proved several leaf lemmas, and Claude assisted with the Lean proofs, including the finite-graph development. The bornological form of `PDEInfra.T_compact` follows a suggestion by Yongxi (Aaron) Lin on the Lean Zulip. To cite this work, see [CITATION.cff](CITATION.cff). Apache 2.0; see [LICENSE](LICENSE).
