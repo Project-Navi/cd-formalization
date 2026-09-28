@@ -203,8 +203,13 @@ jobs:
           lake build CdFormal.CiAxiomFixture
           { echo 'import CdFormal.CiAxiomFixture'; cat "$RUNNER_TEMP/axiom_check.lean"; } \
             > "$RUNNER_TEMP/SelfTest.lean"
-          if lake env lean "$RUNNER_TEMP/SelfTest.lean"; then
-            echo "::error::the axiom check did not report a declared axiom"
+          # Detection must be the reason for failure: require a nonzero exit and the exact report.
+          status=0
+          lake env lean "$RUNNER_TEMP/SelfTest.lean" > "$RUNNER_TEMP/selftest.txt" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/selftest.txt"
+          if [ "$status" -eq 0 ] ||
+              ! grep -qF 'axioms declared in CdFormal: [ciAxiomFixture]' "$RUNNER_TEMP/selftest.txt"; then
+            echo "::error::the axiom self-test did not report ciAxiomFixture"
             exit 1
           fi
           rm -f "$fixture" .lake/build/lib/lean/CdFormal/CiAxiomFixture.*
