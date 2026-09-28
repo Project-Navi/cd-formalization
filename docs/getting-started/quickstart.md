@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- [elan](https://github.com/leanprover/elan), which installs the toolchain pinned in `lean-toolchain` (Lean v4.28.0).
-- Mathlib v4.28.0, which Lake fetches.
+- [elan](https://github.com/leanprover/elan), which installs the toolchain pinned in `lean-toolchain` (Lean v4.34.1).
+- Mathlib v4.34.1, which Lake fetches.
 
 ## Build and verify
 

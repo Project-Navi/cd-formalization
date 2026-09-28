@@ -32,7 +32,7 @@ The model is abstract. The atlas is analytic (`⊤` is `ω`) and modelled on ℝ
 manifold boundary; `SemioticBVP.boundary` is an arbitrary set standing in for ∂M. The Laplacian
 and gradient norm are fields of `SemioticOperators` with a few algebraic properties; they are
 not constructed from `SemioticManifold.riemannianMetric`, which nothing else uses.
-`SemioticBVP.equation` and `SemioticBVP.boundary_condition` are fields whose default values are
+`SemioticBVP.equation` and `SemioticBVP.boundaryCondition` are fields whose default values are
 the displayed problem. A `SemioticBVP` may override them, and `IsWeakCoherentConfiguration`
 uses the supplied fields.
 
@@ -151,7 +151,7 @@ follow the operator formulation. For nonnegative solutions the two agree. -/
 /-- The BVP for the Creative Determinant: -ΔΦ = a|∇Φ| + bΦ - c(Φ₊)^p in M, Φ = 0 on ∂M.
     Paper Definition 3.1 (V1').
 
-    `equation` and `boundary_condition` are fields with default values, so a `SemioticBVP` may
+    `equation` and `boundaryCondition` are fields with default values, so a `SemioticBVP` may
     replace them; statements about an arbitrary `bvp` concern the supplied predicates. -/
 structure SemioticBVP (n : ℕ) (M : Type*)
     [TopologicalSpace M]
@@ -181,15 +181,15 @@ structure SemioticBVP (n : ℕ) (M : Type*)
       (ctx.a x) * (ops.gradNorm Φ x) + (ctx.b x) * (Φ x) -
       (ctx.c x) * (max (Φ x) 0) ^ (ctx.p)
   /-- The boundary condition: Φ = 0 on ∂M -/
-  boundary_condition : (M → ℝ) → Prop := fun Φ ↦
+  boundaryCondition : (M → ℝ) → Prop := fun Φ ↦
     ∀ x ∈ boundary, Φ x = 0
 
 /-! ## Weak Coherent Configuration -/
 
 /-- A weak coherent configuration: a function satisfying `bvp.equation` and
-    `bvp.boundary_condition`, which are the displayed BVP when the default fields are used.
+    `bvp.boundaryCondition`, which are the displayed BVP when the default fields are used.
     Paper §3.2 (inline definition after eq. V1'). -/
 def IsWeakCoherentConfiguration (bvp : SemioticBVP n M) (Φ : M → ℝ) : Prop :=
-  bvp.equation Φ ∧ bvp.boundary_condition Φ
+  bvp.equation Φ ∧ bvp.boundaryCondition Φ
 
 end

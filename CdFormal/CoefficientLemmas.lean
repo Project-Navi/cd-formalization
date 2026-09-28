@@ -45,8 +45,9 @@ theorem a_nonneg (x : M) : 0 ≤ ctx.a x :=
 /-- The creative drive a(x) = κ(x)·γ(x)·μ(x) ≤ 1,
     since each factor lies in [0,1]. -/
 theorem a_le_one (x : M) : ctx.a x ≤ 1 :=
-  mul_le_one₀ (mul_le_one₀ (ctx.κ_bounds x).2 (ctx.γ_bounds x).1 (ctx.γ_bounds x).2)
-    (ctx.μ_bounds x).1 (ctx.μ_bounds x).2
+  (mul_le_of_le_one_left (ctx.μ_bounds x).1
+    ((mul_le_of_le_one_left (ctx.γ_bounds x).1 (ctx.κ_bounds x).2).trans (ctx.γ_bounds x).2)).trans
+    (ctx.μ_bounds x).2
 
 /-- The saturation exponent satisfies p - 1 > 0.
     Direct consequence of `one_lt_p`. -/

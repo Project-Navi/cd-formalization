@@ -275,7 +275,7 @@ theorem laplacian_eq_of_isMinOn {φ : V → ℝ} (hφ : φ ∈ G.unitSphere)
   obtain ⟨r, hr⟩ : ∃ r : V → ℝ, ∀ y, r y = G.laplacian φ y - G.b y * φ y - G.energy φ * φ y :=
     ⟨_, fun _ ↦ rfl⟩
   have h0 := G.sum_mul_eigen_eq_zero hφ hmin (h := fun y ↦ if y ∈ G.boundary then 0 else r y)
-    fun y hy ↦ if_pos hy
+    fun y hy ↦ ite_eq_left hy
   simp only [← hr] at h0
   have hnn : ∀ y ∈ Finset.univ, 0 ≤ (if y ∈ G.boundary then 0 else r y) * r y := by
     intro y _
@@ -283,7 +283,7 @@ theorem laplacian_eq_of_isMinOn {φ : V → ℝ} (hφ : φ ∈ G.unitSphere)
     · simp
     · exact mul_self_nonneg (r y)
   have hx0 := (Finset.sum_eq_zero_iff_of_nonneg hnn).mp h0 x (Finset.mem_univ x)
-  rw [if_neg hx, mul_self_eq_zero, hr] at hx0
+  rw [ite_eq_right hx, mul_self_eq_zero, hr] at hx0
   linarith
 
 theorem abs_mem_unitSphere {φ : V → ℝ} (hφ : φ ∈ G.unitSphere) :

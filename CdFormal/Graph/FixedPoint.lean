@@ -108,10 +108,10 @@ open Classical in
 def plateau (M : ℝ) (x : V) : ℝ := if x ∈ G.boundary then 0 else M
 
 theorem plateau_of_mem {M : ℝ} {x : V} (hx : x ∈ G.boundary) : G.plateau M x = 0 := by
-  rw [plateau, if_pos hx]
+  rw [plateau, ite_eq_left hx]
 
 theorem plateau_of_notMem {M : ℝ} {x : V} (hx : x ∉ G.boundary) : G.plateau M x = M := by
-  rw [plateau, if_neg hx]
+  rw [plateau, ite_eq_right hx]
 
 theorem plateau_le {M : ℝ} (hM : 0 ≤ M) (x : V) : G.plateau M x ≤ M := by
   by_cases hx : x ∈ G.boundary
@@ -150,10 +150,10 @@ theorem isSolution_of_fixedPointMap_eq {K : ℝ} (hK : 0 < K) {u : V → ℝ}
     (hu : G.fixedPointMap K u = u) : G.IsSolution u := by
   refine ⟨fun x hx ↦ ?_, fun x hx ↦ ?_⟩
   · have h := congrFun hu x
-    rw [fixedPointMap, if_neg hx, div_eq_iff (G.denom_pos hK x).ne'] at h
+    rw [fixedPointMap, ite_eq_right hx, div_eq_iff (G.denom_pos hK x).ne'] at h
     linarith [G.mul_sub_numer K u x]
   · have h := congrFun hu x
-    rw [fixedPointMap, if_pos hx] at h
+    rw [fixedPointMap, ite_eq_left hx] at h
     exact h.symm
 
 /-- For K > 0, the fixed points of the map are exactly the solutions. -/
@@ -161,22 +161,22 @@ theorem fixedPointMap_eq_iff_isSolution {K : ℝ} (hK : 0 < K) {u : V → ℝ} :
     G.fixedPointMap K u = u ↔ G.IsSolution u := by
   refine ⟨G.isSolution_of_fixedPointMap_eq hK, fun hu ↦ funext fun x ↦ ?_⟩
   by_cases hx : x ∈ G.boundary
-  · rw [fixedPointMap, if_pos hx, hu.2 x hx]
-  · rw [fixedPointMap, if_neg hx, div_eq_iff (G.denom_pos hK x).ne']
+  · rw [fixedPointMap, ite_eq_left hx, hu.2 x hx]
+  · rw [fixedPointMap, ite_eq_right hx, div_eq_iff (G.denom_pos hK x).ne']
     linarith [G.mul_sub_numer K u x, hu.1 x hx]
 
 theorem le_fixedPointMap_of_subsolution {K : ℝ} (hK : 0 < K) {u : V → ℝ} {x : V}
     (hx : x ∉ G.boundary)
     (hsub : G.laplacian u x ≤ G.a x * G.gradNorm u x + G.b x * u x - G.c x * max (u x) 0 ^ G.p) :
     u x ≤ G.fixedPointMap K u x := by
-  rw [fixedPointMap, if_neg hx, le_div_iff₀ (G.denom_pos hK x)]
+  rw [fixedPointMap, ite_eq_right hx, le_div_iff₀ (G.denom_pos hK x)]
   linarith [G.mul_sub_numer K u x]
 
 theorem fixedPointMap_le_of_supersolution {K : ℝ} (hK : 0 < K) {u : V → ℝ} {x : V}
     (hx : x ∉ G.boundary)
     (hsup : G.a x * G.gradNorm u x + G.b x * u x - G.c x * max (u x) 0 ^ G.p ≤ G.laplacian u x) :
     G.fixedPointMap K u x ≤ u x := by
-  rw [fixedPointMap, if_neg hx, div_le_iff₀ (G.denom_pos hK x)]
+  rw [fixedPointMap, ite_eq_right hx, div_le_iff₀ (G.denom_pos hK x)]
   linarith [G.mul_sub_numer K u x]
 
 /-- Minkowski's inequality for the weighted sums that define the gradient norm. -/
@@ -298,8 +298,8 @@ theorem fixedPointMap_mono
     (hbd : ∀ y ∈ G.boundary, u y = v y) (x : V) :
     G.fixedPointMap K u x ≤ G.fixedPointMap K v x := by
   by_cases hx : x ∈ G.boundary
-  · rw [fixedPointMap, fixedPointMap, if_pos hx, if_pos hx]
-  · rw [fixedPointMap, fixedPointMap, if_neg hx, if_neg hx]
+  · rw [fixedPointMap, fixedPointMap, ite_eq_left hx, ite_eq_left hx]
+  · rw [fixedPointMap, fixedPointMap, ite_eq_right hx, ite_eq_right hx]
     exact div_le_div_of_nonneg_right (G.numer_mono hdom hKM hu huv hvM hbd hx)
       (G.denom_pos hK x).le
 
@@ -329,16 +329,16 @@ theorem exists_isSolution_between
         (hzero u hlu (huv.trans hvh) y hy).trans (hzero v (hlu.trans huv) hvh y hy).symm
   have hlo_le : lo ≤ G.fixedPointMap K lo := fun x ↦ by
     by_cases hx : x ∈ G.boundary
-    · rw [hlo_bd x hx, fixedPointMap, if_pos hx]
+    · rw [hlo_bd x hx, fixedPointMap, ite_eq_left hx]
     · exact G.le_fixedPointMap_of_subsolution hK hx (hsub x hx)
   have hhi_le : G.fixedPointMap K hi ≤ hi := fun x ↦ by
     by_cases hx : x ∈ G.boundary
-    · rw [hhi_bd x hx, fixedPointMap, if_pos hx]
+    · rw [hhi_bd x hx, fixedPointMap, ite_eq_left hx]
     · exact G.fixedPointMap_le_of_supersolution hK hx (hsup x hx)
   have hmaps : ∀ u ∈ Set.Icc lo hi, G.fixedPointMap K u ∈ Set.Icc lo hi := fun u hu ↦
     ⟨hlo_le.trans (hmono lo u le_rfl hu.1 hu.2),
       (hmono u hi hu.1 hu.2 le_rfl).trans hhi_le⟩
-  haveI : Fact (lo ≤ hi) := ⟨hlohi⟩
+  have : Fact (lo ≤ hi) := ⟨hlohi⟩
   obtain ⟨u, hu, -, -⟩ := monotone_fixed_point_between (α := Set.Icc lo hi)
     ⟨fun u ↦ ⟨G.fixedPointMap K u, hmaps u u.2⟩, fun u v huv ↦ hmono u v u.2.1 huv v.2.2⟩
     bot_le le_top bot_le
