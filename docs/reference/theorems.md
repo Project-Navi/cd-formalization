@@ -187,7 +187,7 @@ For a finite type `V` with `[Fintype V]` and `G : SemioticGraph V`. Here every o
 | `SemioticGraph.principalEigenvalue` | the infimum of `SemioticGraph.energy` over `SemioticGraph.unitSphere`, the functions that vanish on the boundary with \(\sum_x u(x)^2 = 1\) |
 
 ```lean
-def IsSolution (u : V → ℝ) : Prop :=
+def SemioticGraph.IsSolution (u : V → ℝ) : Prop :=
   (∀ x, x ∉ G.boundary →
     G.laplacian u x = G.a x * G.gradNorm u x + G.b x * u x - G.c x * max (u x) 0 ^ G.p) ∧
   ∀ x ∈ G.boundary, u x = 0

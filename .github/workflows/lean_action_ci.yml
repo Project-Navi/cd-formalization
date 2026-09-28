@@ -142,7 +142,8 @@ jobs:
                 "results, one record each, using only propext, Classical.choice and Quot.sound.")
           EOF
 
-      # Every Lean name written in inline code in the README and the docs must resolve.
+      # Every Lean name written in inline code in the README and the docs, and every declaration
+      # shown in a Lean code block there, must resolve.
       - name: Check documented names
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
@@ -152,7 +153,12 @@ jobs:
           files = [pathlib.Path("README.md"), *sorted(pathlib.Path("docs").rglob("*.md"))]
           names = set()
           for path in files:
-              text = re.sub(r"^```.*?^```", "", path.read_text(encoding="utf-8"), flags=re.S | re.M)
+              raw = path.read_text(encoding="utf-8")
+              # Declarations shown in Lean code blocks must resolve as well.
+              for block in re.findall(r"^```lean\n(.*?)^```", raw, flags=re.S | re.M):
+                  names.update(re.findall(
+                      r"^(?:theorem|lemma|def|abbrev|structure|class)\s+([^\s(:{\[]+)", block, re.M))
+              text = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)
               for token in re.findall(r"`([^`\n]+)`", text):
                   if (re.fullmatch(r"[^\W\d][\w'.]*[\w']", token)
                           and re.search(r"[A-Z_.]", token)
@@ -198,8 +204,9 @@ jobs:
               sys.exit("header check failed:\n  " + "\n  ".join(bad or ["no files"]))
           print(f"{len(files)} files have a copyright header and a module docstring after the imports.")
 
-      # 'sorry' and 'sorryAx' may not appear anywhere in the Lean sources, comments included.
-      - name: Audit placeholders
+      # 'sorry' and 'sorryAx' may not appear anywhere in the Lean sources, comments included, and
+      # no axiom may be declared.
+      - name: Audit placeholders and axioms
         if: ${{ !cancelled() }}
         run: |
           files=$(git ls-files 'CdFormal.lean' 'CdFormal/*.lean')
@@ -216,4 +223,16 @@ jobs:
             echo "::error::placeholder audit did not run (git grep exit $status)"
             exit 1
           fi
-          echo "$(echo "$files" | wc -l) files audited; no 'sorry' or 'sorryAx'."
+          # No axiom may be declared, even one that no selected declaration uses.
+          status=0
+          git grep -n -E \
+            '^[[:space:]]*(@\[[^]]*\][[:space:]]*)?((private|protected|noncomputable|unsafe)[[:space:]]+)*axiom[[:space:]]' \
+            -- 'CdFormal.lean' 'CdFormal/*.lean' || status=$?
+          if [ "$status" -eq 0 ]; then
+            echo "::error::an axiom is declared in the Lean sources"
+            exit 1
+          elif [ "$status" -ne 1 ]; then
+            echo "::error::axiom audit did not run (git grep exit $status)"
+            exit 1
+          fi
+          echo "$(echo "$files" | wc -l) files audited; no 'sorry', 'sorryAx' or axiom declaration."

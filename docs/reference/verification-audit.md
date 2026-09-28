@@ -32,9 +32,9 @@ The required `build` job, on every pull request and on `main`:
 - runs the Mathlib environment linters (`lake lint`);
 - runs `CdFormal/Verify.lean` with warnings as errors and requires exactly one `#print axioms` record for each listed declaration, each using only `propext`, `Classical.choice` and `Quot.sound`;
 - fails if a headline result is missing from that list: the two continuum existence theorems, `SemioticGraph.exists_pos_graph` and its unweighted corollary, and the supporting lemmas the README names;
-- resolves, with `#check`, every Lean name quoted in inline code in the README and on these pages;
+- resolves, with `#check`, every Lean name quoted in inline code in the README and on these pages, and every declaration shown in a Lean code block there;
 - checks that every Lean file starts with the copyright header, then its imports, then a module docstring;
-- fails if `sorry` or `sorryAx` appears anywhere in the Lean sources, comments included.
+- fails if `sorry` or `sorryAx` appears anywhere in the Lean sources, comments included, or if any `axiom` is declared.
 
 The `docs` job builds this site, checks that every navigation page is built and every built page is in the navigation, and checks local links, assets and anchors. It does not check external links.
 
