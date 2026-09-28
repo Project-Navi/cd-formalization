@@ -11,9 +11,9 @@ import Mathlib.Tactic
 
 ## Main statements
 
-- `spectral_characterization_1d` — β > β* implies (π/L)² - βb < 0 (algebra)
+- `spectral_characterization_1d` — for b > 0, β > β* implies (π/L)² - βb < 0 (algebra)
 - `viabilityThreshold_lt_iff` — for b > 0, β > β* exactly when (π/L)² - βb < 0
-- `scaling_algebraic_contradiction` — k < kᵖ when p > 1 (algebra)
+- `scaling_algebraic_contradiction` — k < kᵖ when k > 1 and p > 1 (algebra)
 - `SemioticBVP.exists_isWeakCoherentConfiguration` — a nonnegative solution
   (Paper Thm 3.12), conditional on `PDEInfra`
 - `SemioticBVP.exists_pos_isWeakCoherentConfiguration` — a nonnegative solution that is
@@ -21,7 +21,8 @@ import Mathlib.Tactic
 
 ## Implementation notes
 
-The algebraic results use no hypotheses. The existence theorems compose the fields of
+The algebraic results require no PDE infrastructure assumptions; their hypotheses, such as b > 0
+or p > 1, are stated in their signatures. The existence theorems compose the fields of
 `PDEInfra` and `SolutionOperator`, which appear as arguments in their signatures; `#print axioms`
 lists only Lean axioms and so does not show them.
 
@@ -43,18 +44,19 @@ variable {n : ℕ} {M : Type*}
 
 /-! ## Spectral Characterization (1D)
 
-For constant viability b on [0,L], the principal Dirichlet eigenvalue of -d²/dx² - β·b is
+For L > 0 and constant viability b on [0,L], the principal Dirichlet eigenvalue of -d²/dx² - β·b is
   eigval = (π/L)² - β·b.
 That identification is classical and not formalized here. For b > 0, eigval < 0 is equivalent
 to β > β* := (π/L)²/b (`viabilityThreshold_lt_iff`). -/
 
-/-- The viability threshold β* = (π/L)² / b for constant viability b on [0,L]. -/
+/-- The viability threshold β* = (π/L)² / b for constant viability b on [0,L] with L > 0. -/
 def viabilityThreshold (L : ℝ) (b : ℝ) : ℝ :=
   (Real.pi / L) ^ 2 / b
 
-/-- Spectral characterization (1D, constant coefficients): β > β* implies (π/L)² − βb < 0.
-    For constant b this expression is the principal Dirichlet eigenvalue of -d²/dx² - βb on
-    [0,L]; that identification, and any statement on a manifold, is not formalized. -/
+/-- Spectral characterization (1D, constant coefficients): for b > 0, β > β* implies
+    (π/L)² − βb < 0. For L > 0 and constant b this expression is the principal Dirichlet
+    eigenvalue of -d²/dx² - βb on [0,L]; that identification, and any statement on a manifold,
+    is not formalized. -/
 theorem spectral_characterization_1d
     (L : ℝ) (b : ℝ) (beta : ℝ) (hb : b > 0) :
     let beta_star := viabilityThreshold L b

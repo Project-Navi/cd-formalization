@@ -18,12 +18,14 @@ that algebraic step. The maximum-principle argument ("at interior max,
 Together these decompose Paper Lemma 3.10 into:
 - **Assumed** (maximum principle): the PDE inequality `b·v ≥ c·v^p` holds
   at an interior maximum
-- **Proved** (this file): `b·v ≥ c·v^p` implies `v ≤ (b/c)^{1/(p-1)}`
+- **Proved** (this file): for v > 0, c > 0 and p > 1, `b·v ≥ c·v^p` implies
+  `v ≤ (b/c)^{1/(p-1)}`
 
 ## Main statements
 
-- `rpow_le_of_mul_rpow_le` — from `b·v ≥ c·v^p` to `v^{p-1} ≤ b/c`
-- `linfty_bound_algebraic` — from `b·v ≥ c·v^p` to `v ≤ (b/c)^{1/(p-1)}`
+- `rpow_le_of_mul_rpow_le` — for v > 0 and c > 0, from `b·v ≥ c·v^p` to `v^{p-1} ≤ b/c`
+- `linfty_bound_algebraic` — for v > 0, c > 0 and p > 1, from `b·v ≥ c·v^p` to
+  `v ≤ (b/c)^{1/(p-1)}`
 
 ## References
 

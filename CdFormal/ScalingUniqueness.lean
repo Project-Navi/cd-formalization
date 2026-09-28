@@ -18,7 +18,7 @@ This is not uniqueness among all solutions, which the paper leaves open (Open Pr
 
 ## Main statements
 
-- `scaling_uniqueness` — if Φ and kΦ both solve the CD equation,
+- `scaling_uniqueness` — if Φ and kΦ with k > 1 both solve the CD equation,
   contradiction at any point with c > 0 and Φ > 0.
 
 ## References

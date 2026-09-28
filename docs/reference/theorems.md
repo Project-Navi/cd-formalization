@@ -85,7 +85,7 @@ theorem viabilityThreshold_lt_iff (L : ℝ) {b : ℝ} (hb : 0 < b) (beta : ℝ) 
     viabilityThreshold L b < beta ↔ (Real.pi / L) ^ 2 - beta * b < 0
 ```
 
-`spectral_characterization_1d` is an inequality about the expression \((\pi/L)^2 - \beta b\), which for constant \(b\) is the principal Dirichlet eigenvalue of \(-d^2/dx^2 - \beta b\) on \([0, L]\); that identification is not formalized.
+`spectral_characterization_1d` is an inequality about the expression \((\pi/L)^2 - \beta b\), which for \(L > 0\) and constant \(b\) is the principal Dirichlet eigenvalue of \(-d^2/dx^2 - \beta b\) on \([0, L]\); that identification is not formalized.
 
 ```lean
 lemma scaling_algebraic_contradiction
