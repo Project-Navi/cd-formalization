@@ -104,13 +104,16 @@ theorem exists_pos_graph (hconn : G.interiorGraph.Connected)
           ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y :=
         Finset.single_le_sum (fun y _ ↦ div_nonneg (by positivity) (G.c_pos y).le)
           (Finset.mem_univ x)
-      have h1 : G.c x * ((|G.b x| + G.a x ^ 2 / 4) / G.c x) = |G.b x| + G.a x ^ 2 / 4 :=
-        mul_div_cancel₀ _ hcx.ne'
-      have h2 := mul_le_mul_of_nonneg_left hterm hcx.le
-      linarith [le_abs_self (G.b x)]
+      calc G.a x ^ 2 / 4 + G.b x ≤ |G.b x| + G.a x ^ 2 / 4 := by
+            linarith [le_abs_self (G.b x)]
+        _ = G.c x * ((|G.b x| + G.a x ^ 2 / 4) / G.c x) := (mul_div_cancel₀ _ hcx.ne').symm
+        _ ≤ G.c x * ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y :=
+            mul_le_mul_of_nonneg_left hterm hcx.le
+        _ ≤ G.c x * (1 + ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y) :=
+            mul_le_mul_of_nonneg_left (le_add_of_nonneg_left zero_le_one) hcx.le
     refine ⟨(1 + ∑ y, (|G.b y| + G.a y ^ 2 / 4) / G.c y) ^ (1 / (G.p - 1)),
       Real.one_le_rpow (le_add_of_nonneg_right hR0) (one_div_pos.mpr hp1).le, fun x ↦ ?_⟩
-    rw [← Real.rpow_mul (by linarith), one_div_mul_cancel hp1.ne', Real.rpow_one]
+    rw [← Real.rpow_mul (add_nonneg zero_le_one hR0), one_div_mul_cancel hp1.ne', Real.rpow_one]
     exact hR x
   -- The shift K of the fixed-point map.
   have hT : ∀ x, 0 ≤ G.a x * ∑ y, √(G.w x y) + G.c x * G.p * M ^ (G.p - 1) + |G.b x| :=

@@ -214,7 +214,7 @@ theorem sum_mul_eigen_eq_zero {φ : V → ℝ} (hφ : φ ∈ G.unitSphere)
         G.energy (fun x ↦ φ x + t * h x) :=
       G.principalEigenvalue_mul_le (u := fun x ↦ φ x + t * h x) fun x hx ↦ by
         simp [(G.mem_unitSphere.mp hφ).1 x hx, hh x hx]
-    rw [G.sum_sq_add_smul, G.energy_add_smul, h1, heig] at hle
+    rw [sum_sq_add_smul, G.energy_add_smul, h1, heig] at hle
     linarith
   have hd := discrim_le_zero key
   rw [discrim, mul_zero, sub_zero] at hd

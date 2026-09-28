@@ -91,11 +91,11 @@ theorem rpow_sub_rpow_le_mul {u v M p : ℝ} (hu : 0 ≤ u) (huv : u ≤ v) (hvM
     rw [hkey] at hb
     linarith
 
-/-- Completing the square: a·√(M·S) ≤ S + M·a²/4 for M > 0 and S ≥ 0. -/
+/-- Completing the square: a·√(M·S) ≤ S + (a²/4)·M for M > 0 and S ≥ 0. -/
 theorem mul_sqrt_mul_le {a M S : ℝ} (hM : 0 < M) (hS : 0 ≤ S) :
-    a * √(M * S) ≤ S + M * a ^ 2 / 4 := by
+    a * √(M * S) ≤ S + a ^ 2 / 4 * M := by
   have hr := Real.sq_sqrt (mul_nonneg hM.le hS)
-  have key : M * (S + M * a ^ 2 / 4 - a * √(M * S)) = (√(M * S) - M * a / 2) ^ 2 := by
+  have key : M * (S + a ^ 2 / 4 * M - a * √(M * S)) = (√(M * S) - M * a / 2) ^ 2 := by
     linear_combination -1 * hr
   have h := sq_nonneg (√(M * S) - M * a / 2)
   rw [← key] at h
@@ -327,7 +327,7 @@ theorem exists_isSolution_between
     · rw [hhi_bd x hx, fixedPointMap, if_pos hx]
     · exact G.fixedPointMap_le_of_supersolution hK hx (hsup x hx)
   have hmaps : ∀ u ∈ Set.Icc lo hi, G.fixedPointMap K u ∈ Set.Icc lo hi := fun u hu ↦
-    ⟨hlo_le.trans (hmono lo u le_rfl hu.1 (hu.1.trans hu.2)),
+    ⟨hlo_le.trans (hmono lo u le_rfl hu.1 hu.2),
       (hmono u hi hu.1 hu.2 le_rfl).trans hhi_le⟩
   haveI : Fact (lo ≤ hi) := ⟨hlohi⟩
   obtain ⟨u, hu, -, -⟩ := monotone_fixed_point_between (α := Set.Icc lo hi)
