@@ -14,13 +14,15 @@ A formalization of the existence theory for the Creative Determinant problem
 −ΔΦ = a|∇Φ| + bΦ − c(Φ₊)ᵖ in M, Φ = 0 on ∂M, with a = κγμ and p > 1.
 
 - **Continuum results are conditional.** `SemioticBVP.exists_isWeakCoherentConfiguration`
-  and `SemioticBVP.exists_pos_isWeakCoherentConfiguration` take `PDEInfra` and
-  `SolutionOperator` as hypotheses; the manifold's Laplacian, gradient norm and boundary are
-  abstract data. See *Assumed results*.
-- **Finite-graph results are unconditional.** `SemioticGraph.exists_pos_graph` and
-  `SemioticGraph.exists_pos_graph_of_unweighted` (`CdFormal/Graph/`) construct the operators,
-  the principal eigendata and the fixed point from concrete data, and assume no unproved
-  result.
+  assumes `PDEInfra`, `SolutionOperator` and an upper bound `B` on `b` (`hB`);
+  `SemioticBVP.exists_pos_isWeakCoherentConfiguration` assumes `PDEInfra`,
+  `SolutionOperator` and supplied `PrincipalEigendata` with a negative eigenvalue. The
+  manifold's Laplacian, gradient norm and boundary are abstract data. See *Assumed results*.
+- **Finite-graph results assume no unproved result.** `SemioticGraph.exists_pos_graph`
+  (`CdFormal/Graph/`) constructs the operators, the principal eigendata and the fixed point
+  from concrete data. It holds under `hconn`, `hdom` and `hneg`: a connected interior graph,
+  the edge condition and a negative principal eigenvalue.
+  `SemioticGraph.exists_pos_graph_of_unweighted` replaces `hdom` with weights in {0, 1}.
 - The graph discretization was chosen for this formalization. Do not describe it as matching
   the continuum problem or any deployed model: no relation between them is formalized.
 
@@ -35,8 +37,9 @@ A formalization of the existence theory for the Creative Determinant problem
 - **Every module compiles.** `lake build` builds only what the root imports, so a file
   nobody imports is never checked and can rot silently. CI builds every tracked module.
 - **The assumption boundary is fixed.** Do not add, strengthen or weaken a `PDEInfra`,
-  `SolutionOperator` or `PrincipalEigendata` field, and do not let a finite-graph result
-  depend on any of them. The only hypotheses of `SemioticGraph.exists_pos_graph` are
+  `SolutionOperator` or `PrincipalEigendata` field; the one allowed change is discharging a
+  field, as described under *Assumed results*. Do not let a finite-graph result depend on any
+  of them. The only hypotheses of `SemioticGraph.exists_pos_graph` are
   connectivity of the interior graph, the edge condition `hdom` (the one extra hypothesis
   approved for it) and a negative principal eigenvalue; keep it that way.
 - **Assumption changes require approval.** Never complete an assigned proof by adding an
@@ -85,10 +88,14 @@ lake env lean -DwarningAsError=true <Pkg>/Verify.lean   # axiom dashboard
   - `lake build --wfail` of the root and every module, then `lake lint`;
   - the axiom check: the selection includes every headline result, one record each, all
     within the allowlist;
-  - the documented-names check: every Lean name in inline code in the README and docs, and
-    every declaration shown in a Lean code block there, must resolve;
-  - the header check: copyright header, then imports, then the module docstring, in every file;
-  - the placeholder audit: no `sorry` or `sorryAx`, and no `axiom` declaration at all;
+  - the documented-names check: every inline-code token in the README and docs that looks
+    like a Lean name containing an uppercase letter, `_` or `.`, and every declaration shown
+    in a Lean code block there, must resolve (all-lowercase names are not checked);
+  - the header check: every file has the copyright header and a module docstring after the
+    imports (Lean itself rejects an `import` after any command, so imports come first);
+  - the placeholder audit: no `sorry` or `sorryAx` anywhere, and no line that starts an
+    `axiom` declaration (a text search; `#print axioms` still catches any axiom a selected
+    result uses);
   - the docs build, and a link check that also verifies fragments.
   Everything else in this file is a convention to follow, not an automated gate.
 - If a repo has a `Makefile`, use its targets (`build`, `verify`, `audit`, `lint`) as
@@ -147,7 +154,9 @@ Every `.lean` file, in order:
   other, and never import the project-specific layer. Once a repo has both layers, add a
   CI check on the import direction. This repo has no separate general-purpose layer: the
   continuum development is in `CdFormal/` and the finite-graph development in
-  `CdFormal/Graph/`. General-purpose declarations still go in Mathlib-style namespaces.
+  `CdFormal/Graph/`. New general-purpose declarations go in Mathlib-style namespaces;
+  existing root-namespace lemmas such as `monotone_fixed_point_between` are cited by the docs
+  and CI, so don't rename them without approval.
 - Unfinished or exploratory work lives in an `Experimental/` directory. Only
   `Experimental/` and `Verify/` may import it; add a CI check for that when the directory
   first appears. This repo has none.
@@ -163,7 +172,8 @@ Every `.lean` file, in order:
   `NeZero_iff`.
 - Conclusion first, hypotheses joined by `_of_` in order: `C_of_A_of_B` for `A → B → C`.
 - American English (`factorization`).
-- No Greek letters in declaration names; spell them out (`sigma`, not `σ`).
+- No Greek letters in new declaration names; spell them out (`sigma`, not `σ`). The
+  coefficient fields `κ`, `γ`, `μ` and their `_bounds` fields keep the paper's notation.
 - Name instances explicitly: `instance instFintypeFoo : Fintype Foo`.
 - Never shadow prelude names with variables (`le`, `lt`, `eq`, `ne`).
 - Fix one set of standard parameter names per repo and declare them in `variable` blocks.
@@ -291,7 +301,6 @@ Every `.lean` file, in order:
 - `SimpleGraph.mk` takes `Std.Symm` and `Std.Irrefl` structures: wrap each proof in `⟨...⟩`.
 - Mathlib has `SimpleGraph.ball c r = {v | G.edist v c < r}` (since v4.30.0); the centre
   lemma is `mem_ball_self`.
-- `absolutelyContinuous_isAddHaarMeasure` is gone; find its successor before relying on it.
 - `dif_pos` / `dif_neg` are deprecated; `dite_eq_left` / `dite_eq_right` have the same
   statements.
 - `Mathlib.Data.Real.Basic` moved to `Mathlib.Basic.Real.Basic`; `ENat.toNat_coe` is
@@ -343,16 +352,18 @@ must describe it exactly:
 | `PDEInfra.monotone_iteration` | Sub/super-solution iteration [Amann1976] |
 | `PrincipalEigendata` | Krein–Rutman or variational theory |
 
-`SolutionOperator` supplies the operator `T` whose fixed points are solutions. The axiom
-check cannot see these hypotheses, so every statement of a continuum result, in the docs and
+`SolutionOperator` supplies an operator `T` with two assumed properties:
+`SolutionOperator.T_boundary` (`T u` vanishes on the boundary) and
+`SolutionOperator.T_fixed_point` (fixed points of `T` are solutions). The axiom check cannot
+see these hypotheses, so every statement of a continuum result, in the docs and
 docstrings, must name them. Discharging a field means proving it from Mathlib and removing
 it from the class, not adding a new assumption in its place.
 
 ## Documentation must match the code
 
-- CI resolves every Lean name in the README and docs, including declarations shown in Lean
-  code blocks, so a renamed declaration fails CI until the docs follow.
-
+- CI resolves the Lean names in the README and docs (inline names containing an uppercase
+  letter, `_` or `.`, and declarations shown in Lean code blocks), so renaming a declaration
+  fails CI until the docs follow.
 - Every Lean name that appears in the README or docs must resolve. Check this
   mechanically by generating a file of `#check @Name` lines and running
   `lake env lean` on it.
