@@ -170,7 +170,8 @@ jobs:
           lake build Spec 2>&1 | tee "$RUNNER_TEMP/spec-build.txt"
           # The statement file's own messages, read as JSON from Lean with the package's options
           # (linters included), not by filtering Lake's text output. Allowed: its sorry warnings.
-          # Any other message, or any output that is not JSON, fails the step. Warnings in the
+          # Any other message (information included: the file must not print), or any output that
+          # is not JSON, fails the step. Warnings in the
           # library are the build step's concern: it runs with warnings as errors.
           lake --quiet lean spec/Spec.lean -- --json > "$RUNNER_TEMP/spec-messages.jsonl"
           python3 - "$RUNNER_TEMP/spec-messages.jsonl" <<'EOF'
@@ -180,9 +181,11 @@ jobs:
           for line in open(sys.argv[1], encoding="utf-8"):
               if not line.strip():
                   continue
-              m = json.loads(line)
-              if m["severity"] == "information":
-                  continue
+              try:
+                  m = json.loads(line)
+              except json.JSONDecodeError:
+                  print(f"::error::output from Lean that is not JSON: {line.strip()}")
+                  sys.exit(1)
               if (m["severity"] == "warning" and m.get("kind") == "hasSorry"
                       and os.path.realpath(m["fileName"]) == spec):
                   sorries += 1
