@@ -157,6 +157,10 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -o pipefail
+          if [ -z "${HEADLINE_RESULTS// /}" ]; then
+            echo "::error::HEADLINE_RESULTS is empty"
+            exit 1
+          fi
           lake build Spec 2>&1 | tee "$RUNNER_TEMP/spec-build.txt"
           # The statement files may warn only about their own `sorry` proofs.
           other=$(grep -E '^(warning|error)' "$RUNNER_TEMP/spec-build.txt" |
