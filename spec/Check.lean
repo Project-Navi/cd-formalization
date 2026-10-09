@@ -12,8 +12,9 @@ import Spec
 `#check_statements` takes every theorem `Spec.name` in the module `Spec` (`spec/Spec.lean`) and
 checks it against the library declaration `name`:
 
-1. the statement's proof is `sorry` itself (an application of `sorryAx` under the statement's
-   binders), so the statement file states and does not prove;
+1. the statement's proof is `sorry` itself (`isBareSorry`: exactly Lean's sorry under the
+   statement's binders, not applied to anything), so the statement file states and does not
+   prove;
 2. the library declaration exists and is a theorem, not an axiom or an opaque constant;
 3. the two types are equal up to binder names and annotations, after the statement's universe
    parameters are replaced by the library's;
@@ -30,6 +31,29 @@ open Lean Elab Command
 /-- The axioms a library proof may use. -/
 def specAllowedAxioms : List Name := [``propext, ``Classical.choice, ``Quot.sound]
 
+/-- Whether `v`, the proof of a statement, is `sorry` itself: under the statement's binders,
+    Lean's labelled sorry `sorryAx (∀ tag : Name, T) false tag`, with a closed label built from
+    `Lean.Name` constructors and `Nat` literals only, or the unlabelled `sorryAx T false`. A sorry
+    applied to further arguments, wrapped in `let` or `have`, or inside an otherwise real proof
+    is not. The kernel has already checked that `T` is the statement's conclusion. -/
+def isBareSorry (v : Expr) : Bool := Id.run do
+  let mut v := v.consumeMData
+  while v.isLambda do
+    v := v.bindingBody!.consumeMData
+  unless v.isAppOf ``sorryAx do return false
+  match v.getAppArgs with
+  | #[_, synthetic] => return synthetic.isConstOf ``Bool.false
+  | #[t, synthetic, tag] =>
+    -- The label is data: `Lean.Name` constructors and `Nat` literals (`OfNat.ofNat`).
+    let nameOnly := tag.getUsedConstants.all (fun c => (`Lean.Name).isPrefixOf c ||
+      [``OfNat.ofNat, ``Nat, ``instOfNatNat].contains c)
+    match t.consumeMData with
+    | .forallE _ (.const ``Lean.Name []) body _ =>
+      return synthetic.isConstOf ``Bool.false && !tag.hasLooseBVars && !tag.hasFVar &&
+        !tag.hasMVar && nameOnly && !body.hasLooseBVar 0
+    | _ => return false
+  | _ => return false
+
 /-- Check every statement of the module `Spec`; see the module docstring. -/
 elab "#check_statements" : command => do
   let env ← getEnv
@@ -44,12 +68,9 @@ elab "#check_statements" : command => do
     let name := s.name.replacePrefix `Spec Name.anonymous
     let .thmInfo st := s
       | errors := errors.push m!"{s.name}: a statement file may declare theorems only"; continue
-    -- The proof must be `sorry` itself, under the statement's binders: depending on `sorryAx`
-    -- somewhere inside an otherwise real proof is not enough.
-    let mut v := st.value.consumeMData
-    while v.isLambda do
-      v := v.bindingBody!.consumeMData
-    unless v.isAppOf ``sorryAx do
+    -- The proof must be `sorry` itself (see `isBareSorry`): depending on `sorryAx` somewhere,
+    -- or applying a sorry to further arguments, is not enough.
+    unless isBareSorry st.value do
       errors := errors.push m!"{s.name}: the statement is proved; its proof must be sorry"
       continue
     let some d := env.find? name
