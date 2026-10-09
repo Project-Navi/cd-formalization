@@ -25,3 +25,9 @@ rev = "v4.34.1"
 
 [[lean_lib]]
 name = "CdFormal"
+
+# Statement files: the headline results restated with `sorry` as the specification, compared
+# with the library by spec/Check.lean in CI. Not a default target; never imported by CdFormal.
+[[lean_lib]]
+name = "Spec"
+srcDir = "spec"

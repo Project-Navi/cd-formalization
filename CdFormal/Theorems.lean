@@ -93,7 +93,10 @@ checked; the hypotheses are assumed and appear as arguments. -/
 
     Uses `PDEInfra.T_compact`, `PDEInfra.linfty_bound`, `PDEInfra.schaefer`,
     `PDEInfra.fixed_point_nonneg` and `SolutionOperator.T_fixed_point`. With the default
-    `SemioticBVP.equation`, Φ ≡ 0 is already a solution (`zero_solves_equation`). -/
+    `SemioticBVP.equation`, Φ ≡ 0 is already a solution (`zero_solves_equation`).
+
+    Conditional: the obligation to meet these hypotheses is the named gap `gap:pde-infra`
+    (docs/explanation/axiom-boundary.md). -/
 theorem SemioticBVP.exists_isWeakCoherentConfiguration
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
@@ -117,7 +120,10 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
     Note: The paper's Thm 3.16 says "assume the hypotheses of Thm 3.12"
     (including bounded b). This Lean statement omits `B`/`hB` because
     `monotone_iteration` uses sub/super-solution theory that does not
-    require an explicit bound on b. -/
+    require an explicit bound on b.
+
+    Conditional: the obligation to meet these hypotheses is the named gap `gap:pde-infra`
+    (docs/explanation/axiom-boundary.md). -/
 theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
     (bvp : SemioticBVP n M)
     (solOp : SolutionOperator bvp)
