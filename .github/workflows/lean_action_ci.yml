@@ -182,7 +182,13 @@ jobs:
           # Any other message (information included: the file must not print), or any output that
           # is not JSON, fails the step. Warnings in the
           # library are the build step's concern: it runs with warnings as errors.
-          lake --quiet lean spec/Spec.lean -- --json > "$RUNNER_TEMP/spec-messages.jsonl"
+          lake --quiet lean spec/Spec.lean -- --json > "$RUNNER_TEMP/spec-messages.jsonl" \
+            2> "$RUNNER_TEMP/spec-stderr.txt"
+          if [ -s "$RUNNER_TEMP/spec-stderr.txt" ]; then
+            echo "::error::Lean wrote to stderr while elaborating the statement file"
+            cat "$RUNNER_TEMP/spec-stderr.txt"
+            exit 1
+          fi
           python3 - "$RUNNER_TEMP/spec-messages.jsonl" "$RUNNER_TEMP/spec-sorries.txt" <<'EOF'
           import json, os, sys
           spec = os.path.realpath("spec/Spec.lean")
@@ -211,11 +217,20 @@ jobs:
           print(f"{sorries} sorry warnings and no other message in spec/Spec.lean")
           EOF
           lake env lean -DwarningAsError=true spec/Check.lean 2>&1 | tee "$RUNNER_TEMP/spec.txt"
+          # A Lean panic prints, substitutes a default value and continues with exit code 0.
+          status=0
+          grep -q -F 'PANIC' "$RUNNER_TEMP/spec.txt" || status=$?
+          if [ "$status" -ne 1 ]; then
+            echo "::error::Lean panicked while checking the statement files (grep exit $status)"
+            exit 1
+          fi
           # One sorry warning per statement: a sorry anywhere else (an example, say) is not a
           # statement the comparator checked.
           statements=$(sed -n 's/^\([0-9][0-9]*\) statements match the library$/\1/p' "$RUNNER_TEMP/spec.txt")
           sorries=$(cat "$RUNNER_TEMP/spec-sorries.txt")
-          if [ -z "$statements" ] || [ "$statements" -ne "$sorries" ]; then
+          # String comparison of two single numbers: a malformed count must not fall through.
+          if ! [[ "$statements" =~ ^[0-9]+$ && "$sorries" =~ ^[0-9]+$ ]] ||
+              [ "$statements" != "$sorries" ]; then
             echo "::error::$sorries sorry warnings for ${statements:-no} checked statements"
             exit 1
           fi

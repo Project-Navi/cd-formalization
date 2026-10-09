@@ -12,7 +12,8 @@ import Spec
 `#check_statements` takes every theorem `Spec.name` in the module `Spec` (`spec/Spec.lean`) and
 checks it against the library declaration `name`:
 
-1. the statement's proof uses `sorryAx`, so the statement file states and does not prove;
+1. the statement's proof is `sorry` itself (an application of `sorryAx` under the statement's
+   binders), so the statement file states and does not prove;
 2. the library declaration exists and is a theorem, not an axiom or an opaque constant;
 3. the two types are equal up to binder names and annotations, after the statement's universe
    parameters are replaced by the library's;
@@ -41,10 +42,14 @@ elab "#check_statements" : command => do
   let mut errors : Array MessageData := #[]
   for s in statements do
     let name := s.name.replacePrefix `Spec Name.anonymous
-    unless s matches .thmInfo _ do
-      errors := errors.push m!"{s.name}: a statement file may declare theorems only"
-      continue
-    unless (← collectAxioms s.name).contains ``sorryAx do
+    let .thmInfo st := s
+      | errors := errors.push m!"{s.name}: a statement file may declare theorems only"; continue
+    -- The proof must be `sorry` itself, under the statement's binders: depending on `sorryAx`
+    -- somewhere inside an otherwise real proof is not enough.
+    let mut v := st.value.consumeMData
+    while v.isLambda do
+      v := v.bindingBody!.consumeMData
+    unless v.isAppOf ``sorryAx do
       errors := errors.push m!"{s.name}: the statement is proved; its proof must be sorry"
       continue
     let some d := env.find? name
