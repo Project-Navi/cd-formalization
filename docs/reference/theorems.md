@@ -50,7 +50,7 @@ theorem SemioticBVP.exists_isWeakCoherentConfiguration
       (∀ x, Phi x ≥ 0)
 ```
 
-Uses `PDEInfra.T_compact`, `PDEInfra.linfty_bound`, `PDEInfra.schaefer`, `PDEInfra.fixed_point_nonneg` and `SolutionOperator.T_fixed_point`. With the default equation, \(\Phi \equiv 0\) is already such a solution (`zero_solves_equation`, below).
+Uses `PDEInfra.T_compact`, `PDEInfra.linfty_bound`, `PDEInfra.schaefer`, `PDEInfra.fixed_point_nonneg` and `SolutionOperator.T_fixed_point`. With the default equation, \(\Phi \equiv 0\) is already such a solution (`zero_solves_equation`, below). Conditional on the named gap `gap:pde-infra` ([assumption boundary](../explanation/axiom-boundary.md)).
 
 ### Solution positive at an interior point (Paper Theorem 3.16)
 
@@ -68,7 +68,7 @@ theorem SemioticBVP.exists_pos_isWeakCoherentConfiguration
       (∃ x, x ∉ bvp.boundary ∧ Phi x > 0)
 ```
 
-Uses `PDEInfra.monotone_iteration`, `PDEInfra.fixed_point_nonneg` and `SolutionOperator.T_fixed_point`. Positivity is at one interior point.
+Uses `PDEInfra.monotone_iteration`, `PDEInfra.fixed_point_nonneg` and `SolutionOperator.T_fixed_point`. Positivity is at one interior point. Conditional on the named gap `gap:pde-infra` ([assumption boundary](../explanation/axiom-boundary.md)).
 
 ## Algebra and real analysis
 

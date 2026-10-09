@@ -28,7 +28,9 @@ A formalization of the existence theory for the Creative Determinant problem
 
 ## Invariants
 
-- **No `sorry` on the default branch.** Every declaration is fully proved before merge.
+- **No `sorry` in the library on the default branch.** Every declaration under `CdFormal/` is
+  fully proved before merge. The statement files under `spec/` are the one exception: each
+  restates a headline result with `sorry` as its proof, and CI requires that.
 - **No `axiom` declarations.** Classical results that are not proved are assumed through a
   typeclass or structure field (see *Assumed results*, which needs approval), never
   through `axiom`.
@@ -59,13 +61,20 @@ lake exe cache get                                   # Mathlib oleans; never bui
 lake build --wfail                                   # warnings are errors (includes sorry)
 lake lint                                            # Mathlib environment linters
 lake env lean -DwarningAsError=true <Pkg>/Verify.lean   # axiom dashboard
+lake build Spec && lake env lean spec/Check.lean        # statement files against the library
 ```
 
 - `CdFormal/Verify.lean` holds exactly one `#print axioms` record per selected declaration:
   every headline result and the supporting declarations the docs cite. The headline results
-  are listed in the CI workflow, not in `Verify.lean`, so dropping one from the dashboard
-  fails CI; add a new headline result to both. Every record may use only `propext`,
-  `Classical.choice` and `Quot.sound`.
+  are listed once, in the CI workflow (`HEADLINE_RESULTS`), not in `Verify.lean` or `spec/`,
+  so dropping one from the dashboard or from the statement files fails CI. Add a new headline
+  result to all three: the workflow list, a `#print axioms` record, and a statement in
+  `spec/Spec.lean` copied from the source with its proof replaced by `sorry`. Every record may
+  use only `propext`, `Classical.choice` and `Quot.sound`.
+- A statement file states; it does not prove. `spec/Check.lean` rejects a statement whose proof
+  is not `sorry`, a statement whose type differs from the library declaration of the same name
+  (binder names and annotations aside), a library declaration that is not a theorem, and a
+  library proof whose axioms leave the allowlist.
 - If the sandbox cannot install Lean or fetch the Mathlib cache, push to a draft PR and
   let CI build and verify. Report which checks ran where; never claim a local build that
   did not happen.
@@ -76,9 +85,12 @@ lake env lean -DwarningAsError=true <Pkg>/Verify.lean   # axiom dashboard
 - Test the checkers themselves. An axiom or `sorry` gate that silently passes is worse than
   none (a pipe without `pipefail` once hid Lean failures here). When you add or change a
   gate, also add a small negative fixture that must fail it and a snapshot of expected
-  axiom output that its parser must accept. This repo's CI has neither yet: after changing
-  the axiom check or the audit, test it by hand against a file that uses `sorry` or declares
-  an `axiom`.
+  axiom output that its parser must accept. In this repo's CI only the environment check
+  carries a fixture (an `axiom` and an `opaque` constant it must report). After changing the
+  axiom dashboard parser, the statement-file comparator or the audit, test them by hand: a
+  file that uses `sorry`, a statement with a changed hypothesis, a statement proved instead
+  of stated, and a library proof that uses native evaluation (which declares an auxiliary
+  axiom under Lean v4.34.1).
 - Change `lake-manifest.json` only in an intentional dependency bump. No CI guard enforces
   this here; check the diff yourself.
 - If a repo has a docs site, `uv run zensical build` must succeed; CI also checks the
@@ -88,14 +100,18 @@ lake env lean -DwarningAsError=true <Pkg>/Verify.lean   # axiom dashboard
   - `lake build --wfail` of the root and every module, then `lake lint`;
   - the axiom check: the selection includes every headline result, one record each, all
     within the allowlist;
+  - the statement-file check: every headline result has a statement in `spec/Spec.lean`, and
+    every statement there matches its library declaration as described above;
   - the documented-names check: every inline-code token in the README and docs that looks
     like a Lean name containing an uppercase letter, `_` or `.`, and every declaration shown
     in a Lean code block there, must resolve (all-lowercase names are not checked);
   - the header check: every file has the copyright header and a module docstring after the
     imports (Lean itself rejects an `import` after any command, so imports come first);
-  - the placeholder audit: no `sorry` or `sorryAx` anywhere, and no line that starts an
-    `axiom` declaration (a text search; `#print axioms` still catches any axiom a selected
-    result uses);
+  - the placeholder audit: no `sorry` or `sorryAx` anywhere in the library sources, comments
+    included (a text search; `spec/` is outside it by design);
+  - the environment check: no module of the library declares an `axiom` or an `opaque`
+    constant, read from the compiled environment, after a self-test with a fixture that
+    declares both;
   - the docs build, and a link check that also verifies fragments.
   Everything else in this file is a convention to follow, not an automated gate.
 - If a repo has a `Makefile`, use its targets (`build`, `verify`, `audit`, `lint`) as
@@ -407,5 +423,18 @@ Aristotle grinds leaf lemmas and detects dependencies. It is not the theorem arc
     `pp.all`; none of them belongs in a leaf proof.
   - Rebuild with `lake build --wfail`: Aristotle doesn't run the project's style linters.
 - Before trusting output, check Aristotle's Lean version against `lean-toolchain`.
+- Elaborating a file runs code (`#eval`, `initialize`, tactics, macros), so elaborate a
+  returned file in a sandbox before it touches the repository: no network, home directory
+  hidden, the project read-only. With bubblewrap, from the project root:
+
+  ```bash
+  bwrap --ro-bind /usr /usr --symlink usr/lib /lib --symlink usr/lib /lib64 \
+    --symlink usr/bin /bin --ro-bind /etc /etc --tmpfs "$HOME" \
+    --ro-bind "$HOME/.elan" "$HOME/.elan" --ro-bind "$PWD" "$PWD" \
+    --ro-bind <returned-dir> /untrusted --proc /proc --dev /dev --tmpfs /tmp \
+    --unshare-all --die-with-parent --chdir "$PWD" lake env lean /untrusted/<File>.lean
+  ```
+
+  Adjust the binds to where elan and the toolchain live on your machine.
 - Keep raw prover artifacts and run logs out of the public repository. Commit only the
   rewritten proofs, and credit Aristotle in the README.

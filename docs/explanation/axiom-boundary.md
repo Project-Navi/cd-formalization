@@ -95,6 +95,10 @@ Classically: \(\varepsilon\varphi_1\) is a sub-solution, a large constant is a s
 
 Replacing a field by a proof would also require the operators to be constructed from the metric and the boundary to be the boundary of a manifold with boundary.
 
+## The named gap
+
+The obligation the two continuum theorems leave open is named `gap:pde-infra`, so that it can be cited wherever they are. It is: for the concrete problem on a compact manifold with boundary, construct a solution operator and prove the fields of `PDEInfra` and `SolutionOperator` (and, for the second theorem, construct the principal eigendata), or prove the conclusions without them. Until then `SemioticBVP.exists_isWeakCoherentConfiguration` and `SemioticBVP.exists_pos_isWeakCoherentConfiguration` are implications. Nothing in the library instantiates their hypotheses, and an axiom report cannot show whether they can be met: `#print axioms` lists Lean axioms, not hypotheses. The statement file `spec/Spec.lean` shows both theorems with every hypothesis written out.
+
 ## The finite-graph theorem
 
 `SemioticGraph.exists_pos_graph` takes no hypothesis of the kind above. On a finite graph the Laplacian and the gradient norm are defined from the weights, the principal eigenvalue is defined as an infimum, attained when the interior is nonempty, and shown to have a positive eigenvector when the interior graph is connected, and the fixed point comes from `monotone_fixed_point_between`. Its hypotheses (a connected interior graph, a negative principal eigenvalue, and the edge-dominance condition) are mathematical conditions stated in its signature; see the [theorem catalog](../reference/theorems.md#finite-graph-existence).

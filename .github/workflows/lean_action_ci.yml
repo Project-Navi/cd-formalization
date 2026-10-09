@@ -14,6 +14,17 @@ concurrency:
 
 env:
   ELAN_HOME: /home/runner/.elan
+  # The headline results. Kept in the workflow, not in Verify.lean or spec/, so that dropping one
+  # from the axiom dashboard or from the statement files fails CI.
+  HEADLINE_RESULTS: >-
+    SemioticBVP.exists_isWeakCoherentConfiguration
+    SemioticBVP.exists_pos_isWeakCoherentConfiguration
+    SemioticGraph.exists_pos_graph
+    SemioticGraph.exists_pos_graph_of_unweighted
+    spectral_characterization_1d
+    linfty_bound_algebraic
+    monotone_fixed_point_between
+    scaling_uniqueness
 
 jobs:
   # CONTRACT: org ruleset requires this exact check name 'build'
@@ -86,7 +97,7 @@ jobs:
         run: lake lint
 
       # Verify.lean lists the selected declarations, which must include the headline results named
-      # below. Each needs exactly one record, and every record may use only propext,
+      # in HEADLINE_RESULTS. Each needs exactly one record, and every record may use only propext,
       # Classical.choice and Quot.sound.
       - name: Check axioms
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
@@ -94,7 +105,7 @@ jobs:
           set -o pipefail
           lake env lean -DwarningAsError=true CdFormal/Verify.lean 2>&1 | tee "$RUNNER_TEMP/axioms.txt"
           python3 - "$RUNNER_TEMP/axioms.txt" <<'EOF'
-          import collections, pathlib, re, sys
+          import collections, os, pathlib, re, sys
           source = pathlib.Path("CdFormal/Verify.lean").read_text(encoding="utf-8")
           expected = re.findall(r"^#print axioms (\S+)\s*$", source, re.M)
           lines = []
@@ -116,13 +127,9 @@ jobs:
                   errors.append(f"{m[1]} uses {sorted(used - allowed)}")
           if not expected:
               errors.append("Verify.lean selects no declarations")
-          # Kept here, not in Verify.lean, so that deselecting a headline result fails the check.
-          headline = ["SemioticBVP.exists_isWeakCoherentConfiguration",
-                      "SemioticBVP.exists_pos_isWeakCoherentConfiguration",
-                      "SemioticGraph.exists_pos_graph",
-                      "SemioticGraph.exists_pos_graph_of_unweighted",
-                      "spectral_characterization_1d", "linfty_bound_algebraic",
-                      "monotone_fixed_point_between", "scaling_uniqueness"]
+          headline = os.environ["HEADLINE_RESULTS"].split()
+          if not headline:
+              errors.append("HEADLINE_RESULTS is empty")
           for name in headline:
               if name not in expected:
                   errors.append(f"headline result {name} is not selected in Verify.lean")
@@ -141,6 +148,32 @@ jobs:
           print(f"{len(expected)} selected declarations, including all {len(headline)} headline "
                 "results, one record each, using only propext, Classical.choice and Quot.sound.")
           EOF
+
+      # spec/Spec.lean restates each headline result with `sorry` as its proof: the statement is
+      # the specification. spec/Check.lean compares every statement there with the library
+      # declaration of the same name (type up to binder names, a theorem with a proof term,
+      # axioms within the allowlist) and rejects a statement file that proves instead of states.
+      - name: Check statement files
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          lake build Spec 2>&1 | tee "$RUNNER_TEMP/spec-build.txt"
+          # The statement files may warn only about their own `sorry` proofs.
+          other=$(grep -E '^(warning|error)' "$RUNNER_TEMP/spec-build.txt" |
+            grep -v 'declaration uses `sorry`' || true)
+          if [ -n "$other" ]; then
+            echo "::error::the statement files build with a warning other than their sorry proofs"
+            exit 1
+          fi
+          lake env lean spec/Check.lean 2>&1 | tee "$RUNNER_TEMP/spec.txt"
+          missing=""
+          for name in $HEADLINE_RESULTS; do
+            grep -qx "SPEC OK $name" "$RUNNER_TEMP/spec.txt" || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::headline results without a matching statement:$missing"
+            exit 1
+          fi
 
       # Every Lean name written in inline code in the README and the docs, and every declaration
       # shown in a Lean code block there, must resolve.
@@ -177,29 +210,35 @@ jobs:
           fi
           echo "$(grep -c '^#check' "$RUNNER_TEMP/DocNames.lean") documented names resolve."
 
-      # No axiom may be declared in any CdFormal module, even one that no selected declaration
-      # uses. The check reads the compiled environment, so it cannot be fooled by layout. It first
-      # proves it can fail: a module declaring a two-line axiom must be reported.
-      - name: Check that no axiom is declared
+      # No axiom and no opaque constant may be declared in any CdFormal module, even one that no
+      # selected declaration uses: the kernel cannot see an opaque constant's value, and neither
+      # #print axioms nor a text search reports one. The check reads the compiled environment, so
+      # it cannot be fooled by layout. It first proves it can fail: a module declaring a two-line
+      # axiom and an opaque constant must have both reported.
+      - name: Check that no axiom or opaque constant is declared
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           cat > "$RUNNER_TEMP/axiom_check.lean" <<'EOF'
           open Lean in
           #eval show CoreM Unit from do
             let env ← getEnv
-            let mut found := #[]
+            let mut axioms := #[]
+            let mut opaques := #[]
             let mut modules := 0
             for mod in env.header.moduleNames, data in env.header.moduleData do
               if mod.getRoot == `CdFormal then
                 modules := modules + 1
                 for c in data.constants do
-                  if c matches .axiomInfo _ then found := found.push c.name
-            unless found.isEmpty do throwError "axioms declared in CdFormal: {found}"
-            IO.println s!"no axiom declared in any of {modules} CdFormal modules"
+                  if c matches .axiomInfo _ then axioms := axioms.push c.name
+                  if c matches .opaqueInfo _ then opaques := opaques.push c.name
+            unless axioms.isEmpty && opaques.isEmpty do
+              throwError "axioms declared in CdFormal: {axioms}; opaque constants: {opaques}"
+            IO.println s!"no axiom or opaque constant declared in {modules} CdFormal modules"
           EOF
           fixture=CdFormal/CiAxiomFixture.lean
           trap 'rm -f "$fixture" .lake/build/lib/lean/CdFormal/CiAxiomFixture.*' EXIT
-          printf 'import CdFormal.Basic\n\naxiom\n  ciAxiomFixture : False\n' > "$fixture"
+          printf '%s\n' 'import CdFormal.Basic' '' 'axiom' '  ciAxiomFixture : False' '' \
+            'opaque ciOpaqueFixture : Nat' > "$fixture"
           lake build CdFormal.CiAxiomFixture
           { echo 'import CdFormal.CiAxiomFixture'; cat "$RUNNER_TEMP/axiom_check.lean"; } \
             > "$RUNNER_TEMP/SelfTest.lean"
@@ -207,9 +246,9 @@ jobs:
           status=0
           lake env lean "$RUNNER_TEMP/SelfTest.lean" > "$RUNNER_TEMP/selftest.txt" 2>&1 || status=$?
           cat "$RUNNER_TEMP/selftest.txt"
-          if [ "$status" -eq 0 ] ||
-              ! grep -qF 'axioms declared in CdFormal: [ciAxiomFixture]' "$RUNNER_TEMP/selftest.txt"; then
-            echo "::error::the axiom self-test did not report ciAxiomFixture"
+          expected='axioms declared in CdFormal: [ciAxiomFixture]; opaque constants: [ciOpaqueFixture]'
+          if [ "$status" -eq 0 ] || ! grep -qF "$expected" "$RUNNER_TEMP/selftest.txt"; then
+            echo "::error::the self-test did not report ciAxiomFixture and ciOpaqueFixture"
             exit 1
           fi
           rm -f "$fixture" .lake/build/lib/lean/CdFormal/CiAxiomFixture.*
@@ -223,7 +262,8 @@ jobs:
         shell: python
         run: |
           import pathlib, re, subprocess, sys
-          files = subprocess.run(["git", "ls-files", "CdFormal.lean", "CdFormal/*.lean"],
+          files = subprocess.run(["git", "ls-files", "CdFormal.lean", "CdFormal/*.lean",
+                                  "spec/*.lean"],
                                  capture_output=True, text=True, check=True).stdout.split()
           header = re.compile(r"/-\nCopyright \(c\) 20\d\d [^\n]+\. All rights reserved\.\n"
                               r"Released under Apache 2\.0 license as described in the file LICENSE\.\n"
@@ -243,8 +283,9 @@ jobs:
               sys.exit("header check failed:\n  " + "\n  ".join(bad or ["no files"]))
           print(f"{len(files)} files have a copyright header and a module docstring after the imports.")
 
-      # 'sorry' and 'sorryAx' may not appear anywhere in the Lean sources, comments included, and
-      # no axiom may be declared.
+      # 'sorry' and 'sorryAx' may not appear anywhere in the library sources, comments included.
+      # The statement files under spec/ are outside this audit: their proofs are sorry by design,
+      # and the statement-file check requires it.
       - name: Audit placeholders
         if: ${{ !cancelled() }}
         run: |
