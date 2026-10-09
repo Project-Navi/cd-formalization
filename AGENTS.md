@@ -71,6 +71,9 @@ lake build Spec && lake env lean spec/Check.lean        # statement files agains
   result to all three: the workflow list, a `#print axioms` record, and a statement in
   `spec/Spec.lean` copied from the source with its proof replaced by `sorry`. Every record may
   use only `propext`, `Classical.choice` and `Quot.sound`.
+- `spec/` holds `Spec.lean` and `Check.lean` only; CI rejects any other file there. The only
+  messages `spec/Spec.lean` may produce are its own `sorry` warnings, read by CI as Lean's JSON
+  messages with the package's linters on.
 - A statement file states; it does not prove. `spec/Check.lean` rejects a statement whose proof
   is not `sorry`, a statement whose type differs from the library declaration of the same name
   (binder names and annotations aside), a library declaration that is not a theorem, and a

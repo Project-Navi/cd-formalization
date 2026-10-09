@@ -161,27 +161,43 @@ jobs:
             echo "::error::HEADLINE_RESULTS is empty"
             exit 1
           fi
+          # spec/ holds the statement file and its checker, nothing else.
+          others=$(git ls-files 'spec/*' | grep -v -x -e spec/Spec.lean -e spec/Check.lean || true)
+          if [ -n "$others" ]; then
+            echo "::error::unexpected files in spec/: $others"
+            exit 1
+          fi
           lake build Spec 2>&1 | tee "$RUNNER_TEMP/spec-build.txt"
-          # The only warnings allowed are the sorry proofs of spec/Spec.lean itself. A grep exit
-          # above 1 is an error, never "no match".
-          status=0
-          grep -E '^(warning|error)' "$RUNNER_TEMP/spec-build.txt" > "$RUNNER_TEMP/spec-warnings.txt" ||
-            status=$?
-          if [ "$status" -gt 1 ]; then
-            echo "::error::could not scan the statement-file build log (grep exit $status)"
-            exit 1
-          fi
-          status=0
-          grep -v -E '^warning: spec/Spec\.lean:[0-9]+:[0-9]+: declaration uses `sorry`$' \
-            "$RUNNER_TEMP/spec-warnings.txt" || status=$?
-          if [ "$status" -eq 0 ]; then
-            echo "::error::the statement files build with a warning other than their sorry proofs"
-            exit 1
-          elif [ "$status" -gt 1 ]; then
-            echo "::error::could not filter the statement-file warnings (grep exit $status)"
-            exit 1
-          fi
-          lake env lean spec/Check.lean 2>&1 | tee "$RUNNER_TEMP/spec.txt"
+          # The statement file's own messages, read as JSON from Lean with the package's options
+          # (linters included), not by filtering Lake's text output. Allowed: its sorry warnings.
+          # Any other message, or any output that is not JSON, fails the step. Warnings in the
+          # library are the build step's concern: it runs with warnings as errors.
+          lake --quiet lean spec/Spec.lean -- --json > "$RUNNER_TEMP/spec-messages.jsonl"
+          python3 - "$RUNNER_TEMP/spec-messages.jsonl" <<'EOF'
+          import json, os, sys
+          spec = os.path.realpath("spec/Spec.lean")
+          sorries, other = 0, []
+          for line in open(sys.argv[1], encoding="utf-8"):
+              if not line.strip():
+                  continue
+              m = json.loads(line)
+              if m["severity"] == "information":
+                  continue
+              if (m["severity"] == "warning" and m.get("kind") == "hasSorry"
+                      and os.path.realpath(m["fileName"]) == spec):
+                  sorries += 1
+                  continue
+              other.append(f'{m["fileName"]}:{m["pos"]["line"]}: {m["severity"]}: {m["data"]}')
+          if other:
+              print("::error::the statement file has a message other than its sorry warnings")
+              print("\n".join(other))
+              sys.exit(1)
+          if sorries == 0:
+              print("::error::the statement file reports no sorry warning")
+              sys.exit(1)
+          print(f"{sorries} sorry warnings and no other message in spec/Spec.lean")
+          EOF
+          lake env lean -DwarningAsError=true spec/Check.lean 2>&1 | tee "$RUNNER_TEMP/spec.txt"
           missing=""
           for name in $HEADLINE_RESULTS; do
             grep -qxF "SPEC OK $name" "$RUNNER_TEMP/spec.txt" || missing="$missing $name"
