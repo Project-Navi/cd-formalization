@@ -162,17 +162,29 @@ jobs:
             exit 1
           fi
           lake build Spec 2>&1 | tee "$RUNNER_TEMP/spec-build.txt"
-          # The statement files may warn only about their own `sorry` proofs.
-          other=$(grep -E '^(warning|error)' "$RUNNER_TEMP/spec-build.txt" |
-            grep -v 'declaration uses `sorry`' || true)
-          if [ -n "$other" ]; then
+          # The only warnings allowed are the sorry proofs of spec/Spec.lean itself. A grep exit
+          # above 1 is an error, never "no match".
+          status=0
+          grep -E '^(warning|error)' "$RUNNER_TEMP/spec-build.txt" > "$RUNNER_TEMP/spec-warnings.txt" ||
+            status=$?
+          if [ "$status" -gt 1 ]; then
+            echo "::error::could not scan the statement-file build log (grep exit $status)"
+            exit 1
+          fi
+          status=0
+          grep -v -E '^warning: spec/Spec\.lean:[0-9]+:[0-9]+: declaration uses `sorry`$' \
+            "$RUNNER_TEMP/spec-warnings.txt" || status=$?
+          if [ "$status" -eq 0 ]; then
             echo "::error::the statement files build with a warning other than their sorry proofs"
+            exit 1
+          elif [ "$status" -gt 1 ]; then
+            echo "::error::could not filter the statement-file warnings (grep exit $status)"
             exit 1
           fi
           lake env lean spec/Check.lean 2>&1 | tee "$RUNNER_TEMP/spec.txt"
           missing=""
           for name in $HEADLINE_RESULTS; do
-            grep -qx "SPEC OK $name" "$RUNNER_TEMP/spec.txt" || missing="$missing $name"
+            grep -qxF "SPEC OK $name" "$RUNNER_TEMP/spec.txt" || missing="$missing $name"
           done
           if [ -n "$missing" ]; then
             echo "::error::headline results without a matching statement:$missing"
