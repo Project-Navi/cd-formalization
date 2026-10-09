@@ -157,14 +157,16 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -o pipefail
-          if [ -z "${HEADLINE_RESULTS// /}" ]; then
+          # Split on any whitespace, so a list of only newlines or tabs counts as empty.
+          read -r -d '' -a headline <<< "$HEADLINE_RESULTS" || true
+          if [ "${#headline[@]}" -eq 0 ]; then
             echo "::error::HEADLINE_RESULTS is empty"
             exit 1
           fi
           # spec/ holds the statement file and its checker, nothing else.
           specfiles=$(git ls-files 'spec/*')
           status=0
-          others=$(printf '%s\n' "$specfiles" | grep -v -x -e spec/Spec.lean -e spec/Check.lean) ||
+          others=$(printf '%s\n' "$specfiles" | grep -v -x -F -e spec/Spec.lean -e spec/Check.lean) ||
             status=$?
           if [ "$status" -gt 1 ]; then
             echo "::error::could not list spec/ (grep exit $status)"
@@ -181,7 +183,7 @@ jobs:
           # is not JSON, fails the step. Warnings in the
           # library are the build step's concern: it runs with warnings as errors.
           lake --quiet lean spec/Spec.lean -- --json > "$RUNNER_TEMP/spec-messages.jsonl"
-          python3 - "$RUNNER_TEMP/spec-messages.jsonl" <<'EOF'
+          python3 - "$RUNNER_TEMP/spec-messages.jsonl" "$RUNNER_TEMP/spec-sorries.txt" <<'EOF'
           import json, os, sys
           spec = os.path.realpath("spec/Spec.lean")
           sorries, other = 0, []
@@ -205,11 +207,20 @@ jobs:
           if sorries == 0:
               print("::error::the statement file reports no sorry warning")
               sys.exit(1)
+          open(sys.argv[2], "w").write(f"{sorries}\n")
           print(f"{sorries} sorry warnings and no other message in spec/Spec.lean")
           EOF
           lake env lean -DwarningAsError=true spec/Check.lean 2>&1 | tee "$RUNNER_TEMP/spec.txt"
+          # One sorry warning per statement: a sorry anywhere else (an example, say) is not a
+          # statement the comparator checked.
+          statements=$(sed -n 's/^\([0-9][0-9]*\) statements match the library$/\1/p' "$RUNNER_TEMP/spec.txt")
+          sorries=$(cat "$RUNNER_TEMP/spec-sorries.txt")
+          if [ -z "$statements" ] || [ "$statements" -ne "$sorries" ]; then
+            echo "::error::$sorries sorry warnings for ${statements:-no} checked statements"
+            exit 1
+          fi
           missing=""
-          for name in $HEADLINE_RESULTS; do
+          for name in "${headline[@]}"; do
             grep -qxF "SPEC OK $name" "$RUNNER_TEMP/spec.txt" || missing="$missing $name"
           done
           if [ -n "$missing" ]; then
