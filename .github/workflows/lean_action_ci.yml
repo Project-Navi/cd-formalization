@@ -162,7 +162,14 @@ jobs:
             exit 1
           fi
           # spec/ holds the statement file and its checker, nothing else.
-          others=$(git ls-files 'spec/*' | grep -v -x -e spec/Spec.lean -e spec/Check.lean || true)
+          specfiles=$(git ls-files 'spec/*')
+          status=0
+          others=$(printf '%s\n' "$specfiles" | grep -v -x -e spec/Spec.lean -e spec/Check.lean) ||
+            status=$?
+          if [ "$status" -gt 1 ]; then
+            echo "::error::could not list spec/ (grep exit $status)"
+            exit 1
+          fi
           if [ -n "$others" ]; then
             echo "::error::unexpected files in spec/: $others"
             exit 1
